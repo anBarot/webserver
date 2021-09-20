@@ -2,7 +2,6 @@
 #define SATOSHIS_SERVER_HPP
 #include "cpp_libraries.hpp"
 #include "Location.hpp"
-#include "error.hpp"
 
 class Server
 {
@@ -23,7 +22,7 @@ public:
 	unsigned 							get_listen_port()	{ return this->listen_port; }
 	std::list<std::string>				&get_name() 		{ return this->names; }
 	unsigned							get_max_body_size() { return this->max_body_size; }
-	std::map<unsigned, std::string>		get_error_page()	{ return this->error_page; }	
+	std::map<unsigned, std::string>		&get_error_page()	{ return this->error_page; }	
 
 	// setters
 	void	add_name(std::string n_name)							{ this->names.push_back(n_name); }

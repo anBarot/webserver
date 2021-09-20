@@ -16,7 +16,8 @@ enum	e_error
 {
 	ARG_ERR,
 	FILE_ERR,
-	SOCK_ERROR,
+	PARSE_ERR,
+	SOCK_ERR,
 	OTHER
 };
 

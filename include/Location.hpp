@@ -7,9 +7,6 @@
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
-#include "error.hpp"
-
-
 
 class Location
 {

@@ -1,6 +1,5 @@
 #include "../../include/webserver.hpp"
 
-
 void ws_trim(std::string& s) {
 
 	if (s.empty())
@@ -13,5 +12,4 @@ void ws_trim(std::string& s) {
 		p++;
 
 	s.erase(p, s.end());
-	s.erase(0, s.find_first_not_of(" \t\r\n"));
 }
