@@ -12,9 +12,11 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 

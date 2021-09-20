@@ -1,11 +1,18 @@
 #include "../include/webserver.hpp"
 
 
+
+
 int main()
 {
-	Server server(80);
+	Server server(8080);
 
-	int server_socket = socket_from_server(server);
+	int server_socket = listen_from_server(server);
+	if(server_socket < 0)
+	{
+		printf("error socket\n");
+		exit(0);
+	}
 
 	fd_set current_sockets, ready_sockets;
 
@@ -24,7 +31,10 @@ int main()
 			{
 				if (i == server_socket)
 				{
-					int client_socket = 0;
+					printf("i = %d\n", i);
+					int client_socket = accept(server_socket, 0,0);
+					send(client_socket, "hello", 5, 0);
+					close(client_socket);
 					FD_SET(client_socket, &current_sockets);
 				}
 				else
