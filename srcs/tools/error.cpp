@@ -15,6 +15,9 @@ int error_and_exit(e_error error_nb)
 		case PARSE_ERR :
 			cout << "Error during parsing, check your .conf file\n";
 			break;
+		case SOCK_ERR :
+			cout << "Socket error\n";
+			break;
 		default :
 			cout << "Uncategorized error\n";
 			break;

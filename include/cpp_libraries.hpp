@@ -12,5 +12,9 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #endif //SATOSHIS_CPP_LIBRARIES_HPP

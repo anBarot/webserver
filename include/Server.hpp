@@ -14,6 +14,7 @@ private:
 
 public:
 	Server() : listen_port(80) {}
+	Server(int port) : listen_port(port) {}
 	~Server() {}
 
 	// getters
