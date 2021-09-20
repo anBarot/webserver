@@ -6,12 +6,12 @@
 
 #include "Server.hpp"
 #include "Location.hpp"
-#include "error.hpp"
 
 //parser
 int conf_parser(char *file_name);
 
 //tools
 void ws_trim(std::string& s);
+int error_and_exit(e_error error_nb);
 
 #endif
