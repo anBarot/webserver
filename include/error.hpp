@@ -2,13 +2,8 @@
 # define ERROR_HPP
 
 #include "cpp_libraries.hpp"
+#include "data_struct.hpp"
 
-enum	e_error
-{
-	ARG_ERR,
-	FILE_ERR,
-	OTHER
-};
 
 struct err_cat
 {

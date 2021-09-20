@@ -6,16 +6,10 @@
 #define SATOSHIS_LOCATION_HPP
 
 #include "cpp_libraries.hpp"
+#include "data_struct.hpp"
 #include "error.hpp"
 
 
-
-enum methods {
-	GET,
-	POST,
-	DELETE,
-	PUT
-};
 
 class Location
 {
