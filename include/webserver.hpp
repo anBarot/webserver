@@ -8,10 +8,15 @@
 #include "Location.hpp"
 #include "error.hpp"
 
+# define BACKLOG 5
+
 //parser
 int conf_parser(char *file_name);
 
 //tools
 void ws_trim(std::string& s);
 
+
+int socket_from_server(Server &server);
+int listen_from_server(Server &server);
 #endif

@@ -14,11 +14,13 @@ struct err_cat
 			switch (error_nb)
 			{
 				case ARG_ERR :
-					return "the accepted format is \"./webserver file.conf\"\n";
+					return "the accepted format is \"./webserver file.conf\"";
 				case FILE_ERR :
-					return "Can't open file\n";
+					return "Can't open file";
+				case SOCK_ERROR:
+					return "Socket error";
 				default :
-					return "Uncategorized error\n";
+					return "Uncategorized error";
 			}
 		}
 	
@@ -27,7 +29,7 @@ struct err_cat
 		~err_cat() {}
 		int act() const
 		{
-			std::cout << "Webserver error : " << message(err_no);
+			std::cout << "Webserver error : " << message(err_no) << std::endl;
 			return (err_no);
 		}
 };
