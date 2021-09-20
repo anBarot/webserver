@@ -20,6 +20,6 @@ int listen_from_server(Server &server)
 	int sock = socket_from_server(server);
 	int listening = listen(sock, BACKLOG);
 	if (listening < 0)
-		throw std::exception("socket error");
+		exit(0);
 	return  listening;
 }

@@ -12,6 +12,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
