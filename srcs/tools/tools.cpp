@@ -1,5 +1,6 @@
 #include "../../include/webserver.hpp"
 
+// ws_trim erases the whitespaces found after the last word of the string
 void ws_trim(std::string& s) {
 
 	if (s.empty())

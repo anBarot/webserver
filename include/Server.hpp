@@ -13,7 +13,7 @@ private:
 	std::map<unsigned, std::string>		error_page;
 
 public:
-	Server() : listen_port(80) {}
+	Server() : listen_port(80), max_body_size(1) {}
 	Server(int port) : listen_port(port) {}
 	~Server() {}
 
