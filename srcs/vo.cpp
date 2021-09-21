@@ -32,7 +32,7 @@ int 	socket_routine(std::vector<int> listen_sockets_pool)
 	// tant qu'il y a des socket à lire on les cherche
 	for (int socket_descriptor = 0; socket_descriptor < FD_SETSIZE && sockets_ready_count > 0; socket_descriptor++)
 	{
-		if (FD_ISSET(socket_descriptor, read_set) && is_value_in_listen_sockets(socket_descriptor, listen_sockets_pool))
+		if (FD_ISSET(socket_descriptor, read_set) && is_value_in_pool(socket_descriptor, listen_sockets_pool))
 		{
 			do
 			{
