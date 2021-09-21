@@ -1,6 +1,5 @@
 #include "../../include/webserver.hpp"
 
-
 int socket_from_server(Server &server)
 {
 	int server_socket = socket(AF_INET, SOCK_STREAM, 0);

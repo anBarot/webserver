@@ -12,6 +12,7 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <stack>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
