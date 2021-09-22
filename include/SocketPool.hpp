@@ -7,6 +7,7 @@
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
+#include "Client.hpp"
 
 class SocketPool
 {
@@ -26,13 +27,19 @@ SocketPool::SocketPool()
 	FD_ZERO(writing_set);
 }
 
-SocketPool::SocketPool(std::vector<int> ls)
+SocketPool::SocketPool(std::vector<int> ls, std::vector<Client> clients) // ajouter les clients
 {
 	FD_ZERO(reading_set);
 	FD_ZERO(writing_set);
 
 	for (std::vector<int>::iterator it = ls.begin(); it != ls.end(); it++)
 		FD_SET(*it, reading_set);
+
+	for (std::stack<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		FD_SET(*it, reading_set);
+		FD_SET(*it, writing_set);
+	}
 }
 
 
