@@ -3,6 +3,9 @@
 // ws_trim erases the whitespaces found after the last word of the string
 void ws_trim(std::string& s) {
 
+	if (s.find("#") != std::string::npos)
+		s.erase(s.find("#"));
+
 	if (s.empty())
 		return;
 
