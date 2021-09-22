@@ -11,11 +11,9 @@ std::vector<Server> parsing_simulation()
 void 	read_socket(SocketPool *sp)
 {
 
-
 	// iteration sur sp.listen_socket jusque trouver un is_set, et l'accepter
 	// créer un client à partir du socket
 	// le foutre dans un write set ??
-
 
 }
 
