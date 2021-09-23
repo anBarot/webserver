@@ -1,5 +1,8 @@
 #include "../include/webserver.hpp"
 
+char buffer[10];
+int last_read;
+
 std::vector<Server> parsing_simulation()
 {
 	std::vector<Server> servers;
@@ -17,6 +20,7 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> clie
 		{
 			new_sd = accept(*it, 0, 0);
 			clients.push_back(Client(new_sd));
+			write(1, "added client in reading set\n", strlen("added client in reading set\n"));
 			return;
 		}
 
@@ -24,6 +28,7 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> clie
 		{
 			new_sd = accept(*it, 0, 0);
 			clients.push_back(Client(new_sd));
+			write(1, "added client in writing set\n", strlen("added client in writing set\n"));
 			return;
 		}
 	}
@@ -36,7 +41,8 @@ void 	read_sockets(SocketPool *sp, std::vector<Client> clients)
 	{
 		if (FD_ISSET(it->socket, &(sp->reading_set)))
 		{
-			// read
+			last_read = read(it->socket, buffer, 10);
+			write(1, "should read something\n", strlen("should read something\n"));
 			break;
 		}
 	}
@@ -49,7 +55,7 @@ void 	write_sockets(SocketPool *sp, std::vector<Client> clients)
 	{
 		if (FD_ISSET(it->socket, &(sp->writing_set)))
 		{
-			// write
+			write(1, buffer, last_read);
 			break;
 		}
 	}
@@ -60,8 +66,11 @@ int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> cl
 {
 	SocketPool sp(listen_sockets_pool, clients_pool); // <= ajouter les socket clients dans  le reading set ET writing set
 	timeval timeout;
+	timeout.tv_sec = 2;
+	timeout.tv_usec = 0;
 
-	int waiting_connexions = select(FD_SETSIZE, &sp.reading_set, &sp.writing_set, 0, 0);
+	int waiting_connexions = select(FD_SETSIZE, &sp.reading_set, &sp.writing_set, 0, &timeout);
+	printf("select = %d\n", waiting_connexions);
 	if (waiting_connexions == -1)
 		return error_and_exit(SOCK_ERR);
 	if (waiting_connexions == 0)
