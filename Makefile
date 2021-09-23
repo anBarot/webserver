@@ -4,7 +4,6 @@ NAME= webserv
 SRCS=	srcs/socket_initialization/socket_initialization.cpp\
 		srcs/tools/tools.cpp \
 		srcs/tools/error.cpp \
-		srcs/tools/is_value_in_listen_sockets.cpp\
 		srcs/parsing/parser.cpp\
 
 MAIN= webserver.cpp

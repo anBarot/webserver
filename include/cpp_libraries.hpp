@@ -17,10 +17,10 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/poll.h>
+#include <sys/select.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <<string.h>
+#include <string.h>
 #include <sys/time.h>
 
 #endif //SATOSHIS_CPP_LIBRARIES_HPP
