@@ -21,7 +21,7 @@ int listen_from_server(Server &server)
 	int listening = listen(sock, BACKLOG);
 	if (listening < 0)
 		error_and_exit(SOCK_ERR);
-	return  listening;
+	return  sock;
 }
 
 std::vector<int> listen_sockets_from_servers(std::vector<Server> servers)

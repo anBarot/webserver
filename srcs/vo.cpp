@@ -70,7 +70,7 @@ int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> cl
 	timeout.tv_usec = 0;
 
 	int waiting_connexions = select(FD_SETSIZE, &sp.reading_set, &sp.writing_set, 0, &timeout);
-	printf("select = %d\n", waiting_connexions);
+	printf("select = %d, FD_SETSIZE = %d\n", waiting_connexions, FD_SETSIZE);
 	if (waiting_connexions == -1)
 		return error_and_exit(SOCK_ERR);
 	if (waiting_connexions == 0)
@@ -88,6 +88,7 @@ int main()
 	int status = 1;
 
 	std::vector<Client> clients_pool;
+
 
 	while(status)
 	{

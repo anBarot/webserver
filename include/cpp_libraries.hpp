@@ -15,6 +15,7 @@
 #include <stack>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>

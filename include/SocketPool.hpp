@@ -19,7 +19,10 @@ public:
 		FD_ZERO(&writing_set);
 
 		for (std::vector<int>::iterator it = ls.begin(); it != ls.end(); it++)
+		{
 			FD_SET(*it, &reading_set);
+			printf("added %d to reading set\n", *it);
+		}
 
 		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 		{
@@ -29,6 +32,7 @@ public:
 	};
 
 	fd_set reading_set, writing_set;
+
 private:
 };
 

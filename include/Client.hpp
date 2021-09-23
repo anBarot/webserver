@@ -11,9 +11,6 @@ public:
 
 	Client(int sock): socket(sock){};
 	int socket;
-	std::string header;
-	std::vector<char> data;
-	std::string response;
 };
 
 #endif //WEBSERVER_CLIENT_HPP
