@@ -6,13 +6,13 @@
 
 using namespace std;
 
-void	display_server(vector<Server> &servers)
+void	display_server(vector<Server_conf> &servers)
 {
 	cout << "Check parsing : \n";
 
-	for(vector<Server>::iterator it = servers.begin(); it != servers.end(); ++it)
+	for(vector<Server_conf>::iterator it = servers.begin(); it != servers.end(); ++it)
 	{
-		cout << "\n\nNew server\n";
+		cout << "\n\nNew server conf\n";
 
 		for (list<string>::iterator i_name = it->get_name().begin(); i_name != it->get_name().end(); ++i_name)
 			cout << "server name : "<< *i_name << "\n";
@@ -26,13 +26,14 @@ void	display_server(vector<Server> &servers)
 
 		for (list<Location>::iterator loc = it->get_location().begin(); loc != it->get_location().end(); ++loc)
 		{
-			cout << "\nFor location : "<< (*loc).get_location() << "\n";
+			cout << "\nFor location : "<< (*loc).get_path() << "\n";
 			cout << "root: "<< (*loc).get_root() << "\n";
 			cout << "auto index : "<< (((*loc).get_auto_index() == true) ? "true" : "false") << "\n";
 			cout << "index : "<< (*loc).get_index() << "\n";
 			cout << "upload path : "<< (*loc).get_upload_path() << "\n";
 			cout << "cgi path : "<< (*loc).get_cgi_path() << "\n";
 			cout << "cgi extension : "<< (*loc).get_cgi_extension() << "\n";
+			cout << "redirection : "<< (*loc).get_redirection() << "\n";
 
 			cout << "methods GET : "<< (((*loc).get_methods(GET) == true) ? "true" : "false") << "\n";
 			cout << "methods PUT : "<< (((*loc).get_methods(PUT) == true) ? "true" : "false") << "\n";
@@ -79,12 +80,12 @@ int		extract_location_field(string &line, Location &loc)
 	extract = extract_field(line, 2);
 
 	if (!extract.first.compare("root") || !extract.first.compare("index") || !extract.first.compare("cgi_path")
-	|| !extract.first.compare("cgi_extension") || !extract.first.compare("upload_path"))
+	|| !extract.first.compare("cgi_extension") || !extract.first.compare("upload_path") || !extract.first.compare("return"))
 	{
 		if (extract.second.find_first_of("\t ") != string::npos)
 				return PARSE_ERR;
 		if (!extract.first.compare("root"))						// extraction field root
-			loc.set_root(extract.second); 								
+			loc.set_root(extract.second); 						// ex : /var/www/	
 		else if (!extract.first.compare("index"))				// extraction field index
 			loc.set_index(extract.second);						// ex : index.php
 		else if (!extract.first.compare("cgi_path"))			// extraction field cgi_path
@@ -93,9 +94,11 @@ int		extract_location_field(string &line, Location &loc)
 			loc.set_cgi_extension(extract.second);				// ex : python
 		else if (!extract.first.compare("upload_path"))			// extraction field upload_path
 			loc.set_upload_path(extract.second);				// ex : /var/www/put_folder
+		else if (!extract.first.compare("return"))				// extraction field redirection
+			loc.set_redirection(extract.second);				// ex : 404
 	}
-	else if (!extract.first.compare("method"))				// extraction field methods
-	{														// ex : GET PUT DELETE
+	else if (!extract.first.compare("method"))					// extraction field methods
+	{															// ex : GET PUT DELETE
 		if (set_and_check_methods(extract.second, loc))
 			return (PARSE_ERR);
 	}
@@ -114,7 +117,7 @@ int		extract_location_field(string &line, Location &loc)
 	return 0;
 }
 
-int		extract_server_field(string &line, Server &server)
+int		extract_server_field(string &line, Server_conf &server)
 {
 	pair<string, string> extract;
 
@@ -165,7 +168,7 @@ int		fill_location(ifstream &conf_file, Location &loc, string &line)
 		return (PARSE_ERR);
 	
 	location_str = line.substr(line.find_first_not_of(S_LOCATION), line.length() - line.find_first_not_of(S_LOCATION) - 1);
-	loc.set_location(location_str);
+	loc.set_path(location_str);
 		
 	while (getline(conf_file, line))
 	{
@@ -189,7 +192,7 @@ int		fill_location(ifstream &conf_file, Location &loc, string &line)
 	return 0;
 }
 
-int fill_server(ifstream &conf_file, Server &server)
+int fill_server(ifstream &conf_file, Server_conf &server)
 {
 	string line;
 
@@ -202,7 +205,6 @@ int fill_server(ifstream &conf_file, Server &server)
 			{
 				while (!line.substr(0, strlen(S_LOCATION)).compare(S_LOCATION))		// create new location and fill it
 				{
-					// cout << "location found\n";
 					server.add_locations(Location());
 					if (fill_location(conf_file, server.get_location().back(), line))
 						return PARSE_ERR;
@@ -228,7 +230,7 @@ int conf_parser(char *file_name)
 {
 	ifstream conf_file (file_name);
 	string line;
-	vector<Server> servers;
+	vector<Server_conf> servers;
 
   	if (conf_file.is_open())
 	{
@@ -237,8 +239,7 @@ int conf_parser(char *file_name)
 			ws_trim(line);
 			while (!line.compare("server:"))
 			{
-				// cout << "server found\n";
-				servers.push_back(Server());
+				servers.push_back(Server_conf());
 				if (fill_server(conf_file, servers.back()))
 					return error_and_exit(PARSE_ERR);
 				if (conf_file.eof() == true)
