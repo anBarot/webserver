@@ -10,13 +10,21 @@
 #include <sstream>
 #include <string.h>
 #include <stdlib.h>
-#include <list>
-#include <vector>
-#include <map>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <unistd.h>
+#include <stdarg.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+// system lib
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/select.h>
+#include <sys/time.h>
+
+// std lib containers
+#include <list>
+#include <queue>
+#include <vector>
+#include <map>
 
 #endif //SATOSHIS_CPP_LIBRARIES_HPP
