@@ -5,7 +5,7 @@
 #ifndef SATOSHIS_DATA_STRUCT_HPP
 #define SATOSHIS_DATA_STRUCT_HPP
 
-enum methods {
+enum e_methods {
 	GET,
 	POST,
 	DELETE,
