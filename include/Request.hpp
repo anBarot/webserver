@@ -18,13 +18,13 @@ typedef struct s_request_line
 class Request
 {
 public:
+
 	t_request_line request_line;
 	std::map<std::string, std::string> headers;
-	std::vector<char> payload;
+	int fd;
+	std::string tmp_file_name;
 
 	Request(){};
-
-
 
 private:
 
