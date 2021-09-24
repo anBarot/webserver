@@ -3,7 +3,7 @@
 #include "cpp_libraries.hpp"
 #include "Location.hpp"
 
-class Server
+class Server_conf
 {
 private:
 	unsigned							listen_port;
@@ -13,9 +13,9 @@ private:
 	std::map<unsigned, std::string>		error_page;
 
 public:
-	Server() : listen_port(80), max_body_size(1) {}
-	Server(int port) : listen_port(port) {}
-	~Server() {}
+	Server_conf() : listen_port(80), max_body_size(1) {}
+	Server_conf(int port) : listen_port(port) {}
+	~Server_conf() {}
 
 	// getters
 	std::list<Location>					&get_location() 			{ return this->locations; }
