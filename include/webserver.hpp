@@ -10,7 +10,6 @@
 #include "Client.hpp"
 #include "SocketPool.hpp"
 
-# define BACKLOG 32
 
 //parser
 int conf_parser(char *file_name);

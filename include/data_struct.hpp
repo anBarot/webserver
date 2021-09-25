@@ -5,6 +5,10 @@
 #ifndef SATOSHIS_DATA_STRUCT_HPP
 #define SATOSHIS_DATA_STRUCT_HPP
 
+# define BUFFER_SIZE 1000
+# define BACKLOG 32
+
+
 enum e_methods {
 	GET,
 	POST,
