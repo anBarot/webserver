@@ -6,6 +6,7 @@
 #define WEBSERVER_CLIENT_HPP
 
 #include "Request.hpp"
+#include "Response.hpp"
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
 
@@ -14,7 +15,8 @@ class Client
 public:
 
 	int socket;
-	std::queue<Request> requests;
+	Response response;
+	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
 
@@ -24,16 +26,15 @@ public:
 
 	void store_incoming_data(char buffer[BUFFER_SIZE], int size)
 	{
-		for (int i = 0; i < size ; i++) // probable bottleneck, will see later
+		for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
 			received_data_raw.push_back(buffer[i]);
 	}
 
 	void extract_request_from_data()
 	{
 		// if a complete request is extractable from the raw data,
-		//		create a request object in the <queue> and remove the data from the <vector><char>
+		//		create a request object in the <queue> and remove the data relevant from the <vector><char> (or the temporary file)
 	}
-
 
 };
 

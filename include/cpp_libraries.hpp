@@ -13,7 +13,7 @@
 #include <list>
 #include <vector>
 #include <map>
-#include <queue>
+#include <deque>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdarg.h>
