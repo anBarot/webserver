@@ -10,7 +10,7 @@ int socket_from_server(Server_conf &server)
 	server_address.sin_port = htons(server.get_listen_port());
 	server_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
-	bind(server_socket, (struct sockaddr *)(&server_address), sizeof (server_address));
+	bind(server_socket, (struct sockaddr *)(&server_address), sizeof(server_address));
 
 	return server_socket;
 }

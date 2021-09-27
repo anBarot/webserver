@@ -151,7 +151,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 	while (getline(conf_file, line) && conf_file.eof() != true)
 	{
 		ws_trim(line);
-		if (line.compare(""))	
+		if (line.compare(""))
 		{
 			if (!line.substr(0, strlen(S_LOCATION)).compare(S_LOCATION))			// if location found 
 			{

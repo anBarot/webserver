@@ -8,12 +8,12 @@ int main(int ac, char **av)
 		return (error_and_exit(ARG_ERR));
 
 	if (conf_parser(av[1], servers))
-		return (1);
+		return (error_and_exit(PARSE_ERR));
 
 	display_server(servers);
 
 	std::vector<int> listen_sockets_pool = listen_sockets_from_servers(servers);
-	
+
 	int status = 1;
 
 	std::vector<Client> clients_pool;

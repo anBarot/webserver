@@ -53,7 +53,7 @@ void 	write_sockets(SocketPool *sp, std::vector<Client> clients)
 
 int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> clients_pool)
 {
-	SocketPool sp(listen_sockets_pool, clients_pool); // <= ajouter les socket clients dans  le reading set ET writing set
+	SocketPool sp(listen_sockets_pool, clients_pool); // <= ajouter les socket clients dans le reading set ET writing set
 	timeval timeout;
 	timeout.tv_sec = 2;
 	timeout.tv_usec = 0;
