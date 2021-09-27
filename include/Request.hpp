@@ -17,19 +17,16 @@ typedef struct s_request_line
 
 class Request
 {
-public:
+	public:
+		t_request_line request_line;
+		std::map<std::string, std::string> headers;
+		int fd;
+		std::string tmp_file_name;
 
-	t_request_line request_line;
-	std::map<std::string, std::string> headers;
-	int fd;
-	std::string tmp_file_name;
+		Request(){};
 
-	Request(){};
-
-private:
+	private:
 
 };
-
-
 
 #endif //WEBSERVER_REQUEST_HPP

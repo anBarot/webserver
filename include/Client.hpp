@@ -10,11 +10,11 @@
 
 class Client
 {
-public:
-	Client(int sock): socket(sock){};
-	int socket;
-	std::queue<Request> requests;
-	std::vector<char> buffer;
+	public:
+		Client(int sock): socket(sock){};
+		int socket;
+		std::queue<Request> requests;
+		std::vector<char> buffer;
 };
 
 #endif //WEBSERVER_CLIENT_HPP

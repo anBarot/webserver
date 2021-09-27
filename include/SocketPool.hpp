@@ -11,29 +11,28 @@
 
 class SocketPool
 {
-public:
-
-	SocketPool(std::vector<int> ls, std::vector<Client> clients) // ajouter les clients
-	{
-		FD_ZERO(&reading_set);
-		FD_ZERO(&writing_set);
-
-		for (std::vector<int>::iterator it = ls.begin(); it != ls.end(); it++)
+	public:
+		SocketPool(std::vector<int> ls, std::vector<Client> clients) // ajouter les clients
 		{
-			FD_SET(*it, &reading_set);
-			printf("added %d to reading set\n", *it);
-		}
+			FD_ZERO(&reading_set);
+			FD_ZERO(&writing_set);
 
-		for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
-		{
-			FD_SET(it->socket, &reading_set);
-			FD_SET(it->socket, &writing_set);
-		}
-	};
+			for (std::vector<int>::iterator it = ls.begin(); it != ls.end(); it++)
+			{
+				FD_SET(*it, &reading_set);
+				printf("added %d to reading set\n", *it);
+			}
 
-	fd_set reading_set, writing_set;
+			for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+			{
+				FD_SET(it->socket, &reading_set);
+				FD_SET(it->socket, &writing_set);
+			}
+		};
 
-private:
+		fd_set reading_set, writing_set;
+
+	private:
 };
 
 

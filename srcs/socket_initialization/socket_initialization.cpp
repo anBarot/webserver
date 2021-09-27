@@ -27,6 +27,7 @@ int listen_from_server(Server_conf &server)
 std::vector<int> listen_sockets_from_servers(std::vector<Server_conf> servers)
 {
 	std::vector<int> listens;
+
 	for (std::vector<Server_conf>::iterator it = servers.begin(); it != servers.end(); it++)
 	{
 		listens.push_back(listen_from_server(*it));

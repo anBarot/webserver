@@ -1,61 +1,16 @@
 #include "../../include/webserver.hpp"
 
-#define S_LOCATION			"\tlocation "
-#define FIELD_DELIMITER		" = "
-#define DIGITS				"0123456789"
-
-using namespace std;
-
-void	display_server(vector<Server_conf> &servers)
+std::pair<std::string, std::string> extract_field(std::string &line, unsigned tab_nb)
 {
-	cout << "Check parsing : \n";
-
-	for(vector<Server_conf>::iterator it = servers.begin(); it != servers.end(); ++it)
-	{
-		cout << "\n\nNew server conf\n";
-
-		for (list<string>::iterator i_name = it->get_name().begin(); i_name != it->get_name().end(); ++i_name)
-			cout << "server name : "<< *i_name << "\n";
-		
-		cout << "listen port : "<< it->get_listen_port() << "\n";
-		cout << "max upload size : "<< it->get_max_body_size() << "\n";
-		try {
-			cout << "error page 404 : "<< it->get_error_page(404) << "\n";
-		}
-		catch(exception e) { cout << "no error page 404\n"; }
-
-		for (list<Location>::iterator loc = it->get_location().begin(); loc != it->get_location().end(); ++loc)
-		{
-			cout << "\nFor location : "<< (*loc).get_path() << "\n";
-			cout << "root: "<< (*loc).get_root() << "\n";
-			cout << "auto index : "<< (((*loc).get_auto_index() == true) ? "true" : "false") << "\n";
-			cout << "index : "<< (*loc).get_index() << "\n";
-			cout << "upload path : "<< (*loc).get_upload_path() << "\n";
-			cout << "cgi path : "<< (*loc).get_cgi_path() << "\n";
-			cout << "cgi extension : "<< (*loc).get_cgi_extension() << "\n";
-			cout << "redirection : "<< (*loc).get_redirection() << "\n";
-
-			cout << "methods GET : "<< (((*loc).get_methods(GET) == true) ? "true" : "false") << "\n";
-			cout << "methods PUT : "<< (((*loc).get_methods(PUT) == true) ? "true" : "false") << "\n";
-			cout << "methods DELETE : "<< (((*loc).get_methods(DELETE) == true) ? "true" : "false") << "\n";
-			cout << "methods POST : "<< (((*loc).get_methods(POST) == true) ? "true" : "false") << "\n";
-		}
-	}
-}
-
-pair<string, string> extract_field(string &line, unsigned tab_nb)
-{
-	pair<string, string> extract(line.substr(tab_nb, line.find_first_of(FIELD_DELIMITER) - tab_nb),
+	std::pair<std::string, std::string> extract(line.substr(tab_nb, line.find_first_of(FIELD_DELIMITER) - tab_nb),
 	line.substr(line.find_first_of(FIELD_DELIMITER) + 3, line.length()));
-  	// cout << "extract first : _" << extract.first << "_ \n";
-  	// cout << "extract second : _" << extract.second << "_ \n";
 	return extract;
 }
 
-int		set_and_check_methods(string &extract, Location &loc)
+int		set_and_check_methods(std::string &extract, Location &loc)
 {
-	istringstream iss(extract);
-	string word;
+	std::istringstream iss(extract);
+	std::string word;
 
 	while (iss >> word)
 	{
@@ -73,16 +28,16 @@ int		set_and_check_methods(string &extract, Location &loc)
 	return (0);
 }
 
-int		extract_location_field(string &line, Location &loc)
+int		extract_location_field(std::string &line, Location &loc)
 {
-	pair<string, string> extract;
+	std::pair<std::string, std::string> extract;
 
 	extract = extract_field(line, 2);
 
 	if (!extract.first.compare("root") || !extract.first.compare("index") || !extract.first.compare("cgi_path")
 	|| !extract.first.compare("cgi_extension") || !extract.first.compare("upload_path") || !extract.first.compare("return"))
 	{
-		if (extract.second.find_first_of("\t ") != string::npos)
+		if (extract.second.find_first_of("\t ") != std::string::npos)
 				return PARSE_ERR;
 		if (!extract.first.compare("root"))						// extraction field root
 			loc.set_root(extract.second); 						// ex : /var/www/	
@@ -117,27 +72,24 @@ int		extract_location_field(string &line, Location &loc)
 	return 0;
 }
 
-int		extract_server_field(string &line, Server_conf &server)
+int		extract_server_field(std::string &line, Server_conf &server)
 {
-	pair<string, string> extract;
+	std::pair<std::string, std::string> extract;
 
 	extract = extract_field(line, 1);								// extract values and set the according field in Server object
 	
 	if (!extract.first.compare("listen"))
 	{
-		istringstream iss(extract.second);
-		string num;
+		std::istringstream iss(extract.second);
+		std::string num;
 		iss >> num;
-		string host;
-		iss >> host;
 
 		server.add_listen_port(atoi(num.c_str()));
-		server.add_name_front(host);
 	}
 	else if (!extract.first.compare("server_name"))
 	{
-		istringstream iss(extract.second);
-		string word;
+		std::istringstream iss(extract.second);
+		std::string word;
 
 		while (iss >> word)
 			server.add_name(word);
@@ -146,10 +98,10 @@ int		extract_server_field(string &line, Server_conf &server)
 		server.add_max_body(atoi(extract.second.c_str()));
 	else if (!extract.first.compare("error_page"))
 	{
-		istringstream iss(extract.second);
-		string num;
+		std::istringstream iss(extract.second);
+		std::string num;
 		iss >> num;
-		string file;
+		std::string file;
 		iss >> file;
 
 		server.add_error_page(atoi(num.c_str()), file);
@@ -160,11 +112,11 @@ int		extract_server_field(string &line, Server_conf &server)
 	return 0;
 }
 
-int		fill_location(ifstream &conf_file, Location &loc, string &line)
+int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 {
-	string location_str;
+	std::string location_str;
 
-	if (line.find(":") == string::npos) 
+	if (line.find(":") == std::string::npos) 
 		return (PARSE_ERR);
 	
 	location_str = line.substr(line.find_first_not_of(S_LOCATION), line.length() - line.find_first_not_of(S_LOCATION) - 1);
@@ -175,7 +127,7 @@ int		fill_location(ifstream &conf_file, Location &loc, string &line)
 		ws_trim(line);
 		if (line.find("\t\t") == 0)			// if line begins with two tabs
 		{
-			if (line.find(" = ") != string::npos)	// if field found : extract field
+			if (line.find(" = ") != std::string::npos)	// if field found : extract field
 			{
 				if (extract_location_field(line, loc))
 					return PARSE_ERR;
@@ -192,9 +144,9 @@ int		fill_location(ifstream &conf_file, Location &loc, string &line)
 	return 0;
 }
 
-int fill_server(ifstream &conf_file, Server_conf &server)
+int fill_server(std::ifstream &conf_file, Server_conf &server)
 {
-	string line;
+	std::string line;
 
 	while (getline(conf_file, line) && conf_file.eof() != true)
 	{
@@ -212,7 +164,7 @@ int fill_server(ifstream &conf_file, Server_conf &server)
 						return 0;
 				}
 			}
-			if (line.find(" = ") != string::npos)			// if server field found, extract server field
+			if (line.find(" = ") != std::string::npos)			// if server field found, extract server field
 			{
 				if (extract_server_field(line, server))
 					return PARSE_ERR;	
@@ -226,11 +178,10 @@ int fill_server(ifstream &conf_file, Server_conf &server)
 	return 0;
 }
 
-int conf_parser(char *file_name)
+int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 {
-	ifstream conf_file (file_name);
-	string line;
-	vector<Server_conf> servers;
+	std::ifstream conf_file (file_name);
+	std::string line;
 
   	if (conf_file.is_open())
 	{
@@ -256,6 +207,5 @@ int conf_parser(char *file_name)
 	else
 		return error_and_exit(FILE_ERR);
 
-	display_server(servers);
 	return 0;
 }

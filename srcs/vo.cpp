@@ -3,14 +3,6 @@
 char buffer[10];
 int last_read;
 
-std::vector<Server> parsing_simulation()
-{
-	std::vector<Server> servers;
-	servers.push_back(Server(8080));
-	servers.push_back(Server(8081));
-	return servers;
-}
-
 void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> clients)
 {
 	int new_sd;
@@ -34,7 +26,6 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> clie
 	}
 }
 
-
 void 	read_sockets(SocketPool *sp, std::vector<Client> clients)
 {
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
@@ -48,7 +39,6 @@ void 	read_sockets(SocketPool *sp, std::vector<Client> clients)
 	}
 }
 
-
 void 	write_sockets(SocketPool *sp, std::vector<Client> clients)
 {
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
@@ -60,7 +50,6 @@ void 	write_sockets(SocketPool *sp, std::vector<Client> clients)
 		}
 	}
 }
-
 
 int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> clients_pool)
 {
@@ -79,19 +68,4 @@ int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> cl
 	read_sockets(&sp, clients_pool);
 	write_sockets(&sp, clients_pool);
 	return 1;
-}
-
-
-int main()
-{
-	std::vector<int> listen_sockets_pool = listen_sockets_from_servers(parsing_simulation());
-	int status = 1;
-
-	std::vector<Client> clients_pool;
-
-
-	while(status)
-	{
-		status = socket_routine(listen_sockets_pool, clients_pool);
-	}
 }
