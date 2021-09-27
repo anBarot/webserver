@@ -49,7 +49,7 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> *cli
  * 	Si y'a rien à lire, on destroy l'objet Client
  */
 
-void 	read_sockets(SocketPool *sp, std::vector<Client> *clients)
+void 	read_from_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
 {
 	int DEBUG_c = 0;
 	int DEBUG_rd = 0;
@@ -78,7 +78,7 @@ void 	read_sockets(SocketPool *sp, std::vector<Client> *clients)
  * On parcourt les socket client sur le writing set:
  * si une response est prête, on l'envoie
  */
-void 	write_sockets(SocketPool *sp, std::vector<Client> *clients)
+void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
 {
 	int DEBUG_c = 0;
 	int DEBUG_wt = 0;
@@ -88,7 +88,7 @@ void 	write_sockets(SocketPool *sp, std::vector<Client> *clients)
 		if (FD_ISSET(it->socket, &(sp->writing_set)) && !it->requests.empty()) // si le client a des requetes à traiter
 		{
 			DEBUG_wt++;
-			// send response
+			send(it->socket, "hello", strlen("hello"), 0); // dummy send
 			break;
 		}
 	}
@@ -124,8 +124,8 @@ int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> *c
 
 	// attention, read et write peuvent se faire à partir du même select ! = danger
 
-	read_sockets(&sp, clients_pool);
-	write_sockets(&sp, clients_pool);
+	read_from_clients_sockets(&sp, clients_pool);
+	write_to_clients_sockets(&sp, clients_pool);
 	return 1;
 }
 
