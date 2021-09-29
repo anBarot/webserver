@@ -22,6 +22,7 @@
 #include <sys/time.h>
 
 // std lib containers
+#include <deque>
 #include <list>
 #include <queue>
 #include <vector>

@@ -8,10 +8,13 @@
 #include "Client.hpp"
 #include "SocketPool.hpp"
 
+<<<<<<< HEAD
 # define BACKLOG 			32
 # define S_LOCATION			"\tlocation "
 # define FIELD_DELIMITER	" = "
 # define DIGITS				"0123456789"
+=======
+>>>>>>> socket_loop
 
 //parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
