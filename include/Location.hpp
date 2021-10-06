@@ -2,8 +2,8 @@
 // Created by lubenica on 20/09/2021.
 //
 
-#ifndef SATOSHIS_LOCATION_HPP
-#define SATOSHIS_LOCATION_HPP
+#ifndef LOCATION_HPP
+#define LOCATION_HPP
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"

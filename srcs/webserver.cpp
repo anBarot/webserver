@@ -8,7 +8,7 @@ int main(int ac, char **av)
 		return (error_and_exit(ARG_ERR));
 
 	if (conf_parser(av[1], servers))
-		return (error_and_exit(PARSE_ERR));
+		return (error_and_exit(CONFFILE_PARSE_ERR));
 
 	display_server(servers);
 

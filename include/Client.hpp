@@ -28,13 +28,6 @@ public:
 		for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
 			received_data_raw.push_back(buffer[i]);
 	}
-
-	void extract_request_from_data()
-	{
-		// if a complete request is extractable from the raw data,
-		//		create a request object in the <queue> and remove the data relevant from the <vector><char> (or the temporary file)
-	}
-
 };
 
 #endif //WEBSERVER_CLIENT_HPP

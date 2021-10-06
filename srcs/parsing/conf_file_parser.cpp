@@ -1,5 +1,9 @@
 #include "../../include/webserver.hpp"
 
+# define S_LOCATION			"\tlocation "
+# define FIELD_DELIMITER	" = "
+# define DIGITS				"0123456789"
+
 std::pair<std::string, std::string> extract_field(std::string &line, unsigned tab_nb)
 {
 	std::pair<std::string, std::string> extract(line.substr(tab_nb, line.find_first_of(FIELD_DELIMITER) - tab_nb),
@@ -23,7 +27,7 @@ int		set_and_check_methods(std::string &extract, Location &loc)
 		else if (!word.compare("DELETE"))
 			loc.set_methods(DELETE, true);
 		else
-			return (PARSE_ERR);
+			return (CONFFILE_PARSE_ERR);
 	}
 	return (0);
 }
@@ -38,7 +42,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	|| !extract.first.compare("cgi_extension") || !extract.first.compare("upload_path") || !extract.first.compare("return"))
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
-				return PARSE_ERR;
+				return CONFFILE_PARSE_ERR;
 		if (!extract.first.compare("root"))						// extraction field root
 			loc.set_root(extract.second); 						// ex : /var/www/	
 		else if (!extract.first.compare("index"))				// extraction field index
@@ -55,7 +59,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	else if (!extract.first.compare("method"))					// extraction field methods
 	{															// ex : GET PUT DELETE
 		if (set_and_check_methods(extract.second, loc))
-			return (PARSE_ERR);
+			return (CONFFILE_PARSE_ERR);
 	}
 	else if (!extract.first.compare("autoindex"))			// extraction field autoindex
 	{
@@ -64,10 +68,10 @@ int		extract_location_field(std::string &line, Location &loc)
 		else if (!extract.second.compare("off"))			// if off : auto_index = false
 			loc.set_auto_index(false);
 		else
-			return PARSE_ERR;
+			return CONFFILE_PARSE_ERR;
 	}
 	else													// else : not an acceptable field
-		return PARSE_ERR;
+		return CONFFILE_PARSE_ERR;
 
 	return 0;
 }
@@ -107,7 +111,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		server.add_error_page(atoi(num.c_str()), file);
 	}
 	else
-		return PARSE_ERR;
+		return CONFFILE_PARSE_ERR;
 
 	return 0;
 }
@@ -117,7 +121,7 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 	std::string location_str;
 
 	if (line.find(":") == std::string::npos) 
-		return (PARSE_ERR);
+		return (CONFFILE_PARSE_ERR);
 	
 	location_str = line.substr(line.find_first_not_of(S_LOCATION), line.length() - line.find_first_not_of(S_LOCATION) - 1);
 	loc.set_path(location_str);
@@ -130,13 +134,13 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 			if (line.find(" = ") != std::string::npos)	// if field found : extract field
 			{
 				if (extract_location_field(line, loc))
-					return PARSE_ERR;
+					return CONFFILE_PARSE_ERR;
 				line.clear();
 				if (conf_file.eof() == true)
 					return 0;
 			}
 			else
-				return PARSE_ERR;
+				return CONFFILE_PARSE_ERR;
 		}
 		else if (line.compare(""))							// line that doesn't begin with two tabs and not an empty line
 			return 0;										// return to fill server
@@ -159,7 +163,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 				{
 					server.add_locations(Location());
 					if (fill_location(conf_file, server.get_location().back(), line))
-						return PARSE_ERR;
+						return CONFFILE_PARSE_ERR;
 					if (conf_file.eof() == true && !line.size())
 						return 0;
 				}
@@ -167,12 +171,12 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 			if (line.find(" = ") != std::string::npos)			// if server field found, extract server field
 			{
 				if (extract_server_field(line, server))
-					return PARSE_ERR;	
+					return CONFFILE_PARSE_ERR;	
 			}
 			else if (!line.compare("server:"))				// if new server found, go back to creating server loop
 				return 0;
 			else
-				return PARSE_ERR;
+				return CONFFILE_PARSE_ERR;
 		}
 	}
 	return 0;
@@ -192,7 +196,7 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 			{
 				servers.push_back(Server_conf());
 				if (fill_server(conf_file, servers.back()))
-					return error_and_exit(PARSE_ERR);
+					return error_and_exit(CONFFILE_PARSE_ERR);
 				if (conf_file.eof() == true)
 				{
 					line.clear();
@@ -200,7 +204,7 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 				}
 			}
 			if (conf_file.eof() == false && line.compare(""))
-				return error_and_exit(PARSE_ERR);
+				return error_and_exit(CONFFILE_PARSE_ERR);
 		}
 		conf_file.close();
   	}

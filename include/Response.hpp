@@ -10,10 +10,10 @@
 
 class Response
 {
-public:
-	std::string status_line;
-	std::map<std::string, std::string> headers;
-	std::vector<char> payload;
+	public:
+		std::string status_line;
+		std::map<std::string, std::string> headers;
+		std::vector<char> payload;
 };
 
 #endif //WEBSERVER_RESPONSE_HPP
