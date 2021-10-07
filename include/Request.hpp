@@ -30,7 +30,7 @@ class Request
 		t_request_line request_line;
 		std::map<std::string, std::string> headers;
 		t_payload payload;
-		std::vector<std::string> expected_trailers;
+		std::set<std::string> expected_trailers;
 
 		Request() 
 		{
@@ -40,46 +40,11 @@ class Request
 			payload.length = 0;
 			payload.tmp_file_name = "unammed";
 		}
-
-		// check if the request line is valid
-		void	check_line()
-		{
-			if (request_line.version != "HTTP/1.1")
-				code = HTTP_VERSION_NOT_SUPPORTED;
-			else if (!is_method(request_line.method))
-				code = BAD_REQUEST;
-
-			if (code != DEFAULT)
-				status = FINISH_PARSING;
-		}
-
-		// check if a payload exists and is pertinent
-		void	check_payload()
-		{
-			if (request_line.method != "GET")
-			{
-				if (headers.count("transfer-encoding") && headers["transfer-encoding"].find("chunked") != std::string::npos)
-					payload.is_chunked = true;
-				else if (headers.count("content-length"))
-					payload.length = atoi(headers["content-length"].c_str());
-				else
-					status = FINISH_PARSING;
-			}
-			else
-				status = FINISH_PARSING;
-		}
-
-		// check if a trailer is expected
-		void	check_trailer()
-		{
-			if (payload.is_chunked == true && headers.count("trailer"))
-			{
-				std::istringstream iss(headers["trailer"]);
-				std::string word;
-				while (iss >> word)
-					expected_trailers.push_back(word);
-			}
-		}
 };
+
+int	extract_request_from_data(Client &client);
+void check_payload(Request &req);
+void check_trailer(Request &req);
+void check_line(Request &req);
 
 #endif //WEBSERVER_REQUEST_HPP

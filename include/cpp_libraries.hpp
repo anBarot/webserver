@@ -28,5 +28,6 @@
 #include <queue>
 #include <vector>
 #include <map>
+#include <set>
 
 #endif //SATOSHIS_CPP_LIBRARIES_HPP

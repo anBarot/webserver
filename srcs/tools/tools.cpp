@@ -52,7 +52,7 @@ int	is_method(std::string str)
 	return 1;
 }
 
-// Change lowercase every char in a string
+// Transform in lowercase every char in a string
 void	strlower(std::string &str)
 {
 	for (size_t i = 0; i < str.size(); i++)

@@ -3,7 +3,7 @@
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
-#include "Server.hpp"
+#include "Server_conf.hpp"
 #include "Location.hpp"
 #include "Client.hpp"
 #include "SocketPool.hpp"

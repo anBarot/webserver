@@ -71,10 +71,10 @@ void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
 	for (std::vector<Client>::iterator it = (*clients).begin(); it != (*clients).end(); it++)
 	{
 		DEBUG_c++;
-		if (FD_ISSET(it->socket, &(sp->writing_set)) && !it->requests.empty()) // si le client a des requetes à traiter
+		if (FD_ISSET(it->socket, &(sp->writing_set)) && !it->requests.front().status == FINISH_PARSING) // si le client a des requetes à traiter
 		{
 			DEBUG_wt++;
-			send(it->socket, "hello", strlen("hello"), 0); // dummy send
+			// send(it->socket, "hello", strlen("hello"), 0); // dummy send
 			break;
 		}
 	}

@@ -27,6 +27,8 @@ public:
 	{
 		for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
 			received_data_raw.push_back(buffer[i]);
+
+		extract_request_from_data(*this);
 	}
 };
 
