@@ -43,18 +43,24 @@ int error_and_exit(e_error error_nb)
 	return (error_nb);
 }
 
-// Check if the string is a method 
-int	is_method(std::string str)
-{
-	if (str == "GET" || str == "PUT" || str == "DELETE" || str == "POST")
-		return 0;
-
-	return 1;
-}
-
 // Transform in lowercase every char in a string
 void	strlower(std::string &str)
 {
 	for (size_t i = 0; i < str.size(); i++)
 		str[i] = std::tolower(str[i]);
+}
+
+// Get the method enum from string
+e_methods	get_method_enum(std::string word)
+{
+	if (word == "GET")
+		return (GET);
+	else if (word == "POST")
+		return POST;
+	else if (word == "PUT")
+		return PUT;
+	else if (word == "DELETE")
+		return DELETE;
+	else
+		return NOT_A_METHOD;
 }

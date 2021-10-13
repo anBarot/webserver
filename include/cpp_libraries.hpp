@@ -21,6 +21,7 @@
 #include <sys/socket.h>
 #include <sys/select.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 // std lib containers
 #include <deque>

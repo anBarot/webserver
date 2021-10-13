@@ -13,13 +13,13 @@
 class Client
 {
 public:
-
 	int socket;
+	int lsocket;
 	Response response;
 	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
-	Client(int sock): socket(sock){};
+	Client(int sock, int lsock): socket(sock), lsocket(lsock) {}
 
 	~Client(){};
 
@@ -28,7 +28,13 @@ public:
 		for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
 			received_data_raw.push_back(buffer[i]);
 
-		extract_request_from_data(*this);
+		while (received_data_raw.size())
+		{
+			if (requests.size() && requests.back().status != FINISH_PARSING)
+				extract_request_from_data(this->requests.back(), this->received_data_raw);
+			else
+				requests.push_back(Request());
+		}
 	}
 };
 

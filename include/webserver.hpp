@@ -13,8 +13,9 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 
 //tools
 void ws_trim(std::string& s);
+std::string get_date();
 int error_and_exit(e_error error_nb);
-int	is_method(std::string str);
+e_methods get_method_enum(std::string word);
 void strlower(std::string &str);
 int socket_from_server(Server_conf &server);
 int listen_from_server(Server_conf &server);

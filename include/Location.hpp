@@ -2,8 +2,8 @@
 // Created by lubenica on 20/09/2021.
 //
 
-#ifndef LOCATION_HPP
-#define LOCATION_HPP
+#ifndef SATOSHIS_LOCATION_HPP
+#define SATOSHIS_LOCATION_HPP
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
@@ -27,6 +27,7 @@ class Location
 			methods[POST] = false;
 			methods[DELETE] = false;
 			methods[PUT] = false;
+			methods[NOT_A_METHOD] = false;
 			auto_index = false;
 		}
 		~Location() {}

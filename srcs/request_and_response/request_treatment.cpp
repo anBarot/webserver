@@ -160,7 +160,10 @@ void extract_request_line(Request &req, std::vector<char> &data)
 	if ((pos = str.find("\r\n")) != std::string::npos)
 	{
 		std::istringstream iss(str);
-		iss >> req.request_line.method;
+		std::string word;
+
+		iss >> word;
+		req.request_line.method = get_method_enum(word);
 		iss >> req.request_line.target;
 		iss >> req.request_line.version;
 
@@ -176,11 +179,8 @@ void extract_request_line(Request &req, std::vector<char> &data)
 	depending on the request status :
 	starting -> line parsed -> header parsed -> payload parsed -> finish
 */
-int	extract_request_from_data(Client &client)
+int	extract_request_from_data(Request &cur_request, std::vector<char> data)
 {
-	std::vector<char> data = client.received_data_raw;
-	Request cur_request = client.requests.back();
-
 	if (cur_request.status == STARTING_PARSING)
 		extract_request_line(cur_request, data);
 	if (cur_request.status == LINE_PARSED)

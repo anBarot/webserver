@@ -5,7 +5,7 @@ void	check_line(Request &req)
 {
 	if (req.request_line.version != "HTTP/1.1")
 		req.code = HTTP_VERSION_NOT_SUPPORTED;
-	else if (!is_method(req.request_line.method))
+	else if (req.request_line.method == NOT_A_METHOD)
 		req.code = BAD_REQUEST;
 
 	if (req.code != DEFAULT)
@@ -18,7 +18,7 @@ void	check_line(Request &req)
 */
 void	check_payload(Request &req)
 {
-	if (req.request_line.method != "GET")
+	if (req.request_line.method != GET)
 	{
 		if (req.headers.count("transfer-encoding") &&
 			req.headers["transfer-encoding"].find("chunked") != std::string::npos)

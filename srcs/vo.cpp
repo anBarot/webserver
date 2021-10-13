@@ -17,7 +17,7 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> *cli
 		if (FD_ISSET(*it, &(sp->reading_set)))
 		{
 			new_sd = accept(*it, 0, 0);
-			(*clients).push_back(Client(new_sd));
+			(*clients).push_back(Client(new_sd, *it));
 			write(1, "added client in reading set\n", strlen("added client in reading set\n"));
 			return;
 		}
@@ -25,7 +25,7 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> *cli
 		if (FD_ISSET(*it, &(sp->writing_set)))
 		{
 			new_sd = accept(*it, 0, 0);
-			(*clients).push_back(Client(new_sd));
+			(*clients).push_back(Client(new_sd, *it));
 			write(1, "added client in writing set\n", strlen("added client in writing set\n"));
 			return;
 		}
@@ -64,7 +64,7 @@ void 	read_from_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
  * On parcourt les socket client sur le writing set:
  * si une response est prête, on l'envoie
  */
-void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
+void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients, std::vector<Server_conf> &server_confs)
 {
 	int DEBUG_c = 0;
 	int DEBUG_wt = 0;
@@ -74,6 +74,8 @@ void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
 		if (FD_ISSET(it->socket, &(sp->writing_set)) && !it->requests.front().status == FINISH_PARSING) // si le client a des requetes à traiter
 		{
 			DEBUG_wt++;
+			fill_response(*it, server_confs);
+			send_response(*it, it->socket);
 			// send(it->socket, "hello", strlen("hello"), 0); // dummy send
 			break;
 		}
@@ -93,7 +95,7 @@ void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
  * write socket
  *
  */
-int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> *clients_pool)
+int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> *clients_pool, std::vector<Server_conf> server_confs)
 {
 	SocketPool sp(listen_sockets_pool, *clients_pool); // <= ajouter les socket clients dans  le reading set ET writing set
 	timeval timeout;
@@ -111,6 +113,6 @@ int 	socket_routine(std::vector<int> listen_sockets_pool, std::vector<Client> *c
 	// attention, read et write peuvent se faire à partir du même select ! = danger
 
 	read_from_clients_sockets(&sp, clients_pool);
-	write_to_clients_sockets(&sp, clients_pool);
+	write_to_clients_sockets(&sp, clients_pool, server_confs);
 	return 1;
 }

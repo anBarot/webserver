@@ -11,9 +11,12 @@
 class Response
 {
 	public:
-		std::string status_line;
+		std::string line;
 		std::map<std::string, std::string> headers;
 		std::vector<char> payload;
+		bool chunk;
 };
+
+void fill_response(Client &client,  std::vector<Server_conf> &conf);
 
 #endif //WEBSERVER_RESPONSE_HPP
