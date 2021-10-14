@@ -155,6 +155,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 						return (CONFFILE_PARSE_ERR);
 					path = line.substr(strlen(S_LOCATION), line.length() - strlen(S_LOCATION) - 1);
 					server.locations[path] = Location();
+					server.locations[path].path = path;
 
 					if (fill_location(conf_file, server.locations[path], line))
 						return CONFFILE_PARSE_ERR;

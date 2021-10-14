@@ -1,9 +1,5 @@
 #include "../include/webserver.hpp"
 
-char buffer[BUFFER_SIZE];
-int last_read;
-char response[8000] = "HTTP/1.1 200 OK\r\n\n";
-
 /*
  * On regarde les socket listeners
  * on ajoute un new client si un des fd est prêt en reading
@@ -39,8 +35,11 @@ void 	add_clients(SocketPool *sp, std::vector<int> lsp, std::vector<Client> *cli
 
 void 	read_from_clients_sockets(SocketPool *sp, std::vector<Client> *clients)
 {
+	char buffer[BUFFER_SIZE];
+	int last_read;
 	int DEBUG_c = 0;
 	int DEBUG_rd = 0;
+
 	for (std::vector<Client>::iterator it = (*clients).begin(); it != (*clients).end(); it++)
 	{
 		DEBUG_c++;
@@ -74,8 +73,8 @@ void 	write_to_clients_sockets(SocketPool *sp, std::vector<Client> *clients, std
 		if (FD_ISSET(it->socket, &(sp->writing_set)) && !it->requests.front().status == FINISH_PARSING) // si le client a des requetes à traiter
 		{
 			DEBUG_wt++;
-			fill_response(*it, server_confs);
-			send_response(*it, it->socket);
+			it->fill_response(server_confs);
+			it->send_response();
 			// send(it->socket, "hello", strlen("hello"), 0); // dummy send
 			break;
 		}

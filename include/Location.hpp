@@ -11,14 +11,15 @@
 class Location
 {
 	public:
-		std::string						root;
-		std::string						index;
-		bool							auto_index;
-		std::string						upload_path;
-		bool							methods[4];
-		std::string						cgi_path;
-		std::string						cgi_extension;
-		std::string						redirection;
+		std::string		path;
+		std::string		root;
+		std::string		index;
+		bool			auto_index;
+		std::string		upload_path;
+		bool			methods[4];
+		std::string		cgi_path;
+		std::string		cgi_extension;
+		std::string		redirection;
 
 		Location() {
 			methods[GET] = false;

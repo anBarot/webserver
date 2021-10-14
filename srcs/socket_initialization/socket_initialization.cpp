@@ -7,7 +7,7 @@ int socket_from_server(Server_conf &server_conf)
 	struct sockaddr_in server_address;
 	memset(&server_address, 0, sizeof (server_address));
 	server_address.sin_family = AF_INET;
-	server_address.sin_port = htons(server_conf.get_listen_port());
+	server_address.sin_port = htons(server_conf.listen_port);
 	server_address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 
 	bind(server_socket, (struct sockaddr *)(&server_address), sizeof(server_address));

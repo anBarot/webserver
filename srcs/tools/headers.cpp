@@ -19,12 +19,26 @@ std::string get_MIME(std::string filename)
 
 	i = filename.size() - 1;
 	while (i > 0 && filename[i] != '.')
-		--i;
-	if (i == 0)
+		i--;
+	if (!i)
 		return ("text/plain");
+	
 	ext = std::string(filename, i + 1, filename.size() - i);
-
 	if (MIME_types.count(ext))
 		return (MIME_types[ext]);
-	return ("application/octet-stream");
+	return ("unrecognized MIME type");
+}
+
+std::string	get_file_size(std::string file_name)
+{
+	struct stat st;
+	std::stringstream ss;
+    std::string res;
+
+	if (stat(file_name.c_str(), &st) || !S_ISREG(st.st_mode))
+		return 0;
+
+	ss << st.st_size;
+	ss >> res;
+	return (res);
 }

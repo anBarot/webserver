@@ -7,6 +7,8 @@
 
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Location.hpp"
+#include "Server_conf.hpp"
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
 
@@ -23,19 +25,10 @@ public:
 
 	~Client(){};
 
-	void store_incoming_data(char buffer[BUFFER_SIZE], int size)
-	{
-		for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
-			received_data_raw.push_back(buffer[i]);
-
-		while (received_data_raw.size())
-		{
-			if (requests.size() && requests.back().status != FINISH_PARSING)
-				extract_request_from_data(this->requests.back(), this->received_data_raw);
-			else
-				requests.push_back(Request());
-		}
-	}
+	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
+	void fill_response(std::vector<Server_conf> &confs);
+	void send_response();
+	void close_connection();
 };
 
 #endif //WEBSERVER_CLIENT_HPP

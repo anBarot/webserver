@@ -1,13 +1,6 @@
 #include "../../include/webserver.hpp"
 
-void create_response_line(e_response_code code, std::string &line)
-{
-	std::stringstream sst;
-	sst << "HTTP/1.1 " << code << " " << reason_phrase[code] << "\r\n";
-	sst >> line;
-}
-
-void create_header_allow(std::map<std::string, std::string> &headers, Location &loc)
+void Response::create_header_allow(Location &loc)
 {
 	std::stringstream sst;
 
@@ -66,38 +59,64 @@ Location get_location(std::map<std::string, Location> &loc_map, std::string path
 	return (loc_map[path.substr(0, i_max_matching)]);
 }
 
-void fill_response(Client &client, std::vector<Server_conf> &confs)
+void Client::send_response()
 {
-	Server_conf sv;
-	Location loc;
-	Request &req = client.requests.front();
-
-	client.response.headers["Server"] = "webserver";
-	while (client.requests.front().status == FINISH_PARSING)
+	char buf[BUFFER_SIZE];
+	std::ifstream file (response.file_name);
+	
+	if (send(socket, response.line.c_str(), response.line.size(), NULL) == -1 ||
+		send(socket, response.header_string.c_str(),  response.header_string.size(), NULL) == -1)
+		close_connection();
+	while (!file.eof())
 	{
-		sv = get_server_conf(req, confs, client.lsocket);
-		loc = get_location(sv.locations, req.request_line.target);
-		client.response.headers["Date"] = get_date(time(NULL));
-		if (loc.methods[req.request_line.method] == false)
-		{
-			req.code = METHOD_NOT_ALLOWED;
-			create_header_allow(client.response.headers, loc);
-		}
+		file.read(buf, BUFFER_SIZE);
+		if (send(socket, buf,  BUFFER_SIZE, NULL) == -1)
+			close_connection();
+	}
+	file.close();
+}
+
+void Client::fill_response(std::vector<Server_conf> &confs)
+{
+	Request &req = requests.front();
+	Server_conf sv = get_server_conf(req, confs, lsocket);
+	Location loc = get_location(sv.locations, req.request_line.target);
+
+	response.headers["Server"] = "webserver";
+	response.headers["Date"] = get_date(time(NULL));
+	if (loc.methods[req.request_line.method] == false)
+	{
+		response.code = METHOD_NOT_ALLOWED;
+		response.create_header_allow(loc);
+	}
+	else
+	{
 		switch (req.request_line.method)
 		{
 			case GET :
-				response_method_get(client, client.requests.front(), sv, loc);
+				response.method_get(req, loc);
 			case POST :
-				response_method_post();
+				response.method_post();
 			case PUT :
-				response_method_put();
+				response.method_put();
 			case DELETE :
-				response_method_delete();
+				response.method_delete(req, loc);
 			case NOT_A_METHOD :
-				client.requests.front().code = BAD_REQUEST;
+				response.code = BAD_REQUEST;
 			default :
 				break;
 		}
-		create_response_line(req.code, client.response.line);
 	}
+	if (response.code >= 400)
+		response.file_name = sv.error_page[response.code];
+	response.create_response_line();
+	response.create_header_string();
+}
+
+void Client::close_connection()
+{
+	
+
+
+
 }

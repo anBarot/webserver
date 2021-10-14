@@ -13,8 +13,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netinet/in.h>
+#include <dirent.h>
 
 // system lib
 #include <sys/types.h>

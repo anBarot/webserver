@@ -190,3 +190,17 @@ int	extract_request_from_data(Request &cur_request, std::vector<char> data)
 	if (cur_request.status == PAYLOAD_PARSED)
 		extract_trailer(cur_request, data);
 }
+
+void Client::store_incoming_data(char *buffer, int size)
+{
+	for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
+		received_data_raw.push_back(buffer[i]);
+
+	while (received_data_raw.size())
+	{
+		if (requests.size() && requests.back().status != FINISH_PARSING)
+			extract_request_from_data(this->requests.back(), this->received_data_raw);
+		else
+			requests.push_back(Request());
+	}
+}
