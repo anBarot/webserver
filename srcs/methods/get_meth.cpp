@@ -1,81 +1,48 @@
 #include "../../include/webserver.hpp"
 
-void create_header_allow(std::map<std::string, std::string> &headers, Location &loc)
+void implement_header_GET(Request &req, std::map<std::string, std::string> &headers, std::string &path)
 {
-	std::stringstream sst;
-
-	if (loc.get_methods(GET) == true)
-		sst << "GET ";
-	if (loc.get_methods(POST) == true)
-		sst << "POST ";
-	if (loc.get_methods(PUT) == true)
-		sst << "PUT ";
-	if (loc.get_methods(DELETE) == true)
-		sst << "DELETE";
-	sst << "\r\n";
-	sst >> headers["allow"];
+	headers["Content-Type"] = get_MIME(path);
+	headers["Transfer-Encoding"] = "chunked";
 }
 
-void implement_header_GET(Request &req, std::map<std::string, std::string> &headers, e_methods meth)
+void create_directory_listing(Response &res, std::string &path)
 {
-	if (req.headers.count("content-language")) 
-		headers["content-language"] = ;
-	if () 
-		headers["Content-Length"] = ;
-	if () 
-		headers["Content-Type"] = ;
-	headers["Date"] = get_date();
-	if (req.code < 400) 
-		headers["transfer-encoding"] = ;
 
-	if (meth == GET)
-	{
-		if () 
-			headers["Content-Location"] = ;
-		if () 
-			headers["Last-Modified"] = ;
-		if () 
-			headers["Location"] = ;
-		if () 
-			headers["Retry-After"] = ;
-		if () 
-			headers["Sever"] = ;
-		if () 
-			headers["WWW-Authenticate"] = ;
-	}
+
+
 }
 
-void response_method_get(Client &client, Request &req, Server_conf &sv)
+void get_index_file(Request &req, Response &rep, std::string &path)
 {
-	struct stat st ;
+	struct stat st;
 
-	if (stat(req.request_line.target.c_str(), &st) != 0)
+	if (stat(path.c_str(), &st))
 		req.code = NOT_FOUND;
-	else if (S_ISDIR(st.st_mode) && sv.is_location(req.request_line.target) == true)
-	{
-		Location &loc = sv.get_location(req.request_line.target);
+	else
+		rep.file_name = path;
+}
 
-		if (loc.get_auto_index() == false)
-			req.code = NOT_FOUND;
-		else 
-		{
-			if (loc.get_methods(GET) == false)
-			{
-				req.code = METHOD_NOT_ALLOWED;
-				create_header_allow(client.response.headers, loc);
-			}
-			else
-				req.code = OK;
-		}
+void response_method_get(Client &client, Request &req, Server_conf &sv, Location &loc)
+{
+	struct stat st;
+	std::string path;
+
+	req.code = OK;
+	get_absolute_path(path, loc);
+	if (stat(req.request_line.target.c_str(), &st))
+		req.code = NOT_FOUND;
+	else if (S_ISDIR(st.st_mode))
+	{
+		if (loc.auto_index == false)
+			get_index_file(req, client.response, path.append("/").append(loc.index));
+		else
+			create_directory_listing(client.response, req.request_line.target);
 	}
 	else if (S_ISREG(st.st_mode))
 	{
-
+		client.response.headers["Last-Modified"] = get_date(st.st_mtime);
+		client.response.headers["Content-Length"] = st.st_size;
+		client.response.file_name = req.request_line.target;
 	}
-
-	std::stringstream sst;
-	sst << "HTTP/1.1 " << req.code << " " << reason_phrase[req.code] << "\r\n";
-	sst >> client.response.line;
-	if (req.code < 400)
-		implement_response_header(req, client.response.headers, GET);
 }

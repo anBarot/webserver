@@ -23,7 +23,7 @@ int		set_and_check_methods(std::string &extract, Location &loc)
 
 		if (method_enum == NOT_A_METHOD)
 			return (CONFFILE_PARSE_ERR);
-		loc.set_methods(method_enum, true);
+		loc.methods[method_enum] = true;
 	}
 	return (0);
 }
@@ -39,34 +39,34 @@ int		extract_location_field(std::string &line, Location &loc)
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
 				return CONFFILE_PARSE_ERR;
-		if (!extract.first.compare("root"))						// extraction field root
-			loc.set_root(extract.second); 						// ex : /var/www/	
-		else if (!extract.first.compare("index"))				// extraction field index
-			loc.set_index(extract.second);						// ex : index.php
-		else if (!extract.first.compare("cgi_path"))			// extraction field cgi_path
-			loc.set_cgi_path(extract.second);					// ex :	/usr/bin/php-cgi
-		else if (!extract.first.compare("cgi_extension"))		// extraction field cgi_extension
-			loc.set_cgi_extension(extract.second);				// ex : python
-		else if (!extract.first.compare("upload_path"))			// extraction field upload_path
-			loc.set_upload_path(extract.second);				// ex : /var/www/put_folder
-		else if (!extract.first.compare("return"))				// extraction field redirection
-			loc.set_redirection(extract.second);				// ex : 404
+		if (!extract.first.compare("root"))				 
+			loc.root = extract.second; 					 
+		else if (!extract.first.compare("index"))		 
+			loc.index = extract.second;					 
+		else if (!extract.first.compare("cgi_path"))	 
+			loc.cgi_path = extract.second;				
+		else if (!extract.first.compare("cgi_extension"))
+			loc.cgi_extension = extract.second;			 
+		else if (!extract.first.compare("upload_path"))	 
+			loc.upload_path = extract.second;			
+		else if (!extract.first.compare("return"))		 
+			loc.redirection = extract.second;			 
 	}
-	else if (!extract.first.compare("method"))					// extraction field methods
-	{															// ex : GET PUT DELETE
+	else if (!extract.first.compare("method"))					
+	{															 
 		if (set_and_check_methods(extract.second, loc))
 			return (CONFFILE_PARSE_ERR);
 	}
-	else if (!extract.first.compare("autoindex"))			// extraction field autoindex
+	else if (!extract.first.compare("autoindex"))			
 	{
-		if (!extract.second.compare("on"))					// if on : auto_index = true
-			loc.set_auto_index(true);
-		else if (!extract.second.compare("off"))			// if off : auto_index = false
-			loc.set_auto_index(false);
+		if (!extract.second.compare("on"))					
+			loc.auto_index = true;
+		else if (!extract.second.compare("off"))			
+			loc.auto_index = false;
 		else
 			return CONFFILE_PARSE_ERR;
 	}
-	else													// else : not an acceptable field
+	else													
 		return CONFFILE_PARSE_ERR;
 
 	return 0;
@@ -76,7 +76,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 {
 	std::pair<std::string, std::string> extract;
 
-	extract = extract_field(line, 1);								// extract values and set the according field in Server object
+	extract = extract_field(line, 1);
 	
 	if (!extract.first.compare("listen"))
 	{
@@ -84,7 +84,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		std::string num;
 		iss >> num;
 
-		server.add_listen_port(atoi(num.c_str()));
+		server.listen_port = atoi(num.c_str());
 	}
 	else if (!extract.first.compare("server_name"))
 	{
@@ -92,10 +92,10 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		std::string word;
 
 		while (iss >> word)
-			server.add_name(word);
+			server.names.push_back(word);
 	}
 	else if (!extract.first.compare("max_body_size"))
-		server.add_max_body(atoi(extract.second.c_str()));
+		server.max_body_size = atoi(extract.second.c_str());
 	else if (!extract.first.compare("error_page"))
 	{
 		std::istringstream iss(extract.second);
@@ -104,7 +104,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		std::string file;
 		iss >> file;
 
-		server.add_error_page(atoi(num.c_str()), file);
+		server.error_page[atoi(num.c_str())] = file;
 	}
 	else
 		return CONFFILE_PARSE_ERR;
@@ -117,9 +117,9 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 	while (getline(conf_file, line))
 	{
 		ws_trim(line);
-		if (line.find("\t\t") == 0)			// if line begins with two tabs
+		if (line.find("\t\t") == 0)			
 		{
-			if (line.find(" = ") != std::string::npos)	// if field found : extract field
+			if (line.find(" = ") != std::string::npos)	
 			{
 				if (extract_location_field(line, loc))
 					return CONFFILE_PARSE_ERR;
@@ -130,8 +130,8 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 			else
 				return CONFFILE_PARSE_ERR;
 		}
-		else if (line.compare(""))							// line that doesn't begin with two tabs and not an empty line
-			return 0;										// return to fill server
+		else if (line.compare(""))							
+			return 0;										
 	}
 	return 0;
 }
@@ -145,29 +145,29 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 		ws_trim(line);
 		if (line != "")
 		{
-			if (!line.substr(0, strlen(S_LOCATION)).compare(S_LOCATION))			// if location found 
+			if (!line.substr(0, strlen(S_LOCATION)).compare(S_LOCATION))			 
 			{
-				while (line.substr(0, strlen(S_LOCATION)) == S_LOCATION)		// create new location and fill it
+				while (line.substr(0, strlen(S_LOCATION)) == S_LOCATION)
 				{
-					std::string location_str;
+					std::string path;
 
 					if (line.find(":") == std::string::npos) 
 						return (CONFFILE_PARSE_ERR);
-					location_str = line.substr(strlen(S_LOCATION), line.length() - strlen(S_LOCATION) - 1);
-					server.add_locations(location_str, Location());
+					path = line.substr(strlen(S_LOCATION), line.length() - strlen(S_LOCATION) - 1);
+					server.locations[path] = Location();
 
-					if (fill_location(conf_file, server.get_location(location_str), line))
+					if (fill_location(conf_file, server.locations[path], line))
 						return CONFFILE_PARSE_ERR;
 					if (conf_file.eof() == true && !line.size())
 						return 0;
 				}
 			}
-			if (line.find(" = ") != std::string::npos)			// if server field found, extract server field
+			if (line.find(" = ") != std::string::npos)			
 			{
 				if (extract_server_field(line, server))
 					return CONFFILE_PARSE_ERR;	
 			}
-			else if (line == "server:")						// if new server found, go back to creating server loop
+			else if (line == "server:")						
 				return 0;
 			else
 				return CONFFILE_PARSE_ERR;

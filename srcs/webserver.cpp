@@ -15,6 +15,7 @@ int main(int ac, char **av)
 
 	display_server(servers_conf);
 
+	maps_init();
 	listen_sockets_pool = listen_sockets_from_servers(servers_conf);
 
 	while(status)
