@@ -26,7 +26,7 @@ std::string get_MIME(std::string filename)
 	ext = std::string(filename, i + 1, filename.size() - i);
 	if (MIME_types.count(ext))
 		return (MIME_types[ext]);
-	return ("unrecognized MIME type");
+	return ("application/octet-stream");
 }
 
 std::string	get_file_size(std::string file_name)
@@ -40,5 +40,23 @@ std::string	get_file_size(std::string file_name)
 
 	ss << st.st_size;
 	ss >> res;
+	return (res);
+}
+
+std::string get_allow(Location &loc)
+{
+	std::stringstream sst;
+	std::string res;
+
+	if (loc.methods[GET] == true)
+		sst << "GET ";
+	if (loc.methods[POST] == true)
+		sst << "POST ";
+	if (loc.methods[PUT] == true)
+		sst << "PUT ";
+	if (loc.methods[DELETE] == true)
+		sst << "DELETE";
+	sst << "\r\n";
+	sst >> res;
 	return (res);
 }

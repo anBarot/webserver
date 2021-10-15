@@ -14,12 +14,15 @@ void ws_trim(std::string& s);
 void strlower(std::string &str);
 int error_and_exit(e_error error_nb);
 e_methods get_method_enum(std::string word);
+
+// Debug
 void display_server(std::vector<Server_conf> &servers);
 
 // Headers
 std::string get_date(time_t now);
 std::string get_MIME(std::string filename);
 std::string	get_file_size(std::string file_name);
+std::string get_allow(Location &loc);
 
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);

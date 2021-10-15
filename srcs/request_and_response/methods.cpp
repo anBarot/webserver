@@ -49,7 +49,7 @@ void Response::get_index_file(std::string &path)
 void Response::method_get(Request &req, Location &loc)
 {
 	struct stat st;
-	std::string path;
+	std::string path(req.request_line.target);
 
 	req.code = OK;
 	path.replace(0, loc.path.size(), loc.root);
@@ -87,4 +87,29 @@ void Response::method_delete(Request &req, Location &loc)
 		headers["Content-Type"] = "text/html";
 		headers["Content-Length"] = "0";
 	}
+}
+
+void Response::method_put(Request &req, Location &loc)
+{
+	struct stat st;
+	std::string path;
+
+	path.append(req.request_line.target).replace(0, loc.path.size(), loc.root);
+	if (path.back() == '/')
+	{
+		code = BAD_REQUEST;
+		return;
+	}
+	if (loc.upload_path.size())
+		path = path.replace(0, path.find_last_of("/"), loc.upload_path);
+	
+	if (stat(path.c_str(), &st) == -1)
+		code = CREATED;
+	else
+		code = NO_CONTENT;
+	
+	std::ifstream extr_file(req.payload.tmp_file_name);
+	std::ofstream file;
+	file.open("test.txt", std::ofstream::out | std::ofstream::trunc);
+	file << extr_file.rdbuf();
 }

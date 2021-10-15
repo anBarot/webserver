@@ -34,11 +34,12 @@ class Response
 			sst >> header_string;
 		}
 
-		void create_header_allow(Location &loc);
 		void get_index_file(std::string &path);
 		void create_directory_listing(std::string &path);
 		void method_get(Request &req, Location &loc);
 		void method_delete(Request &req, Location &loc);
+		void method_put(Request &req, Location &loc);
+		void method_post(Request &req, Location &loc);
 };
 
 #endif //WEBSERVER_RESPONSE_HPP

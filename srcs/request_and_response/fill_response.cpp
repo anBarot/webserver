@@ -1,21 +1,5 @@
 #include "../../include/webserver.hpp"
 
-void Response::create_header_allow(Location &loc)
-{
-	std::stringstream sst;
-
-	if (loc.methods[GET] == true)
-		sst << "GET ";
-	if (loc.methods[POST] == true)
-		sst << "POST ";
-	if (loc.methods[PUT] == true)
-		sst << "PUT ";
-	if (loc.methods[DELETE] == true)
-		sst << "DELETE";
-	sst << "\r\n";
-	sst >> headers["Allow"];
-}
-
 Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, int lsock)
 {
 	bool first_encounter = false;
@@ -87,7 +71,7 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 	if (loc.methods[req.request_line.method] == false)
 	{
 		response.code = METHOD_NOT_ALLOWED;
-		response.create_header_allow(loc);
+		response.headers["Allow"] = get_allow(loc);
 	}
 	else
 	{
@@ -96,9 +80,9 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 			case GET :
 				response.method_get(req, loc);
 			case POST :
-				response.method_post();
+				response.method_post(req, loc);
 			case PUT :
-				response.method_put();
+				response.method_put(req, loc);
 			case DELETE :
 				response.method_delete(req, loc);
 			case NOT_A_METHOD :
