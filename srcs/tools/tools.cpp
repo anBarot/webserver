@@ -65,8 +65,8 @@ e_methods	get_method_enum(std::string word)
 		return NOT_A_METHOD;
 }
 
-// Init reason_phrase map and MIME_Type map
-void	maps_init()
+// Init reason_phrase map 
+void	maps_init_reason_phrase(std::map<int, std::string> &reason_phrase)
 {
 	reason_phrase[100] = "Continue",
 	reason_phrase[101] = "Switching Protocols";
@@ -109,7 +109,11 @@ void	maps_init()
 	reason_phrase[503] = "Service Unavailable";
 	reason_phrase[504] = "Gateway Timeout";
 	reason_phrase[505] = "HTTP Version Not Supported";
+}
 
+// Init MIME_types map 
+void	maps_init_MIME_types(std::map<std::string, std::string> &MIME_types)
+{
 	MIME_types["aac"] = "audio/aac";
 	MIME_types["abw"] = "application/x-abiword";
 	MIME_types["arc"] = "application/octet-stream";
@@ -177,4 +181,4 @@ void	maps_init()
 	MIME_types["3gp"] = "audio/3gpp";
 	MIME_types["3g2"] = "audio/3gpp2";
 	MIME_types["7z"] = "application/x-7z-compressed";
-};
+}

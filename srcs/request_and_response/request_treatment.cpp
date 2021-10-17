@@ -68,7 +68,7 @@ void extract_trailer(Request &req, std::vector<char> &data)
 			strlower(header);
 
 			if (req.expected_trailers.find(header) != req.expected_trailers.end())
-				req.headers.insert(header, value);
+				req.headers[header] = value;
 		}
 		str.erase(0, pos + 2);
 		data.erase(data.begin(), data.begin() + pos + 2);
@@ -86,7 +86,7 @@ void extract_payload(Request &req, std::vector<char> &data)
 	if (req.payload.tmp_file_name == "unammed")
 		req.payload.tmp_file_name = std::tmpnam(NULL);
 
-	std::ofstream file(req.payload.tmp_file_name);
+	std::ofstream file(req.payload.tmp_file_name.c_str());
 
 	if (req.payload.is_chunked)
 	{
@@ -109,7 +109,7 @@ void extract_payload(Request &req, std::vector<char> &data)
 	}
 
 	if (req.status == PAYLOAD_PARSED && req.expected_trailers.empty() == true)
-		req.status == FINISH_PARSING;
+		req.status = FINISH_PARSING;
 
 	file.close();
 }
@@ -133,8 +133,8 @@ void extract_headers(Request &req, std::vector<char> &data)
 			data.erase(data.begin(), data.begin() + 2);
 
 			req.status = HEADER_PARSED;
-			check_payload(req);
-			check_trailer(req);
+			req.check_payload();
+			req.check_trailer();
 			break;
 		}
 
@@ -142,7 +142,7 @@ void extract_headers(Request &req, std::vector<char> &data)
 		value = str.substr(str.find_first_of(": ") + 2, str.length());
 		strlower(header);
 
-		req.headers.insert(header, value);
+		req.headers[header] = value;
 		str.erase(0, pos + 2);
 		data.erase(data.begin(), data.begin() + pos + 2);
 	}
@@ -170,7 +170,7 @@ void extract_request_line(Request &req, std::vector<char> &data)
 		data.erase(data.begin(), data.begin() + pos + 2);
 		req.status = LINE_PARSED;
 
-		check_line(req);
+		req.check_line();
 	}
 }
 
@@ -179,7 +179,7 @@ void extract_request_line(Request &req, std::vector<char> &data)
 	depending on the request status :
 	starting -> line parsed -> header parsed -> payload parsed -> finish
 */
-int	extract_request_from_data(Request &cur_request, std::vector<char> data)
+void extract_request_from_data(Request &cur_request, std::vector<char> &data)
 {
 	if (cur_request.status == STARTING_PARSING)
 		extract_request_line(cur_request, data);
@@ -189,15 +189,20 @@ int	extract_request_from_data(Request &cur_request, std::vector<char> data)
 		extract_payload(cur_request, data);
 	if (cur_request.status == PAYLOAD_PARSED)
 		extract_trailer(cur_request, data);
+	
+	display_request(cur_request);
 }
 
 void Client::store_incoming_data(char *buffer, int size)
 {
-	for (int i = 0; i < size ; i++) // probable bottleneck, will see later (should write in a temporary file ?)
+	std::cout << "Store incoming data : " << buffer << std::endl;
+	for (int i = 0; i < size ; i++)
 		received_data_raw.push_back(buffer[i]);
 
 	while (received_data_raw.size())
 	{
+		std::cout << "loop received data\n";
+		std::cout << "raw data size : " << received_data_raw.size() << std::endl;
 		if (requests.size() && requests.back().status != FINISH_PARSING)
 			extract_request_from_data(this->requests.back(), this->received_data_raw);
 		else

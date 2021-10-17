@@ -79,7 +79,7 @@ enum e_response_code {
 	HTTP_VERSION_NOT_SUPPORTED = 505
 };
 
-std::map<int, std::string> reason_phrase;
-std::map<std::string, std::string> MIME_types;
+extern std::map<int, std::string> reason_phrase;
+extern std::map<std::string, std::string> MIME_types;
 
 #endif //SATOSHIS_DATA_STRUCT_HPP

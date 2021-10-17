@@ -17,23 +17,8 @@ class Response
 		std::map<std::string, std::string> headers;
 		std::string file_name;
 
-		void create_response_line()
-		{
-			std::stringstream sst;
-			sst << "HTTP/1.1 " << code << " " << reason_phrase[code] << "\r\n";
-			sst >> line;
-		}
-
-		void Response::create_header_string()
-		{
-			std::stringstream sst;
-
-			for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-				sst << it->first << ": " << it->second << "\r\n";
-			sst << "\r\n";
-			sst >> header_string;
-		}
-
+		void create_response_line();
+		void create_header_string();
 		void get_index_file(std::string &path);
 		void create_directory_listing(std::string &path);
 		void method_get(Request &req, Location &loc);

@@ -10,7 +10,6 @@
 #include "Location.hpp"
 #include "Server_conf.hpp"
 #include "cpp_libraries.hpp"
-#include "data_struct.hpp"
 
 class Client
 {

@@ -95,7 +95,7 @@ void Response::method_put(Request &req, Location &loc)
 	std::string path;
 
 	path.append(req.request_line.target).replace(0, loc.path.size(), loc.root);
-	if (path.back() == '/')
+	if (path[path.size() - 1] == '/')
 	{
 		code = BAD_REQUEST;
 		return;
@@ -108,8 +108,18 @@ void Response::method_put(Request &req, Location &loc)
 	else
 		code = NO_CONTENT;
 	
-	std::ifstream extr_file(req.payload.tmp_file_name);
+	std::ifstream extr_file(req.payload.tmp_file_name.c_str());
 	std::ofstream file;
-	file.open("test.txt", std::ofstream::out | std::ofstream::trunc);
+	file.open(path.c_str(), std::ofstream::out | std::ofstream::trunc);
 	file << extr_file.rdbuf();
+	file.close();
+	remove(req.payload.tmp_file_name.c_str());
+	headers["Content-Location"] = path;
+}
+
+void Response::method_post(Request &req, Location &loc)
+{
+
+
+
 }

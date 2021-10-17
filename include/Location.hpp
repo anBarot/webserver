@@ -16,7 +16,7 @@ class Location
 		std::string		index;
 		bool			auto_index;
 		std::string		upload_path;
-		bool			methods[4];
+		bool			methods[5];
 		std::string		cgi_path;
 		std::string		cgi_extension;
 		std::string		redirection;

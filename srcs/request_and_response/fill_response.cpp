@@ -1,5 +1,22 @@
 #include "../../include/webserver.hpp"
 
+void Response::create_response_line()
+{
+	std::stringstream sst;
+	sst << "HTTP/1.1 " << code << " " << reason_phrase[code] << "\r\n";
+	sst >> line;
+}
+
+void Response::create_header_string()
+{
+	std::stringstream sst;
+
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+		sst << it->first << ": " << it->second << "\r\n";
+	sst << "\r\n";
+	sst >> header_string;
+}
+
 Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, int lsock)
 {
 	bool first_encounter = false;
@@ -27,34 +44,38 @@ Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, int l
 	return (sv);
 }
 
-Location get_location(std::map<std::string, Location> &loc_map, std::string path)
+Location &get_location(std::map<std::string, Location> &loc_map, std::string path)
 {
 	size_t i_max_matching;
-	size_t i_mem; 
+	size_t i_mem;
+	std::string loc_path;
 
 	i_mem = 0;
 	i_max_matching = 0;
-	for (std::map<std::string, Location>::iterator it = loc_map.begin(); it != loc_map.end(); it++)
+	for (std::map<std::string, Location>::iterator it = loc_map.begin(); it != loc_map.end(); ++it)
 	{
 		i_mem = path.find_first_not_of(it->first);
 		if (i_mem > i_max_matching)
 			i_max_matching = i_mem;
 	}
-	return (loc_map[path.substr(0, i_max_matching)]);
+	loc_path = path.substr(0, i_max_matching);
+	std::cout << "check req path : " << path << "\n";
+	std::cout << "check loc path : " << loc_path << "\n";
+	return (loc_map[loc_path]);
 }
 
 void Client::send_response()
 {
 	char buf[BUFFER_SIZE];
-	std::ifstream file (response.file_name);
+	std::ifstream file(response.file_name.c_str());
 	
-	if (send(socket, response.line.c_str(), response.line.size(), NULL) == -1 ||
-		send(socket, response.header_string.c_str(),  response.header_string.size(), NULL) == -1)
+	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
+		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
 		close_connection();
 	while (!file.eof())
 	{
 		file.read(buf, BUFFER_SIZE);
-		if (send(socket, buf,  BUFFER_SIZE, NULL) == -1)
+		if (send(socket, buf,  BUFFER_SIZE, 0) == -1)
 			close_connection();
 	}
 	file.close();
@@ -62,9 +83,10 @@ void Client::send_response()
 
 void Client::fill_response(std::vector<Server_conf> &confs)
 {
+	std::cout << "fill response function\n";
 	Request &req = requests.front();
 	Server_conf sv = get_server_conf(req, confs, lsocket);
-	Location loc = get_location(sv.locations, req.request_line.target);
+	Location &loc = get_location(sv.locations, req.request_line.target);
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
@@ -95,11 +117,13 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		response.file_name = sv.error_page[response.code];
 	response.create_response_line();
 	response.create_header_string();
+	display_response(response);
+	while (1);
 }
 
 void Client::close_connection()
 {
-	
+
 
 
 

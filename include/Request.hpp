@@ -40,12 +40,12 @@ class Request
 			payload.length = 0;
 			payload.tmp_file_name = "unammed";
 		}
+		void check_payload();
+		void check_trailer();
+		void check_line();
+		void check_request_error(std::vector<Server_conf> &server_conf);
 };
 
-int	extract_request_from_data(Request &cur_request, std::vector<char> data);
-void check_request_error(Request &req, std::vector<Server_conf> &server_conf);
-void check_payload(Request &req);
-void check_trailer(Request &req);
-void check_line(Request &req);
+void extract_request_from_data(Request &cur_request, std::vector<char> &data);
 
 #endif //WEBSERVER_REQUEST_HPP

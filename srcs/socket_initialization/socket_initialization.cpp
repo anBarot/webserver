@@ -24,13 +24,13 @@ int listen_from_server(Server_conf &server)
 	return  sock;
 }
 
-std::vector<int> listen_sockets_from_servers(std::vector<Server_conf> servers_conf)
+std::map<int, int>  listen_sockets_from_servers(std::vector<Server_conf> servers_conf)
 {
-	std::vector<int> listens;
+	std::map<int, int> listens;
 
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
-		listens.push_back(listen_from_server(*it));
+		listens[listen_from_server(*it)] = it->listen_port;
 	}
 	return listens;
 }
