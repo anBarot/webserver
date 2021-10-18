@@ -81,7 +81,6 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 	// printf("%d clients, %d write\n", DEBUG_c, DEBUG_wt);
 }
 
-
 /*
  * args : list de socket listeners initialisé depuis les ports; une liste de clients
  * On ajoute les socket listeners au read set

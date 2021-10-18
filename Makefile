@@ -1,15 +1,19 @@
 
 NAME= webserv
 
-SRCS=	srcs/webserver.cpp \
-		srcs/socket_initialization/socket_initialization.cpp \
+SRCS = 	srcs/webserver.cpp \
 		srcs/vo.cpp \
-		srcs/tools/tools.cpp \
-		srcs/tools/error.cpp \
+		srcs/conf_file_parsing/conf_file_parser.cpp  \
+		srcs/socket_initialization/socket_initialization.cpp \
+		srcs/request_and_response/request_checking.cpp \
+		srcs/request_and_response/fill_response.cpp \
+		srcs/request_and_response/request_treatment.cpp \
+		srcs/request_and_response/methods.cpp \
 		srcs/tools/debug_display.cpp \
-		srcs/parsing/parser.cpp
+		srcs/tools/headers.cpp \
+		srcs/tools/tools.cpp
 
-MAIN= webserver.cpp
+MAIN = webserver.cpp
 
 all:
 	clang++ -std=c++98  $(SRCS)  -o $(NAME)

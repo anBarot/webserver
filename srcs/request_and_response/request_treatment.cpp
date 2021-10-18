@@ -195,14 +195,14 @@ void extract_request_from_data(Request &cur_request, std::vector<char> &data)
 
 void Client::store_incoming_data(char *buffer, int size)
 {
-	std::cout << "Store incoming data : " << buffer << std::endl;
+	// std::cout << "Store incoming data : " << buffer << std::endl;
 	for (int i = 0; i < size ; i++)
 		received_data_raw.push_back(buffer[i]);
 
 	while (received_data_raw.size())
 	{
-		std::cout << "loop received data\n";
-		std::cout << "raw data size : " << received_data_raw.size() << std::endl;
+		// std::cout << "loop received data\n";
+		// std::cout << "raw data size : " << received_data_raw.size() << std::endl;
 		if (requests.size() && requests.back().status != FINISH_PARSING)
 			extract_request_from_data(this->requests.back(), this->received_data_raw);
 		else

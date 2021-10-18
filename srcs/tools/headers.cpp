@@ -31,12 +31,15 @@ std::string get_MIME(std::string filename)
 
 std::string	get_file_size(std::string file_name)
 {
+	// std::cout << "get file size fun : " << file_name << "\n";
 	struct stat st;
 	std::stringstream ss;
     std::string res;
 
 	if (stat(file_name.c_str(), &st) || !S_ISREG(st.st_mode))
-		return 0;
+		return "";
+
+	// std::cout << "file found\n";
 
 	ss << st.st_size;
 	ss >> res;

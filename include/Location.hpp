@@ -22,12 +22,18 @@ class Location
 		std::string		redirection;
 
 		Location() {
+			root = path;
+			index = "index.html";
+			upload_path = "";
 			methods[GET] = false;
 			methods[POST] = false;
 			methods[DELETE] = false;
 			methods[PUT] = false;
 			methods[NOT_A_METHOD] = false;
-			auto_index = false;
+			auto_index = true;
+			cgi_path = "";
+			cgi_extension = "";
+			redirection = "";
 		}
 		~Location() {}
 };

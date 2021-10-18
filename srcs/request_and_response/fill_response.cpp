@@ -3,8 +3,8 @@
 void Response::create_response_line()
 {
 	std::stringstream sst;
-	sst << "HTTP/1.1 " << code << " " << reason_phrase[code] << "\r\n";
-	sst >> line;
+	sst << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
+	line = sst.str();
 }
 
 void Response::create_header_string()
@@ -14,7 +14,7 @@ void Response::create_header_string()
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
 		sst << it->first << ": " << it->second << "\r\n";
 	sst << "\r\n";
-	sst >> header_string;
+	header_string = sst.str();
 }
 
 Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, int lsock)
@@ -49,18 +49,22 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 	size_t i_max_matching;
 	size_t i_mem;
 	std::string loc_path;
+	std::string subpath;
 
 	i_mem = 0;
 	i_max_matching = 0;
 	for (std::map<std::string, Location>::iterator it = loc_map.begin(); it != loc_map.end(); ++it)
 	{
-		i_mem = path.find_first_not_of(it->first);
+		subpath = path.substr(0, it->first.size());
+		(subpath == it->first) ? i_mem = subpath.size() : i_mem = 0;
 		if (i_mem > i_max_matching)
 			i_max_matching = i_mem;
 	}
+	if (i_mem == 0)
+		return (loc_map["/"]);
 	loc_path = path.substr(0, i_max_matching);
-	std::cout << "check req path : " << path << "\n";
-	std::cout << "check loc path : " << loc_path << "\n";
+	if (loc_path[loc_path.size() - 1] == '/')
+		loc_path = loc_path.substr(0, loc_path.size() - 1);
 	return (loc_map[loc_path]);
 }
 
@@ -79,11 +83,12 @@ void Client::send_response()
 			close_connection();
 	}
 	file.close();
+	while(1);
 }
 
 void Client::fill_response(std::vector<Server_conf> &confs)
 {
-	std::cout << "fill response function\n";
+	std::cout << "fill response function : " << requests.front().code << "\n";
 	Request &req = requests.front();
 	Server_conf sv = get_server_conf(req, confs, lsocket);
 	Location &loc = get_location(sv.locations, req.request_line.target);
@@ -97,28 +102,20 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 	}
 	else
 	{
-		switch (req.request_line.method)
-		{
-			case GET :
-				response.method_get(req, loc);
-			case POST :
-				response.method_post(req, loc);
-			case PUT :
-				response.method_put(req, loc);
-			case DELETE :
-				response.method_delete(req, loc);
-			case NOT_A_METHOD :
-				response.code = BAD_REQUEST;
-			default :
-				break;
-		}
+		if (req.request_line.method == GET)
+			response.method_get(req, loc, sv);
+		else if (req.request_line.method == POST)
+			response.method_post(req, loc);
+		else if (req.request_line.method == PUT)
+			response.method_put(req, loc);
+		else if (req.request_line.method == DELETE)
+			response.method_delete(req, loc);
+		else
+			response.code = BAD_REQUEST;
 	}
-	if (response.code >= 400)
-		response.file_name = sv.error_page[response.code];
 	response.create_response_line();
 	response.create_header_string();
 	display_response(response);
-	while (1);
 }
 
 void Client::close_connection()

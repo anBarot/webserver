@@ -21,7 +21,7 @@ class Response
 		void create_header_string();
 		void get_index_file(std::string &path);
 		void create_directory_listing(std::string &path);
-		void method_get(Request &req, Location &loc);
+		void method_get(Request &req, Location &loc, Server_conf &sv);
 		void method_delete(Request &req, Location &loc);
 		void method_put(Request &req, Location &loc);
 		void method_post(Request &req, Location &loc);
