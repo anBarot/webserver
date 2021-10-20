@@ -1,5 +1,18 @@
 #include "../include/webserver.hpp"
 
+void close_connections(std::vector<Client> &clients_pool)
+{
+	for (std::vector<Client>::iterator it = clients_pool.begin(); it != clients_pool.end(); it++)
+	{
+		if (it->status == 1)
+		{
+			close(it->socket);
+			clients_pool.erase(it);
+			std::cout << "close client connexion : " << it->socket << "\n";
+		}
+	}
+}
+
 /*
  * On regarde les socket listeners
  * on ajoute un new client si un des fd est prêt en reading
@@ -74,6 +87,8 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 			DEBUG_wt++;
 			it->fill_response(server_confs);
 			it->send_response();
+			if (it->response.code >= 400)
+				it->status = 1;
 			// send(it->socket, "hello", strlen("hello"), 0);
 			break;
 		}
@@ -90,7 +105,7 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
  * add client si besoin
  * read socket
  * write socket
- *
+ *iterator
  */
 int 	socket_routine(std::map<int, int> &listen_sockets_pool, std::vector<Client> &clients_pool, std::vector<Server_conf> &server_confs)
 {
@@ -109,5 +124,6 @@ int 	socket_routine(std::map<int, int> &listen_sockets_pool, std::vector<Client>
 	add_clients(sp, listen_sockets_pool, clients_pool);
 	read_from_clients_sockets(sp, clients_pool);
 	write_to_clients_sockets(sp, clients_pool, server_confs);
+	close_connections(clients_pool);
 	return 1;
 }

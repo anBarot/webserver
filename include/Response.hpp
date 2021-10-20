@@ -17,6 +17,8 @@ class Response
 		std::map<std::string, std::string> headers;
 		std::string file_name;
 
+		Response() : code(OK)	{}
+
 		void create_response_line();
 		void create_header_string();
 		void get_index_file(std::string &path);

@@ -16,18 +16,18 @@ class Client
 public:
 	int socket;
 	int lsocket;
+	int status;
 	Response response;
 	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
-	Client(int sock, int lsock): socket(sock), lsocket(lsock) {}
+	Client(int sock, int lsock): socket(sock), lsocket(lsock), status(0) {}
 
 	~Client(){};
 
 	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
 	void fill_response(std::vector<Server_conf> &confs);
 	void send_response();
-	void close_connection();
 };
 
 #endif //WEBSERVER_CLIENT_HPP

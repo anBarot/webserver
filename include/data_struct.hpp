@@ -30,8 +30,7 @@ enum	e_request_status {
 	LINE_PARSED,
 	HEADER_PARSED,
 	PAYLOAD_PARSED,
-	FINISH_PARSING,
-	TREATED
+	FINISH_PARSING
 };
 
 enum e_response_code {

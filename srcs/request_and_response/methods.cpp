@@ -2,8 +2,6 @@
 
 void create_html_listing_file(std::string path, std::string listing_html)
 {
-	std::cout << "creating html list file : " << path << " : " << listing_html << "\n";
-
 	std::ifstream filein("html/listing.html");
 	std::ofstream fileout("listing_temp.html");
 	size_t pos_done;
@@ -21,7 +19,6 @@ void create_html_listing_file(std::string path, std::string listing_html)
 	}
 	filein.close();
 	fileout.close();
-	while (1);
 }
 
 void Response::create_directory_listing(std::string &path)

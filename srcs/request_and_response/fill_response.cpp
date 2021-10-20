@@ -71,19 +71,19 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 void Client::send_response()
 {
 	char buf[BUFFER_SIZE];
-	std::ifstream file(response.file_name.c_str());
+	FILE *pFile = fopen(response.file_name.c_str(), "r");
+	size_t rsize = BUFFER_SIZE;
 	
 	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
 		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
-		close_connection();
-	while (!file.eof())
+		status = 1;
+	while (rsize == BUFFER_SIZE)
 	{
-		file.read(buf, BUFFER_SIZE);
-		if (send(socket, buf,  BUFFER_SIZE, 0) == -1)
-			close_connection();
+		rsize = fread(buf, 1, BUFFER_SIZE, pFile);
+		if (send(socket, buf,  rsize, 0) == -1)
+			status = 1;
 	}
-	file.close();
-	while(1);
+	fclose(pFile);
 }
 
 void Client::fill_response(std::vector<Server_conf> &confs)
@@ -116,12 +116,5 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 	response.create_response_line();
 	response.create_header_string();
 	display_response(response);
-}
-
-void Client::close_connection()
-{
-
-
-
-
+	requests.pop_front();
 }
