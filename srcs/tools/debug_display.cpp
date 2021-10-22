@@ -60,6 +60,7 @@ void display_response(Response &rep)
 		std::cout << it->first << " : " << it->second << std::endl;
 	
 	std::cout << "code : " << rep.code << std::endl;
+	std::cout << "file to send : " << rep.file_name << "\n";
 }
 
 void	display_request(Request &req)

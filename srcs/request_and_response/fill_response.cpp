@@ -1,5 +1,31 @@
 #include "../../include/webserver.hpp"
 
+std::string	create_error_file(int code)
+{
+	std::ifstream filein("./html/error.html");
+	std::ofstream fileout("./error_temp.html");
+	size_t pos_done;
+	size_t pos_dtwo;
+	std::string str;
+
+	std::ostringstream num;
+	num << code;
+ 	
+	while (std::getline(filein, str))
+	{
+		if ((pos_done = str.find("$1")) != std::string::npos)
+			str.replace(pos_done, 2, num.str());
+		if ((pos_dtwo = str.find("$2")) != std::string::npos)
+			str.replace(pos_dtwo, 2, reason_phrase[code]);
+		fileout << str;
+		fileout << "\n";
+	}
+	filein.close();
+	fileout.close();
+	str = "./error_temp.html";
+	return str;
+}
+
 void Response::create_response_line()
 {
 	std::stringstream sst;
@@ -70,37 +96,38 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 
 void Client::send_response()
 {
-	char buf[BUFFER_SIZE];
-	FILE *pFile = fopen(response.file_name.c_str(), "r");
-	size_t rsize = BUFFER_SIZE;
-	
+	std::ifstream file(response.file_name.c_str());
+	std::stringstream buf;
+	std::string str;
+
 	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
 		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
 		status = 1;
-	while (rsize == BUFFER_SIZE)
-	{
-		rsize = fread(buf, 1, BUFFER_SIZE, pFile);
-		if (send(socket, buf,  rsize, 0) == -1)
-			status = 1;
-	}
-	fclose(pFile);
+	// buf << std::hex << response.headers["Content-Length"];
+	// str = buf.str().append("\r\n");
+	// if (send(socket, str.c_str(), str.size(), 0) == -1)
+	// 	status = 1;
+	buf << file.rdbuf();
+	str = buf.str();
+	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
+		// send(socket, "\r\n0\r\n", 5, 0) == -1)
+		send(socket, "\r\n", 2, 0) == -1)
+		status = 1;
+	file.close();
 }
 
 void Client::fill_response(std::vector<Server_conf> &confs)
 {
-	std::cout << "fill response function : " << requests.front().code << "\n";
 	Request &req = requests.front();
 	Server_conf sv = get_server_conf(req, confs, lsocket);
 	Location &loc = get_location(sv.locations, req.request_line.target);
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
-	if (loc.methods[req.request_line.method] == false)
-	{
-		response.code = METHOD_NOT_ALLOWED;
-		response.headers["Allow"] = get_allow(loc);
-	}
-	else
+	response.headers["Content-Length"] = "0";
+	response.headers["Host"] = "localhost:5000";
+	(loc.methods[req.request_line.method] == false) ? req.code = METHOD_NOT_ALLOWED : 0; 
+	if (req.code < 400)
 	{
 		if (req.request_line.method == GET)
 			response.method_get(req, loc, sv);
@@ -110,11 +137,24 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 			response.method_put(req, loc);
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
-		else
-			response.code = BAD_REQUEST;
 	}
+	response.code = req.code;
+	std::cout << "fill response : check if error\n";
+	if (response.code >= 400)
+	{
+		if (response.code == METHOD_NOT_ALLOWED)
+			response.headers["Allow"] = get_allow(loc);
+		if (sv.error_page.count(response.code) && get_file_size(sv.error_page[response.code]) != "")
+			response.file_name = sv.error_page[response.code];
+		else
+			response.file_name = create_error_file(response.code);
+	}
+	if (response.file_name != "")
+		response.headers["Content-Length"] = get_file_size(response.file_name);
+	std::cout << "fill response : create response line\n";
 	response.create_response_line();
 	response.create_header_string();
 	display_response(response);
+	std::cout << "fill response : pop front request\n";
 	requests.pop_front();
 }

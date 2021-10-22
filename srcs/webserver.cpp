@@ -16,7 +16,7 @@ int main(int ac, char **av)
 	if (conf_parser(av[1], servers_conf))
 		return (error_and_exit(CONFFILE_PARSE_ERR));
 
-	display_servers(servers_conf);
+	// display_servers(servers_conf);
 
 	maps_init_MIME_types(MIME_types);
 	maps_init_reason_phrase(reason_phrase);

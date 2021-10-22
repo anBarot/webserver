@@ -23,7 +23,6 @@ void create_html_listing_file(std::string path, std::string listing_html)
 
 void Response::create_directory_listing(std::string &path)
 {
-	std::cout << "Directory listing : " << path << "\n";
 	std::vector<std::string> files;
     struct dirent *entry;
 	std::string listing_str;
@@ -34,10 +33,10 @@ void Response::create_directory_listing(std::string &path)
 	closedir(dir);
 
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
-		std::cout << "dir listing : " << *it << "\n";
-
-	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
-		listing_str.append("\t<li>").append(*it).append("</li>\n");
+	{
+		if (*it != "." && *it != "..")
+			listing_str.append("<a href=\"").append(*it).append("\">").append(*it).append("</a>\n");
+	}
 
 	create_html_listing_file(path, listing_str);
 	file_name = "listing_temp.html";
@@ -71,16 +70,12 @@ void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 	if (stat(path.c_str(), &st))
 	{
 		std::cout << "dir not found\n";
-		code = NOT_FOUND;
-		if (sv.error_page.count(NOT_FOUND) && get_file_size(sv.error_page[NOT_FOUND]) != "")
-			file_name = sv.error_page[NOT_FOUND];
-		else
-			file_name = "./html/error.html";
+		req.code = NOT_FOUND;
 	}
 	else if (S_ISDIR(st.st_mode))
 	{
 		if (loc.auto_index == false)
-			get_index_file(path.append("/").append(loc.index));
+			get_index_file(path.append(loc.index));
 		else
 			create_directory_listing(path);
 	}
@@ -91,10 +86,8 @@ void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 		headers["Content-Type"] = get_MIME(path);
 		file_name = req.request_line.target;
 	}
-	std::cout << "file name : " << file_name << "\n";
-	headers["Transfer-Encoding"] = "chunked";
-	headers["Content-Length"] = get_file_size(file_name);
-	std::cout << "Quitting method get\n";
+	// headers["Transfer-Encoding"] = "chunked";
+	std::cout << "quitting method get\n";
 }
 
 void Response::method_delete(Request &req, Location &loc)

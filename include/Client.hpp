@@ -21,12 +21,17 @@ public:
 	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
-	Client(int sock, int lsock): socket(sock), lsocket(lsock), status(0) {}
+	Client(int sock, int lsock): socket(sock), lsocket(lsock), status(0)
+	{
+		requests.push_back(Request());
+
+	}
 
 	~Client(){};
 
 	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
 	void fill_response(std::vector<Server_conf> &confs);
+	void fill_error_response();
 	void send_response();
 };
 

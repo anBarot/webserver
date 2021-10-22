@@ -16,7 +16,7 @@ SRCS = 	srcs/webserver.cpp \
 MAIN = webserver.cpp
 
 all:
-	clang++ -std=c++98  $(SRCS)  -o $(NAME)
+	clang++ -std=c++98 -g $(SRCS)  -o $(NAME)
 
 clean:
 	rm -rf $(NAME)

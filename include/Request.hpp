@@ -38,8 +38,9 @@ class Request
 			code = DEFAULT;
 			payload.is_chunked = false;
 			payload.length = 0;
-			payload.tmp_file_name = "unammed";
+			payload.tmp_file_name = "";
 		}
+
 		void check_payload();
 		void check_trailer();
 		void check_line();

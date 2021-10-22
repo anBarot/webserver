@@ -18,6 +18,16 @@ class Response
 		std::string file_name;
 
 		Response() : code(OK)	{}
+		~Response() {}
+
+		void clear()
+		{
+			code = OK;
+			line.clear();
+			header_string.clear();
+			headers.clear();
+			file_name.clear();
+		}
 
 		void create_response_line();
 		void create_header_string();
