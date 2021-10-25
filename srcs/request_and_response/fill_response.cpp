@@ -121,7 +121,6 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
-	response.headers["Content-Length"] = "0";
 	(loc.methods[req.request_line.method] == false) ? req.code = METHOD_NOT_ALLOWED : 0; 
 	if (req.code < 400)
 	{
@@ -130,7 +129,7 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		else if (req.request_line.method == POST)
 			response.method_post(req, loc);
 		else if (req.request_line.method == PUT)
-			response.method_put(req, loc);
+			response.method_put(req, loc, sv);
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
 	}

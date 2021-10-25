@@ -45,9 +45,11 @@ void 	read_from_clients_sockets(SocketPool &sp, std::vector<Client> &clients)
 		if (FD_ISSET(it->socket, &(sp.reading_set)))
 		{
 			DEBUG_rd++;
-			last_read = read(it->socket, buffer, BUFFER_SIZE);
-			if (last_read == 0)
+			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
+			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
 			{
+				shutdown(it->socket, SHUT_RDWR);
+				close(it->socket);
 				clients.erase(it);
 				break;
 			}
@@ -108,7 +110,7 @@ int 	socket_routine(std::map<int, int> &listen_sockets_pool, std::vector<Client>
 	// printf("select = %d\n", waiting_connexions);
 	if (waiting_connexions == -1)
 		return error_and_exit(SOCK_ERR);
-	if (waiting_connexions == 0)
+	if (!waiting_connexions)
 		return (1);
 
 	add_clients(sp, listen_sockets_pool, clients_pool);

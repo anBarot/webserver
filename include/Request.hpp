@@ -30,6 +30,7 @@ class Request
 		t_request_line request_line;
 		std::map<std::string, std::string> headers;
 		t_payload payload;
+		bool has_trailer;
 		std::set<std::string> expected_trailers;
 
 		Request() 
@@ -39,6 +40,7 @@ class Request
 			payload.is_chunked = false;
 			payload.length = 0;
 			payload.tmp_file_name = "";
+			has_trailer = false;
 		}
 
 		void check_payload();

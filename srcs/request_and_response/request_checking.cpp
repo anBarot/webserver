@@ -24,7 +24,10 @@ void	Request::check_payload()
 			headers["transfer-encoding"].find("chunked") != std::string::npos)
 			payload.is_chunked = true;
 		else if (headers.count("content-length"))
+		{
+			std::cout << "request has payload\n";
 			payload.length = atoi(headers["content-length"].c_str());
+		}
 		else
 			status = FINISH_PARSING;
 	}

@@ -1,9 +1,11 @@
+// préciser host pour HTTP/1.1
 GET /home/abarot/ HTTP/1.1 
 GET /wordpress/bla.html HTTP/1.1
 DELETE /wordpress/to_delete.txt HTTP/1.1
 
-
+***
 DELETE /Desktop/to_delete.txt HTTP/1.1
+host: localhost
 {
 ---  HTTP/1.1 200 OK
 ---  Server: nginx/1.18.0 (Ubuntu)
@@ -15,8 +17,36 @@ DELETE /Desktop/to_delete.txt HTTP/1.1
 ---  ETag: "61767b47-0"
 ---  Accept-Ranges: bytes
 }
+***
 
 
+***
+PUT /wordpress/test.txt HTTP/1.1 
+content-length : 5
+host: localhost
+{
+---  HTTP/1.1 204 No Content
+---  Server: nginx/1.18.0 (Ubuntu)
+---  Date: Mon, 25 Oct 2021 11:47:09 GMT
+---  Connection: keep-alive
+}
+***
 
-Ctrl C -> à corriger (loop ?)
+
+***
+PUT /wordpress/test_2.txt HTTP/1.1
+host: localhost
+content-length: 5
+
+1234
+{
+---  HTTP/1.1 201 Created
+---  Server: nginx/1.18.0 (Ubuntu)
+---  Date: Mon, 25 Oct 2021 12:02:26 GMT
+---  Content-Length: 0
+---  Location: http://localhost:8000/wordpress/test_2.txt
+---  Connection: keep-alive
+}
+***
+
 temps de reco trop long

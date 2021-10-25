@@ -34,6 +34,9 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 */
 void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data)
 {
+	std::cout << "payload length : " << req.payload.length << "\n";
+	std::cout << "string : " << str << "\n";
+	std::cout << "file name : " << req.payload.tmp_file_name << "\n";
 	if (str.size() >= req.payload.length)
 	{
 		file << str.substr(0, req.payload.length);
@@ -104,13 +107,13 @@ void extract_payload(Request &req, std::vector<char> &data)
 	else if (req.payload.length)
 	{
 		extract_with_length(str, file, req, data);
-		if (req.payload.length)
+		if (!req.payload.length)
 			req.status = PAYLOAD_PARSED;
 	}
 
-	if (req.status == PAYLOAD_PARSED && req.expected_trailers.empty() == true)
+	if (req.status == PAYLOAD_PARSED && req.has_trailer == false)
 		req.status = FINISH_PARSING;
-
+	
 	file.close();
 }
 

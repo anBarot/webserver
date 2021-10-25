@@ -117,15 +117,21 @@ void Response::method_delete(Request &req, Location &loc)
 	}
 }
 
-void Response::method_put(Request &req, Location &loc)
+void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 {
+	// Location: http://localhost:8000/wordpress/test_2.txt
 	struct stat st;
 	std::string path;
+	std::string location_path("http://");
+	std::stringstream sst;
+
+	sst << sv.names.front() << ":" << sv.listen_port << req.request_line.target;
+	location_path.append(sst.str());
 
 	path.append(req.request_line.target).replace(0, loc.path.size(), loc.root);
 	if (path[path.size() - 1] == '/')
 	{
-		code = BAD_REQUEST;
+		code = CONFLICT;
 		return;
 	}
 	if (loc.upload_path.size())
@@ -142,7 +148,8 @@ void Response::method_put(Request &req, Location &loc)
 	file << extr_file.rdbuf();
 	file.close();
 	remove(req.payload.tmp_file_name.c_str());
-	headers["Content-Location"] = path;
+	headers["Location"] = location_path;
+	headers["Connection"] = "keep-alive";
 }
 
 void Response::method_post(Request &req, Location &loc)
