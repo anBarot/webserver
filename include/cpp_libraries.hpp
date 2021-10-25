@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <dirent.h>
+#include <errno.h>
 
 // system lib
 #include <sys/types.h>

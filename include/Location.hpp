@@ -23,7 +23,7 @@ class Location
 
 		Location() {
 			root = path;
-			index = "index.html";
+			index = "";
 			upload_path = "";
 			methods[GET] = false;
 			methods[POST] = false;

@@ -14,6 +14,8 @@ void maps_init_MIME_types(std::map<std::string, std::string> &MIME_types);
 void ws_trim(std::string& s);
 void strlower(std::string &str);
 int error_and_exit(e_error error_nb);
+int	is_dir(std::string path);
+int is_reg(std::string path);
 e_methods get_method_enum(std::string word);
 
 // Debug

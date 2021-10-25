@@ -24,7 +24,7 @@ void display_server(Server_conf &sv)
 
 void display_location(Location &loc)
 {
-	std::cout << "Check location content :\n";
+	std::cout << "\n\n---   Check location content :   ---\n";
 
 	std::cout << "path : " << loc.path << "\n";
 	std::cout << "root : " << loc.root << "\n";

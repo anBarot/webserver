@@ -67,6 +67,7 @@ Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, int l
 			}
 		}
 	}
+
 	return (sv);
 }
 
@@ -82,11 +83,12 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 	for (std::map<std::string, Location>::iterator it = loc_map.begin(); it != loc_map.end(); ++it)
 	{
 		subpath = path.substr(0, it->first.size());
+		// std::cout << "Get location - subpath : " << subpath << "\n";
 		(subpath == it->first) ? i_mem = subpath.size() : i_mem = 0;
 		if (i_mem > i_max_matching)
 			i_max_matching = i_mem;
 	}
-	if (i_mem == 0)
+	if (i_max_matching == 0)
 		return (loc_map["/"]);
 	loc_path = path.substr(0, i_max_matching);
 	if (loc_path[loc_path.size() - 1] == '/')
@@ -103,14 +105,9 @@ void Client::send_response()
 	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
 		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
 		status = 1;
-	// buf << std::hex << response.headers["Content-Length"];
-	// str = buf.str().append("\r\n");
-	// if (send(socket, str.c_str(), str.size(), 0) == -1)
-	// 	status = 1;
 	buf << file.rdbuf();
 	str = buf.str();
 	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
-		// send(socket, "\r\n0\r\n", 5, 0) == -1)
 		send(socket, "\r\n", 2, 0) == -1)
 		status = 1;
 	file.close();
@@ -125,7 +122,6 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
 	response.headers["Content-Length"] = "0";
-	response.headers["Host"] = "localhost:5000";
 	(loc.methods[req.request_line.method] == false) ? req.code = METHOD_NOT_ALLOWED : 0; 
 	if (req.code < 400)
 	{

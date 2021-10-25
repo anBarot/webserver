@@ -21,11 +21,13 @@ void create_html_listing_file(std::string path, std::string listing_html)
 	fileout.close();
 }
 
-void Response::create_directory_listing(std::string &path)
+void Response::create_directory_listing(std::string &path, std::string &loc_path)
 {
 	std::vector<std::string> files;
     struct dirent *entry;
 	std::string listing_str;
+	std::string absolute_path;
+	std::string tmp_loc_path;
 
 	DIR *dir = opendir(path.c_str());
 	while ((entry = readdir(dir)) != NULL)
@@ -35,7 +37,17 @@ void Response::create_directory_listing(std::string &path)
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
 		if (*it != "." && *it != "..")
-			listing_str.append("<a href=\"").append(*it).append("\">").append(*it).append("</a>\n");
+		{
+			absolute_path = path;
+			tmp_loc_path = loc_path;
+			absolute_path.append("/").append(*it);
+			tmp_loc_path.append("/").append(*it); 
+			std::cout << "absolute path : " << absolute_path << "\n";
+			std::cout << "tmp loc path : " << tmp_loc_path << "\n";
+			if (is_dir(absolute_path))
+				it->append("/");
+			listing_str.append("<a href=\"").append(tmp_loc_path).append("\">").append(*it).append("</a>\n");
+		}
 	}
 
 	create_html_listing_file(path, listing_str);
@@ -43,28 +55,16 @@ void Response::create_directory_listing(std::string &path)
 	headers["Content-Type"] = "text/html";
 }
 
-void Response::get_index_file(std::string &path)
-{
-	std::cout << "Index file : " << path << "\n";
-	struct stat st;
-
-	if (stat(path.c_str(), &st))
-		code = NOT_FOUND;
-	else
-	{
-		file_name = path;
-		headers["Content-Type"] = get_MIME(path);
-	}
-}
-
 void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 {
 	std::cout << "Enterring method get\n";
 	struct stat st;
 	std::string path(req.request_line.target);
+	std::string path_index = path;
 
 	req.code = OK;
-	path.replace(0, loc.path.size(), loc.root);
+	path = loc.root.append(path);
+	path_index.append("/").append(loc.index);
 
 	std::cout << "calling stat : " << path << "\n";
 	if (stat(path.c_str(), &st))
@@ -74,10 +74,13 @@ void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 	}
 	else if (S_ISDIR(st.st_mode))
 	{
-		if (loc.auto_index == false)
-			get_index_file(path.append(loc.index));
+		if (loc.index != "" && is_reg(path_index))
+		{
+			file_name = path;
+			headers["Content-Type"] = get_MIME(path);
+		}
 		else
-			create_directory_listing(path);
+			create_directory_listing(path, loc.path);
 	}
 	else if (S_ISREG(st.st_mode))
 	{
@@ -86,7 +89,6 @@ void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 		headers["Content-Type"] = get_MIME(path);
 		file_name = req.request_line.target;
 	}
-	// headers["Transfer-Encoding"] = "chunked";
 	std::cout << "quitting method get\n";
 }
 
@@ -96,14 +98,22 @@ void Response::method_delete(Request &req, Location &loc)
 	std::string path;
 
 	req.code = OK;
-	path.replace(0, loc.path.size(), loc.root);
+	path = loc.root.append(req.request_line.target);
 	if (stat(path.c_str(), &st) || S_ISDIR(st.st_mode))
-		req.code = NOT_FOUND;
+		code = NOT_FOUND;
 	else
 	{
-		unlink(path.c_str());
-		headers["Content-Type"] = "text/html";
-		headers["Content-Length"] = "0";
+		if (remove(path.c_str()))
+		{
+			std::cout << "Can't delete : " << path << " : " << strerror(errno) << "\n";
+			req.code = UNAUTHORIZED;
+		}
+		else
+		{
+			headers["Content-Type"] = get_MIME(path);
+			headers["Content-Length"] = "0";
+			headers["Connection"] = "keep-alive";
+		}
 	}
 }
 

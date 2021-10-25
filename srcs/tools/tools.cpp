@@ -65,6 +65,30 @@ e_methods	get_method_enum(std::string word)
 		return NOT_A_METHOD;
 }
 
+// Return 1 if the path is a directory, 0 else
+int	is_dir(std::string path)
+{
+	struct stat st;
+
+	if (stat(path.c_str(), &st))
+		return 0;
+	if (S_ISDIR(st.st_mode))
+		return 1;
+	return 0;
+}
+
+// Return 1 if the path is a file, 0 else
+int is_reg(std::string path)
+{
+	std::cout << "Index file : " << path << "\n";
+	struct stat st;
+
+	if (stat(path.c_str(), &st))
+		return 0;
+	else
+		return 1;
+}
+
 // Init reason_phrase map 
 void	maps_init_reason_phrase(std::map<int, std::string> &reason_phrase)
 {
@@ -165,6 +189,7 @@ void	maps_init_MIME_types(std::map<std::string, std::string> &MIME_types)
 	MIME_types["tiff"] = "image/tiff";
 	MIME_types["ts"] = "application/typescript";
 	MIME_types["ttf"] = "font/ttf";
+	MIME_types["txt"] = "text/plain";
 	MIME_types["vsd"] = "application/vnd.visio";
 	MIME_types["wav"] = "audio/x-wav";
 	MIME_types["weba"] = "audio/webm";
