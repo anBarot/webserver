@@ -34,6 +34,7 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 */
 void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data)
 {
+	std::cout << "\nextract with length\n";
 	std::cout << "payload length : " << req.payload.length << "\n";
 	std::cout << "string : " << str << "\n";
 	std::cout << "file name : " << req.payload.tmp_file_name << "\n";
@@ -89,7 +90,7 @@ void extract_payload(Request &req, std::vector<char> &data)
 	if (req.payload.tmp_file_name == "")
 		req.payload.tmp_file_name = std::tmpnam(NULL);
 
-	std::ofstream file(req.payload.tmp_file_name.c_str());
+	std::ofstream file(req.payload.tmp_file_name.c_str(), std::ios::out | std::ios::app);
 
 	if (req.payload.is_chunked)
 	{

@@ -73,4 +73,10 @@ content-length: 5
 }
 ***
 
-temps de reco trop long
+
+test : PUT payload length > content-length
+
+
+
+
+Waiting socket time : 2 min

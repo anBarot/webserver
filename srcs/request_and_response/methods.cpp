@@ -101,8 +101,8 @@ void Response::method_delete(Request &req, Location &loc)
 	struct stat st;
 	std::string path;
 
-	req.code = OK;
-	path = loc.root.append(req.request_line.target);
+	req.code = NO_CONTENT;
+	path = loc.root + req.request_line.target;
 	if (stat(path.c_str(), &st) || S_ISDIR(st.st_mode))
 		code = NOT_FOUND;
 	else
@@ -110,7 +110,7 @@ void Response::method_delete(Request &req, Location &loc)
 		if (remove(path.c_str()))
 		{
 			std::cout << "Can't delete : " << path << " : " << strerror(errno) << "\n";
-			req.code = UNAUTHORIZED;
+			req.code = FORBIDDEN;
 		}
 		else
 		{
@@ -125,13 +125,16 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 {
 	struct stat st;
 	std::string path;
-	std::string location_path("http://");
+	std::string location_path;
+	
 	std::stringstream sst;
-
-	sst << sv.names.front() << ":" << sv.listen_port << req.request_line.target;
+	sst << "http://" << sv.names.front() << ":" << sv.listen_port << req.request_line.target;
 	location_path.append(sst.str());
+	
+	path = loc.root + req.request_line.target;
 
-	path.append(req.request_line.target).replace(0, loc.path.size(), loc.root);
+	std::cout << "Put request path : " << path << "\n";
+
 	if (path[path.size() - 1] == '/')
 	{
 		code = CONFLICT;
@@ -139,18 +142,13 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 	}
 	if (loc.upload_path.size())
 		path = path.replace(0, path.find_last_of("/"), loc.upload_path);
-	
+
 	if (stat(path.c_str(), &st) == -1)
 		code = CREATED;
 	else
 		code = NO_CONTENT;
-	
-	std::ifstream extr_file(req.payload.tmp_file_name.c_str());
-	std::ofstream file;
-	file.open(path.c_str(), std::ofstream::out | std::ofstream::trunc);
-	file << extr_file.rdbuf();
-	file.close();
-	remove(req.payload.tmp_file_name.c_str());
+
+	rename(req.payload.tmp_file_name.c_str(), path.c_str());
 	headers["Location"] = location_path;
 	headers["Connection"] = "keep-alive";
 }
