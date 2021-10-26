@@ -1,7 +1,31 @@
 // préciser host pour HTTP/1.1
-GET /home/abarot/ HTTP/1.1 
 GET /wordpress/bla.html HTTP/1.1
 DELETE /wordpress/to_delete.txt HTTP/1.1
+
+***
+GET / HTTP/1.1 
+{
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Tue, 26 Oct 2021 12:15:34 GMT
+Content-Type: text/html
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+1dd
+<html>
+<head><title>Index of /</title></head>
+<body>
+<h1>Index of /</h1><hr><pre><a href="../">../</a>
+<a href="html/">html/</a>                                              05-Feb-2021 21:06                   -
+<a href="les_foodies/">les_foodies/</a>                                       05-Feb-2021 22:54                   -
+<a href="wordpress/">wordpress/</a>                                         25-Oct-2021 13:12                   -
+</pre><hr></body>
+</html>
+
+0
+}
+***
 
 ***
 DELETE /Desktop/to_delete.txt HTTP/1.1

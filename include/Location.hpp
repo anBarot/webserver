@@ -22,7 +22,8 @@ class Location
 		std::string		redirection;
 
 		Location() {
-			root = path;
+			root = "";
+			path = "";
 			index = "";
 			upload_path = "";
 			methods[GET] = false;

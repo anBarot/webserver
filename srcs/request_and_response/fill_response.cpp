@@ -83,7 +83,6 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 	for (std::map<std::string, Location>::iterator it = loc_map.begin(); it != loc_map.end(); ++it)
 	{
 		subpath = path.substr(0, it->first.size());
-		// std::cout << "Get location - subpath : " << subpath << "\n";
 		(subpath == it->first) ? i_mem = subpath.size() : i_mem = 0;
 		if (i_mem > i_max_matching)
 			i_max_matching = i_mem;
@@ -91,7 +90,7 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 	if (i_max_matching == 0)
 		return (loc_map["/"]);
 	loc_path = path.substr(0, i_max_matching);
-	if (loc_path[loc_path.size() - 1] == '/')
+	if (loc_path.size() > 1 && loc_path[loc_path.size() - 1] == '/')
 		loc_path = loc_path.substr(0, loc_path.size() - 1);
 	return (loc_map[loc_path]);
 }

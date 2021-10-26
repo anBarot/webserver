@@ -3,12 +3,6 @@
 std::map<int, std::string> reason_phrase;
 std::map<std::string, std::string> MIME_types;
 
-void signal_callback_handler(int signum) 
-{
-   std::cout << "caught interruption signal " << signum << std::endl;
-   exit(signum);
-}
-
 int main(int ac, char **av)
 {
 	std::vector<Server_conf> servers_conf;
@@ -28,7 +22,6 @@ int main(int ac, char **av)
 	maps_init_reason_phrase(reason_phrase);
 	listen_sockets_pool = listen_sockets_from_servers(servers_conf);
 
-	signal(SIGINT, signal_callback_handler);
 
 	while(status)
 	{

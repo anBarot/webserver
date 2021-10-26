@@ -79,6 +79,7 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 			it->response.clear();
 			if (it->status == 1)
 			{
+				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);
 			}

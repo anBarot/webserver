@@ -8,6 +8,7 @@ void create_html_listing_file(std::string path, std::string listing_html)
 	size_t pos_dtwo;
 	std::string str;
  	
+	path.append("/");
 	while (std::getline(filein, str))
 	{
 		if ((pos_done = str.find("$1")) != std::string::npos)
@@ -21,36 +22,31 @@ void create_html_listing_file(std::string path, std::string listing_html)
 	fileout.close();
 }
 
-void Response::create_directory_listing(std::string &path, std::string &loc_path)
+void Response::create_directory_listing(std::string path, std::string loc_root)
 {
 	std::vector<std::string> files;
     struct dirent *entry;
 	std::string listing_str;
 	std::string absolute_path;
-	std::string tmp_loc_path;
 
 	DIR *dir = opendir(path.c_str());
 	while ((entry = readdir(dir)) != NULL)
 		files.push_back(entry->d_name);
 	closedir(dir);
 
+	sort(files.begin(), files.end());
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
-		if (*it != "." && *it != "..")
+		if (*it != ".")
 		{
-			absolute_path = path;
-			tmp_loc_path = loc_path;
-			absolute_path.append("/").append(*it);
-			tmp_loc_path.append("/").append(*it); 
-			std::cout << "absolute path : " << absolute_path << "\n";
-			std::cout << "tmp loc path : " << tmp_loc_path << "\n";
+			absolute_path = path + "/" + *it;
 			if (is_dir(absolute_path))
 				it->append("/");
-			listing_str.append("<a href=\"").append(tmp_loc_path).append("\">").append(*it).append("</a>\n");
+			listing_str.append("<a href=\"").append(*it).append("\">").append(*it).append("</a>\n");
 		}
 	}
-
-	create_html_listing_file(path, listing_str);
+	
+	create_html_listing_file(path.erase(0, loc_root.size()), listing_str);
 	file_name = "listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
@@ -60,34 +56,42 @@ void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 	std::cout << "Enterring method get\n";
 	struct stat st;
 	std::string path(req.request_line.target);
-	std::string path_index = path;
+	std::string path_index;
 
 	req.code = OK;
-	path = loc.root.append(path);
+	if (path[path.size() - 1] == '/')
+		path.erase(path.size() - 1, 1);
+	path = loc.root + path;
+	path_index = path;
 	path_index.append("/").append(loc.index);
 
 	std::cout << "calling stat : " << path << "\n";
 	if (stat(path.c_str(), &st))
 	{
-		std::cout << "dir not found\n";
+		std::cout << "dir not found : "<< strerror(errno) << "\n";
 		req.code = NOT_FOUND;
 	}
 	else if (S_ISDIR(st.st_mode))
 	{
+		std::cout << "\nGetting directory\n";
 		if (loc.index != "" && is_reg(path_index))
 		{
-			file_name = path;
-			headers["Content-Type"] = get_MIME(path);
+			std::cout << "\nGetting index directory\n";
+			file_name = path_index;
+			headers["Content-Type"] = get_MIME(path_index);
 		}
 		else
-			create_directory_listing(path, loc.path);
+		{
+			std::cout << "\nGetting directory listing\n";
+			create_directory_listing(path, loc.root);
+		}
 	}
 	else if (S_ISREG(st.st_mode))
 	{
-		std::cout << "stat is reg\n";
+		std::cout << "\nGetting file\n";
 		headers["Last-Modified"] = get_date(st.st_mtime);
 		headers["Content-Type"] = get_MIME(path);
-		file_name = req.request_line.target;
+		file_name = path;
 	}
 	std::cout << "quitting method get\n";
 }
@@ -119,7 +123,6 @@ void Response::method_delete(Request &req, Location &loc)
 
 void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 {
-	// Location: http://localhost:8000/wordpress/test_2.txt
 	struct stat st;
 	std::string path;
 	std::string location_path("http://");

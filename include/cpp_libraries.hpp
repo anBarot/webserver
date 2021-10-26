@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <signal.h>
+#include <algorithm>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <dirent.h>
