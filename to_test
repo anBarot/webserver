@@ -1,10 +1,6 @@
 // préciser host pour HTTP/1.1
 
--> segfault : browser : /wordpress and /dir_2 link
--> segfault : browser : /wordpress and /dir_3 link
-
-
-
+-> inf loop PUT content-length: 0
 
 
 ***

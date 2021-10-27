@@ -107,7 +107,7 @@ void extract_payload(Request &req, std::vector<char> &data)
 			data.erase(data.begin(), data.begin() + sec_pos + 2);
 		}
 	}
-	else if (req.payload.length)
+	else
 	{
 		extract_with_length(str, file, req, data);
 		if (!req.payload.length)

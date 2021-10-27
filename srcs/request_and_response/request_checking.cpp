@@ -19,15 +19,20 @@ void	Client::check_line()
 */
 void	Client::check_payload()
 {
-	if (requests.back().request_line.method != GET)
+	if (requests.back().request_line.method == PUT ||
+		requests.back().request_line.method == POST)
 	{
 		if (requests.back().headers.count("transfer-encoding") &&
 			requests.back().headers["transfer-encoding"].find("chunked") != std::string::npos)
 			requests.back().payload.is_chunked = true;
 		else if (requests.back().headers.count("content-length"))
 		{
-			std::cout << "request has payload\n";
 			requests.back().payload.length = atoi(requests.back().headers["content-length"].c_str());
+			if (requests.back().payload.length < 0)
+			{
+				requests.back().status = FINISH_PARSING;
+				response.code = BAD_REQUEST;
+			}
 		}
 		else
 			requests.back().status = FINISH_PARSING;
