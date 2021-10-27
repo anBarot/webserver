@@ -120,8 +120,9 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
-	(loc.methods[req.request_line.method] == false) ? req.code = METHOD_NOT_ALLOWED : 0; 
-	if (req.code < 400)
+	if (response.code < 400 && loc.methods[req.request_line.method] == false) 
+		response.code = METHOD_NOT_ALLOWED;
+	if (response.code < 400)
 	{
 		if (req.request_line.method == GET)
 			response.method_get(req, loc, sv);
@@ -132,8 +133,6 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
 	}
-	response.code = req.code;
-	std::cout << "fill response : check if error\n";
 	if (response.code >= 400)
 	{
 		if (response.code == METHOD_NOT_ALLOWED)
@@ -145,10 +144,8 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 	}
 	if (response.file_name != "")
 		response.headers["Content-Length"] = get_file_size(response.file_name);
-	std::cout << "fill response : create response line\n";
 	response.create_response_line();
 	response.create_header_string();
 	display_response(response);
-	std::cout << "fill response : pop front request\n";
 	requests.pop_front();
 }

@@ -24,12 +24,15 @@ public:
 	Client(int sock, int lsock): socket(sock), lsocket(lsock), status(0)
 	{
 		requests.push_back(Request());
-
 	}
 
 	~Client(){};
 
 	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
+	void extract_request_from_data(std::vector<char> &data);
+	void check_payload();
+	void check_trailer();
+	void check_line();
 	void fill_response(std::vector<Server_conf> &confs);
 	void fill_error_response();
 	void send_response();

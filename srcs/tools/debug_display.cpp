@@ -73,8 +73,6 @@ void	display_request(Request &req)
 	std::cout << "Headers : \n"; 
 	for (std::map<std::string, std::string>::iterator it = req.headers.begin(); it != req.headers.end(); it++)
 		std::cout << it->first << " : " << it->second << "\n";
-
-	std::cout << "code : " << req.code << std::endl;
 }
 
 

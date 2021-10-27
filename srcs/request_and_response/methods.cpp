@@ -18,23 +18,32 @@ void create_html_listing_file(std::string path, std::string listing_html)
 		fileout << str;
 		fileout << "\n";
 	}
+	std::cout << "closing file in\n";
 	filein.close();
+	std::cout << "closing file out\n";
 	fileout.close();
 }
 
-void Response::create_directory_listing(std::string path, std::string loc_root)
+void Response::create_directory_listing(std::string path, std::string loc_root, std::string loc_path)
 {
 	std::vector<std::string> files;
     struct dirent *entry;
+	DIR *dir;
 	std::string listing_str;
 	std::string absolute_path;
 
-	DIR *dir = opendir(path.c_str());
+	if ((dir = opendir(path.c_str())) == NULL)
+	{
+		code = FORBIDDEN;
+		return ;
+	}
 	while ((entry = readdir(dir)) != NULL)
 		files.push_back(entry->d_name);
 	closedir(dir);
 
 	sort(files.begin(), files.end());
+	if (loc_path[loc_path.size() - 1] != '/')
+		loc_path.append("/");
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
 		if (*it != ".")
@@ -42,7 +51,7 @@ void Response::create_directory_listing(std::string path, std::string loc_root)
 			absolute_path = path + "/" + *it;
 			if (is_dir(absolute_path))
 				it->append("/");
-			listing_str.append("<a href=\"").append(*it).append("\">").append(*it).append("</a>\n");
+			listing_str.append("<a href=\"").append(loc_path).append(*it).append("\">").append(*it).append("</a>\n");
 		}
 	}
 	
@@ -53,47 +62,47 @@ void Response::create_directory_listing(std::string path, std::string loc_root)
 
 void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 {
-	std::cout << "Enterring method get\n";
+	// std::cout << "Enterring method get\n";
 	struct stat st;
 	std::string path(req.request_line.target);
 	std::string path_index;
 
-	req.code = OK;
 	if (path[path.size() - 1] == '/')
 		path.erase(path.size() - 1, 1);
 	path = loc.root + path;
 	path_index = path;
 	path_index.append("/").append(loc.index);
 
-	std::cout << "calling stat : " << path << "\n";
+	// std::cout << "calling stat : " << path << "\n";
+	code = OK;
 	if (stat(path.c_str(), &st))
 	{
-		std::cout << "dir not found : "<< strerror(errno) << "\n";
-		req.code = NOT_FOUND;
+		// std::cout << "dir not found : "<< strerror(errno) << "\n";
+		code = NOT_FOUND;
 	}
 	else if (S_ISDIR(st.st_mode))
 	{
-		std::cout << "\nGetting directory\n";
+		// std::cout << "\nGetting directory\n";
 		if (loc.index != "" && is_reg(path_index))
 		{
-			std::cout << "\nGetting index directory\n";
+			// std::cout << "\nGetting index directory\n";
 			file_name = path_index;
 			headers["Content-Type"] = get_MIME(path_index);
 		}
 		else
 		{
-			std::cout << "\nGetting directory listing\n";
-			create_directory_listing(path, loc.root);
+			// std::cout << "\nGetting directory listing\n";
+			create_directory_listing(path, loc.root, loc.path);
 		}
 	}
 	else if (S_ISREG(st.st_mode))
 	{
-		std::cout << "\nGetting file\n";
+		// std::cout << "\nGetting file\n";
 		headers["Last-Modified"] = get_date(st.st_mtime);
 		headers["Content-Type"] = get_MIME(path);
 		file_name = path;
 	}
-	std::cout << "quitting method get\n";
+	// std::cout << "quitting method get\n";
 }
 
 void Response::method_delete(Request &req, Location &loc)
@@ -101,7 +110,6 @@ void Response::method_delete(Request &req, Location &loc)
 	struct stat st;
 	std::string path;
 
-	req.code = NO_CONTENT;
 	path = loc.root + req.request_line.target;
 	if (stat(path.c_str(), &st) || S_ISDIR(st.st_mode))
 		code = NOT_FOUND;
@@ -110,7 +118,7 @@ void Response::method_delete(Request &req, Location &loc)
 		if (remove(path.c_str()))
 		{
 			std::cout << "Can't delete : " << path << " : " << strerror(errno) << "\n";
-			req.code = FORBIDDEN;
+			code = FORBIDDEN;
 		}
 		else
 		{
@@ -119,6 +127,7 @@ void Response::method_delete(Request &req, Location &loc)
 			headers["Connection"] = "keep-alive";
 		}
 	}
+	code = NO_CONTENT;
 }
 
 void Response::method_put(Request &req, Location &loc, Server_conf &sv)
@@ -127,6 +136,12 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 	std::string path;
 	std::string location_path;
 	
+	if (req.payload.tmp_file_name == "")
+	{
+		code = BAD_REQUEST;
+		return ;
+	}
+
 	std::stringstream sst;
 	sst << "http://" << sv.names.front() << ":" << sv.listen_port << req.request_line.target;
 	location_path.append(sst.str());

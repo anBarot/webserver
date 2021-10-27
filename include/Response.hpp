@@ -22,7 +22,7 @@ class Response
 
 		void clear()
 		{
-			code = OK;
+			code = DEFAULT;
 			line.clear();
 			header_string.clear();
 			headers.clear();
@@ -31,7 +31,7 @@ class Response
 
 		void create_response_line();
 		void create_header_string();
-		void create_directory_listing(std::string path, std::string loc_path);
+		void create_directory_listing(std::string path, std::string loc_root, std::string loc_path);
 		void method_get(Request &req, Location &loc, Server_conf &sv);
 		void method_delete(Request &req, Location &loc);
 		void method_put(Request &req, Location &loc, Server_conf &sv);

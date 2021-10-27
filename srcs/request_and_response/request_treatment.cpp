@@ -38,10 +38,12 @@ void extract_with_length(std::string &str, std::ofstream &file, Request &req, st
 	std::cout << "payload length : " << req.payload.length << "\n";
 	std::cout << "string : " << str << "\n";
 	std::cout << "file name : " << req.payload.tmp_file_name << "\n";
-	if (str.size() >= req.payload.length)
+	if (str.size() > req.payload.length)
 	{
-		file << str.substr(0, req.payload.length);
-		data.erase(data.begin(), data.begin() + req.payload.length);
+		file.close();
+		remove(req.payload.tmp_file_name.c_str());
+		req.payload.tmp_file_name = "";
+		data.erase(data.begin(), data.begin() + str.size());
 		req.payload.length = 0;
 	}
 	else
@@ -135,10 +137,7 @@ void extract_headers(Request &req, std::vector<char> &data)
 		if (str.find_first_of("\r\n") == 0)
 		{
 			data.erase(data.begin(), data.begin() + 2);
-
 			req.status = HEADER_PARSED;
-			req.check_payload();
-			req.check_trailer();
 			break;
 		}
 
@@ -173,8 +172,6 @@ void extract_request_line(Request &req, std::vector<char> &data)
 
 		data.erase(data.begin(), data.begin() + pos + 2);
 		req.status = LINE_PARSED;
-
-		req.check_line();
 	}
 }
 
@@ -183,18 +180,29 @@ void extract_request_line(Request &req, std::vector<char> &data)
 	depending on the request status :
 	starting -> line parsed -> header parsed -> payload parsed -> finish
 */
-void extract_request_from_data(Request &cur_request, std::vector<char> &data)
+void Client::extract_request_from_data(std::vector<char> &data)
 {
-	if (cur_request.status == STARTING_PARSING)
-		extract_request_line(cur_request, data);
-	if (cur_request.status == LINE_PARSED)
-		extract_headers(cur_request, data);
-	if (cur_request.status == HEADER_PARSED)
-		extract_payload(cur_request, data);
-	if (cur_request.status == PAYLOAD_PARSED)
-		extract_trailer(cur_request, data);
+	if (requests.back().status == STARTING_PARSING)
+	{
+		extract_request_line(requests.back(), data);
+		if (requests.back().status == LINE_PARSED) 
+			check_line();
+	}
+	if (requests.back().status == LINE_PARSED)
+	{
+		extract_headers(requests.back(), data);
+		if (requests.back().status == HEADER_PARSED)
+		{
+			check_payload();
+			check_trailer();
+		}
+	}
+	if (requests.back().status == HEADER_PARSED)
+		extract_payload(requests.back(), data);
+	if (requests.back().status == PAYLOAD_PARSED)
+		extract_trailer(requests.back(), data);
 	
-	display_request(cur_request);
+	display_request(requests.back());
 }
 
 void Client::store_incoming_data(char *buffer, int size)
@@ -205,7 +213,7 @@ void Client::store_incoming_data(char *buffer, int size)
 	while (received_data_raw.size())
 	{
 		if (requests.size() && requests.back().status != FINISH_PARSING)
-			extract_request_from_data(this->requests.back(), this->received_data_raw);
+			extract_request_from_data(received_data_raw);
 		else
 			requests.push_back(Request());
 	}
