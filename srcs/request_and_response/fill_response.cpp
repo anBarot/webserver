@@ -124,11 +124,14 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		response.code = METHOD_NOT_ALLOWED;
 	if (response.code < 400)
 	{
+		if (is_cgi_compatible(req, loc))
+		{
+			response.apply_cgi(req, loc);
+			std::cout << "end apply_cgi";
+		}
 		if (req.request_line.method == GET)
 			response.method_get(req, loc, sv);
-		else if (req.request_line.method == POST)
-			response.method_post(req, loc);
-		else if (req.request_line.method == PUT)
+		else if (req.request_line.method == PUT || req.request_line.method == POST)
 			response.method_put(req, loc, sv);
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
@@ -146,6 +149,6 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		response.headers["Content-Length"] = get_file_size(response.file_name);
 	response.create_response_line();
 	response.create_header_string();
-	display_response(response);
+	// display_response(response);
 	requests.pop_front();
 }

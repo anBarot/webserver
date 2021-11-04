@@ -2,8 +2,8 @@
 
 void create_html_listing_file(std::string path, std::string listing_html)
 {
-	std::ifstream filein("html/listing.html");
-	std::ofstream fileout("listing_temp.html");
+	std::ifstream filein("./html/listing.html");
+	std::ofstream fileout("./html/listing_temp.html");
 	size_t pos_done;
 	size_t pos_dtwo;
 	std::string str;
@@ -18,9 +18,7 @@ void create_html_listing_file(std::string path, std::string listing_html)
 		fileout << str;
 		fileout << "\n";
 	}
-	std::cout << "closing file in\n";
 	filein.close();
-	std::cout << "closing file out\n";
 	fileout.close();
 }
 
@@ -56,13 +54,12 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	}
 	
 	create_html_listing_file(path.erase(0, loc_root.size()), listing_str);
-	file_name = "listing_temp.html";
+	file_name = "./html/listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
 
 void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 {
-	// std::cout << "Enterring method get\n";
 	struct stat st;
 	std::string path(req.request_line.target);
 	std::string path_index;
@@ -73,36 +70,34 @@ void Response::method_get(Request &req, Location &loc, Server_conf &sv)
 	path_index = path;
 	path_index.append("/").append(loc.index);
 
-	// std::cout << "calling stat : " << path << "\n";
 	code = OK;
+	std::cout << "Method get with path : " << path << "\n";
 	if (stat(path.c_str(), &st))
-	{
-		// std::cout << "dir not found : "<< strerror(errno) << "\n";
 		code = NOT_FOUND;
-	}
 	else if (S_ISDIR(st.st_mode))
 	{
-		// std::cout << "\nGetting directory\n";
 		if (loc.index != "" && is_reg(path_index))
 		{
-			// std::cout << "\nGetting index directory\n";
 			file_name = path_index;
 			headers["Content-Type"] = get_MIME(path_index);
 		}
 		else
-		{
-			// std::cout << "\nGetting directory listing\n";
 			create_directory_listing(path, loc.root, loc.path);
-		}
 	}
 	else if (S_ISREG(st.st_mode))
 	{
-		// std::cout << "\nGetting file\n";
 		headers["Last-Modified"] = get_date(st.st_mtime);
-		headers["Content-Type"] = get_MIME(path);
-		file_name = path;
+
+		std::ifstream file(path.c_str());
+		if (file.good() == false)
+			code = FORBIDDEN;
+		else
+		{
+			file_name = path;
+			headers["Content-Type"] = get_MIME(path);
+		}
+		file.close();
 	}
-	// std::cout << "quitting method get\n";
 }
 
 void Response::method_delete(Request &req, Location &loc)
@@ -111,15 +106,15 @@ void Response::method_delete(Request &req, Location &loc)
 	std::string path;
 
 	path = loc.root + req.request_line.target;
-	if (stat(path.c_str(), &st) || S_ISDIR(st.st_mode))
+
+	if (is_dir(path))
+		code = CONFLICT;
+	else if (stat(path.c_str(), &st))
 		code = NOT_FOUND;
 	else
 	{
 		if (remove(path.c_str()))
-		{
-			std::cout << "Can't delete : " << path << " : " << strerror(errno) << "\n";
 			code = FORBIDDEN;
-		}
 		else
 		{
 			headers["Content-Type"] = get_MIME(path);
@@ -148,9 +143,7 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 	
 	path = loc.root + req.request_line.target;
 
-	std::cout << "Put request path : " << path << "\n";
-
-	if (path[path.size() - 1] == '/')
+	if (is_dir(path) || path[path.size() - 1] == '/')
 	{
 		code = CONFLICT;
 		return;
@@ -163,14 +156,11 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 	else
 		code = NO_CONTENT;
 
-	rename(req.payload.tmp_file_name.c_str(), path.c_str());
-	headers["Location"] = location_path;
-	headers["Connection"] = "keep-alive";
-}
-
-void Response::method_post(Request &req, Location &loc)
-{
-
-
-
+	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
+		code = UNAUTHORIZED;
+	else
+	{
+		headers["Location"] = location_path;
+		headers["Connection"] = "keep-alive";
+	}
 }

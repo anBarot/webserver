@@ -34,34 +34,34 @@ int		extract_location_field(std::string &line, Location &loc)
 
 	extract = extract_field(line, 2);
 
-	if (!extract.first.compare("root") || !extract.first.compare("index") || !extract.first.compare("cgi_path")
-	|| !extract.first.compare("cgi_extension") || !extract.first.compare("upload_path") || !extract.first.compare("return"))
+	if (extract.first == "root" || extract.first == "index" || extract.first == "cgi_path"
+	|| extract.first == "cgi_extension" || extract.first == "upload_path" || extract.first == "return")
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
 				return CONFFILE_PARSE_ERR;
-		if (!extract.first.compare("root"))				 
+		if (extract.first == "root")				 
 			loc.root = extract.second; 					 
-		else if (!extract.first.compare("index"))		 
+		else if (extract.first == "index") 
 			loc.index = extract.second;					 
-		else if (!extract.first.compare("cgi_path"))	 
+		else if (extract.first == "cgi_path")	
 			loc.cgi_path = extract.second;				
-		else if (!extract.first.compare("cgi_extension"))
+		else if (extract.first == "cgi_extension")
 			loc.cgi_extension = extract.second;			 
-		else if (!extract.first.compare("upload_path"))	 
+		else if (extract.first == "upload_path")	
 			loc.upload_path = extract.second;			
-		else if (!extract.first.compare("return"))		 
+		else if (extract.first == "return")		
 			loc.redirection = extract.second;			 
 	}
-	else if (!extract.first.compare("method"))					
+	else if (extract.first == "method")					
 	{															 
 		if (set_and_check_methods(extract.second, loc))
 			return (CONFFILE_PARSE_ERR);
 	}
-	else if (!extract.first.compare("autoindex"))			
+	else if (extract.first == "autoindex")			
 	{
-		if (!extract.second.compare("on"))					
+		if (extract.second == "on")				
 			loc.auto_index = true;
-		else if (!extract.second.compare("off"))			
+		else if (extract.second == "off")	
 			loc.auto_index = false;
 		else
 			return CONFFILE_PARSE_ERR;
@@ -78,7 +78,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 
 	extract = extract_field(line, 1);
 	
-	if (!extract.first.compare("listen"))
+	if (extract.first == "listen")
 	{
 		std::istringstream iss(extract.second);
 		std::string num;
@@ -86,7 +86,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 
 		server.listen_port = atoi(num.c_str());
 	}
-	else if (!extract.first.compare("server_name"))
+	else if (extract.first == "server_name")
 	{
 		std::istringstream iss(extract.second);
 		std::string word;
@@ -94,9 +94,9 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		while (iss >> word)
 			server.names.push_back(word);
 	}
-	else if (!extract.first.compare("max_body_size"))
+	else if (extract.first == "max_body_size")
 		server.max_body_size = atoi(extract.second.c_str());
-	else if (!extract.first.compare("error_page"))
+	else if (extract.first == "error_page")
 	{
 		std::istringstream iss(extract.second);
 		std::string num;
@@ -130,7 +130,7 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 			else
 				return CONFFILE_PARSE_ERR;
 		}
-		else if (line.compare(""))							
+		else if (line != "")					
 			return 0;										
 	}
 	return 0;
@@ -145,7 +145,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 		ws_trim(line);
 		if (line != "")
 		{
-			if (!line.substr(0, strlen(S_LOCATION)).compare(S_LOCATION))			 
+			if (line.substr(0, strlen(S_LOCATION)) == S_LOCATION)		 
 			{
 				while (line.substr(0, strlen(S_LOCATION)) == S_LOCATION)
 				{
@@ -168,7 +168,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 				if (extract_server_field(line, server))
 					return CONFFILE_PARSE_ERR;	
 			}
-			else if (line == "server:")						
+			else if (line == "server:")			
 				return 0;
 			else
 				return CONFFILE_PARSE_ERR;
@@ -187,7 +187,7 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 		while (getline(conf_file, line))
 		{
 			ws_trim(line);
-			while (!line.compare("server:"))
+			while (line == "server:")
 			{
 				servers.push_back(Server_conf());
 				if (fill_server(conf_file, servers.back()))
@@ -198,7 +198,7 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 					break;
 				}
 			}
-			if (conf_file.eof() == false && line.compare(""))
+			if (conf_file.eof() == false && line != "")
 				return error_and_exit(CONFFILE_PARSE_ERR);
 		}
 		conf_file.close();

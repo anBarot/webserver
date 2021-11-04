@@ -9,6 +9,7 @@ SRCS = 	srcs/webserver.cpp \
 		srcs/request_and_response/fill_response.cpp \
 		srcs/request_and_response/request_treatment.cpp \
 		srcs/request_and_response/methods.cpp \
+		srcs/cgi/cgi.cpp \
 		srcs/tools/debug_display.cpp \
 		srcs/tools/headers.cpp \
 		srcs/tools/tools.cpp

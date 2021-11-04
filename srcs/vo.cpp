@@ -73,6 +73,7 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 		DEBUG_c++;
 		if (FD_ISSET(it->socket, &(sp.writing_set)) && it->requests.front().status == FINISH_PARSING)
 		{
+			display_request(it->requests.front());
 			DEBUG_wt++;
 			it->fill_response(server_confs);
 			it->send_response();

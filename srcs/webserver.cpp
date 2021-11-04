@@ -22,11 +22,8 @@ int main(int ac, char **av)
 	maps_init_reason_phrase(reason_phrase);
 	listen_sockets_pool = listen_sockets_from_servers(servers_conf);
 
-
 	while(status)
-	{
 		status = socket_routine(listen_sockets_pool, clients_pool, servers_conf);
-	}
 
 	return (0);
 }

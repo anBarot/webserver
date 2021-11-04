@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <signal.h>
 #include <algorithm>
@@ -26,6 +27,7 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 // std lib containers
 #include <deque>

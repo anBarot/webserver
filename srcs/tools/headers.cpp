@@ -45,18 +45,15 @@ std::string	get_file_size(std::string file_name)
 
 std::string get_allow(Location &loc)
 {
-	std::stringstream sst;
 	std::string res;
 
 	if (loc.methods[GET] == true)
-		sst << "GET ";
+		res.append("GET ");
 	if (loc.methods[POST] == true)
-		sst << "POST ";
+		res.append("POST ");
 	if (loc.methods[PUT] == true)
-		sst << "PUT ";
+		res.append("PUT ");
 	if (loc.methods[DELETE] == true)
-		sst << "DELETE";
-	sst << "\r\n";
-	sst >> res;
+		res.append("DELETE");
 	return (res);
 }

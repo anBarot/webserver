@@ -18,6 +18,7 @@ int error_and_exit(e_error error_nb);
 int	is_dir(std::string path);
 int is_reg(std::string path);
 e_methods get_method_enum(std::string word);
+std::string get_method_string(e_methods enm);
 
 // Debug
 void display_servers(std::vector<Server_conf> &servers);
@@ -41,5 +42,8 @@ int listen_from_server(Server_conf &server);
 std::map<int, int> listen_sockets_from_servers(std::vector<Server_conf> servers);
 int socket_routine(std::map<int, int> &listen_sockets_pool, std::vector<Client> &clients_pool, std::vector<Server_conf> &server_confs);
 void send_response(Client &client, int csock);
+
+// CGI
+int	is_cgi_compatible(Request &req, Location &loc);
 
 #endif

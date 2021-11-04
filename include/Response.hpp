@@ -36,6 +36,7 @@ class Response
 		void method_delete(Request &req, Location &loc);
 		void method_put(Request &req, Location &loc, Server_conf &sv);
 		void method_post(Request &req, Location &loc);
+		void apply_cgi(Request &req, Location &loc);
 };
 
 #endif //WEBSERVER_RESPONSE_HPP

@@ -14,11 +14,19 @@ void	Client::check_line()
 }
 
 /*
+	check if host header is provided, as required in HTTP/1.1 protocol
 	check if a payload must be extracted and how (length or chunked).
 	If not, the request status is set as finised.
 */
 void	Client::check_payload()
 {
+	if (requests.back().headers.count("host") == 0)
+	{
+		requests.back().status = FINISH_PARSING;
+		response.code = BAD_REQUEST;
+		return ;
+	}
+
 	if (requests.back().request_line.method == PUT ||
 		requests.back().request_line.method == POST)
 	{
@@ -35,7 +43,10 @@ void	Client::check_payload()
 			}
 		}
 		else
+		{
+			response.code = LENGTH_REQUIRED;
 			requests.back().status = FINISH_PARSING;
+		}
 	}
 	else
 		requests.back().status = FINISH_PARSING;

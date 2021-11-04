@@ -34,10 +34,10 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 */
 void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data)
 {
-	std::cout << "\nextract with length\n";
-	std::cout << "payload length : " << req.payload.length << "\n";
-	std::cout << "string : " << str << "\n";
-	std::cout << "file name : " << req.payload.tmp_file_name << "\n";
+	// std::cout << "\nextract with length\n";
+	// std::cout << "payload length : " << req.payload.length << "\n";
+	// std::cout << "string : " << str << "\n";
+	// std::cout << "file name : " << req.payload.tmp_file_name << "\n";
 	if (str.size() > req.payload.length)
 	{
 		file.close();
@@ -136,6 +136,7 @@ void extract_headers(Request &req, std::vector<char> &data)
 	{
 		if (str.find_first_of("\r\n") == 0)
 		{
+			// data.erase(data.begin(), data.begin() + 1);
 			data.erase(data.begin(), data.begin() + 2);
 			req.status = HEADER_PARSED;
 			break;
@@ -201,8 +202,6 @@ void Client::extract_request_from_data(std::vector<char> &data)
 		extract_payload(requests.back(), data);
 	if (requests.back().status == PAYLOAD_PARSED)
 		extract_trailer(requests.back(), data);
-	
-	display_request(requests.back());
 }
 
 void Client::store_incoming_data(char *buffer, int size)
@@ -210,8 +209,10 @@ void Client::store_incoming_data(char *buffer, int size)
 	for (int i = 0; i < size ; i++)
 		received_data_raw.push_back(buffer[i]);
 
-	while (received_data_raw.size())
+	if (received_data_raw.size())
 	{
+		std::string str(received_data_raw.begin(), received_data_raw.end());
+		std::cout << "\nReceived data : " << str << "\n";
 		if (requests.size() && requests.back().status != FINISH_PARSING)
 			extract_request_from_data(received_data_raw);
 		else

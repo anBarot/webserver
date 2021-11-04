@@ -80,6 +80,21 @@ e_methods	get_method_enum(std::string word)
 		return NOT_A_METHOD;
 }
 
+// Get the method string from enum
+std::string get_method_string(e_methods enm)
+{
+	if (enm == GET)
+		return ("GET");
+	else if (enm == POST)
+		return "POST";
+	else if (enm == PUT)
+		return "PUT";
+	else if (enm == DELETE)
+		return "DELETE";
+	else
+		return "";
+}
+
 // Return 1 if the path is a directory, 0 else
 int	is_dir(std::string path)
 {
