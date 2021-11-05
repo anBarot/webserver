@@ -22,7 +22,6 @@ char **create_exec_arg(std::string exec_path, std::string script)
 
 char **create_env_array(std::map<std::string, std::string> env_map)
 {
-
 	char **res;
 	std::string tmp;
 	std::map<std::string, std::string>::iterator it = env_map.begin(); 
@@ -63,7 +62,7 @@ char **create_cgi_env(Request &req, Location &loc)
 	env_map["CONTENT_LENGTH"] = req.headers["content-length"];
 	// env_map["HTTP_COOKIE"] = ;
 	// env_map["HTTP_USER_AGENT"] = ;
-	env_map["PATH_INFO"] = req.request_line.target;
+	env_map["PATH_INFO"] = req_path;
 	env_map["QUERY_STRING"] = get_query(req.payload.tmp_file_name);
 	// env_map["REMOTE_ADDR"] = ;
 	// env_map["REMOTE_HOST"] = ;
@@ -77,6 +76,7 @@ char **create_cgi_env(Request &req, Location &loc)
 
 int	is_cgi_compatible(Request &req, Location &loc)
 {
+	std::cout << "Enterring is CGI function\n";
 	std::string &target = req.request_line.target;
 	std::string ext;
 	size_t pos;
@@ -87,6 +87,7 @@ int	is_cgi_compatible(Request &req, Location &loc)
 		((pos = target.find_last_of(".")) == std::string::npos))
 		return 0;
 	ext = target.substr(pos + 1, target.size()); 
+	std::cout << "extension : " << ext << "\n";
 	while (iss >> word)
 	{
 		if (ext == word)
@@ -98,7 +99,7 @@ int	is_cgi_compatible(Request &req, Location &loc)
 void Response::apply_cgi(Request &req, Location &loc)
 {
 	std::cout << "Enterring CGI function\n";
-	int *fd;
+	int fd[2];
 	pid_t pid;
 	int cgi_file_fd;
 	char **cgi_env;
@@ -107,6 +108,7 @@ void Response::apply_cgi(Request &req, Location &loc)
 	std::string exec_path;
 	std::string script_name;
 	std::string &target = req.request_line.target;
+	std::string cgi_file_path("/tmp/tmp_cgi");
 
 	exec_path = loc.cgi_path + target;
 	script_name = target.substr(target.find_last_of("/") + 1, target.size());
@@ -122,10 +124,9 @@ void Response::apply_cgi(Request &req, Location &loc)
 	pid = fork();
 	if (!pid)
 	{
-		std::cout << "Enterring fork\n";
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		cgi_file_fd = open("/tmp/tmp_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		cgi_file_fd = open(cgi_file_path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (cgi_file_fd == -1)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
@@ -136,15 +137,16 @@ void Response::apply_cgi(Request &req, Location &loc)
 		close(fd[0]);
 		exit(0);
 	}
+	else if (pid == -1)
+	{
+		code = INTERNAL_SERVER_ERROR;
+		return ;
+	}
 	close(fd[0]);
 	close(fd[1]);
-	waitpid(-1, &status, 0);
-	std::cout << "Ending fork : " << status << "\n";
-	std::cout << "freeing exec args\n";
+	waitpid(pid, &status, 0);
 	free_arguments(exec_arg);
-	std::cout << "freeing cgi env args\n";
 	free_arguments(cgi_env);
-	std::cout << "changing request line target\n";
-	req.request_line.target = "/tmp/tmp_cgi";
-	std::cout << "end cgi function\n";
+	std::cout << "request line target : " << req.request_line.target << "\n";
+	req.request_line.target = cgi_file_path;
 }

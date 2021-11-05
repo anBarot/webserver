@@ -1,1 +1,3 @@
--> suppression request code, only response code
+-> correction bug cgi
+-> chunked response if transfer encoding
+-> redirection

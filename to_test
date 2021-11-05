@@ -1,7 +1,37 @@
 // préciser host pour HTTP/1.1
 
--> inf loop PUT content-length: 0
+***
+GET / HTTP/1.1
+host: localhost
+transfer-encoding: chunked
+{
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Thu, 04 Nov 2021 14:52:42 GMT
+Content-Type: text/html
+Transfer-Encoding: chunked
+Connection: keep-alive
 
+510
+<html>
+<head><title>Index of /</title></head>
+<body>
+<h1>Index of /</h1><hr><pre><a href="../">../</a>
+<a href="YoupiBanane/">YoupiBanane/</a>                                       28-Oct-2021 12:39                   -
+<a href="cgi-bin/">cgi-bin/</a>                                           03-Nov-2021 14:40                   -
+<a href="html/">html/</a>                                              05-Feb-2021 21:06                   -
+<a href="les_foodies/">les_foodies/</a>                                       05-Feb-2021 22:54                   -
+<a href="wordpress/">wordpress/</a>                                         04-Nov-2021 14:28                   -
+<a href="post_test.html">post_test.html</a>                                     04-Nov-2021 12:17                 368
+<a href="testpy.html">testpy.html</a>                                        02-Nov-2021 14:02                 218
+<a href="testpy.py">testpy.py</a>                                          02-Nov-2021 15:19                 471
+<a href="testpy_2.html">testpy_2.html</a>                                      02-Nov-2021 15:20                 210
+<a href="ubuntu_cgi_tester">ubuntu_cgi_tester</a>                                  28-Oct-2021 12:42             6954349
+</pre><hr></body>
+</html>
+
+0
+}
 
 ***
 GET / HTTP/1.1 

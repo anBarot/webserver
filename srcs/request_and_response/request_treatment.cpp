@@ -136,6 +136,7 @@ void extract_headers(Request &req, std::vector<char> &data)
 	{
 		if (str.find_first_of("\r\n") == 0)
 		{
+			// A voir : pb script correction
 			// data.erase(data.begin(), data.begin() + 1);
 			data.erase(data.begin(), data.begin() + 2);
 			req.status = HEADER_PARSED;

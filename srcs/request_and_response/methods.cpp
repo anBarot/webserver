@@ -58,12 +58,23 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	headers["Content-Type"] = "text/html";
 }
 
-void Response::method_get(Request &req, Location &loc, Server_conf &sv)
+void Response::method_get(Request &req, Location &loc)
 {
+	std::cout << "Enterring method GET with path \n";
+	std::cout << req.request_line.target << "\n";
 	struct stat st;
 	std::string path(req.request_line.target);
 	std::string path_index;
 
+	if (is_cgi == true)
+	{
+		file_name = path;
+		headers["Content-Type"] = "text/html";
+		headers["Connection"] = "keep-alive";
+		return ;
+	}
+
+	std::cout << "";
 	if (path[path.size() - 1] == '/')
 		path.erase(path.size() - 1, 1);
 	path = loc.root + path;
