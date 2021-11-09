@@ -62,15 +62,16 @@ void extract_trailer(Request &req, std::vector<char> &data)
 {
 	std::string str(data.begin(), data.end());
 	size_t pos;
+	size_t pos_dpoint;
 	std::string header;
 	std::string value;
 
 	while ((pos = str.find_first_of("\r\n")) != std::string::npos)
 	{
-		if (str.find_first_of(":") != std::string::npos)
+		if ((pos_dpoint = str.find_first_of(":")) != std::string::npos)
 		{
-			header = str.substr(0, str.find_first_of(": "));
-			value = str.substr(str.find_first_of(": ") + 2, str.length());
+			header = str.substr(0, pos_dpoint);
+			value = str.substr(str.find_first_of(": ") + 2, pos - pos_dpoint - 1);
 			strlower(header);
 
 			if (req.expected_trailers.find(header) != req.expected_trailers.end())
@@ -129,6 +130,7 @@ void extract_headers(Request &req, std::vector<char> &data)
 {
 	std::string str(data.begin(), data.end());
 	size_t pos;
+	size_t pos_dpoint;
 	std::string header;
 	std::string value;
 	
@@ -142,9 +144,9 @@ void extract_headers(Request &req, std::vector<char> &data)
 			req.status = HEADER_PARSED;
 			break;
 		}
-
-		header = str.substr(0, str.find_first_of(": "));
-		value = str.substr(str.find_first_of(": ") + 2, str.length());
+		pos_dpoint = str.find_first_of(": ");
+		header = str.substr(0, pos_dpoint);
+		value = str.substr(pos_dpoint + 2, pos - pos_dpoint - 1);
 		strlower(header);
 
 		req.headers[header] = value;

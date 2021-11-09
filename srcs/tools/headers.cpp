@@ -57,3 +57,16 @@ std::string get_allow(Location &loc)
 		res.append("DELETE");
 	return (res);
 }
+
+int is_header_str(std::string str)
+{
+	size_t pos_dpoint;
+	size_t pos_header_end;
+
+	pos_dpoint = str.find(":");
+	pos_header_end = str.find_last_of("\r\n");
+	if (pos_header_end == str.size() - 1 && pos_dpoint != 0)
+		return 1;
+
+	return 0;
+}

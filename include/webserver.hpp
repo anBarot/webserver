@@ -32,6 +32,7 @@ std::string get_date(time_t now);
 std::string get_MIME(std::string filename);
 std::string	get_file_size(std::string file_name);
 std::string get_allow(Location &loc);
+int is_header_str(std::string str);
 
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);

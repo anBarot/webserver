@@ -22,6 +22,7 @@ char **create_exec_arg(std::string exec_path, std::string script)
 
 char **create_env_array(std::map<std::string, std::string> env_map)
 {
+	std::cout << "creating env array\n";
 	char **res;
 	std::string tmp;
 	std::map<std::string, std::string>::iterator it = env_map.begin(); 
@@ -48,6 +49,7 @@ std::string get_query(std::string file_name)
 	while (std::getline(payload_file, str))
 		res = res + str;
 
+	std::cout << "Query string : " << res << "\n";
 	return res;
 }
 
@@ -76,27 +78,21 @@ char **create_cgi_env(Request &req, Location &loc)
 
 int	is_cgi_compatible(Request &req, Location &loc)
 {
-	std::cout << "Enterring is CGI function\n";
 	std::string &target = req.request_line.target;
 	std::string ext;
 	size_t pos;
-	std::istringstream iss(loc.cgi_extension);
-	std::string word;
 
 	if (loc.cgi_path == "" || req.request_line.method == DELETE || 
 		((pos = target.find_last_of(".")) == std::string::npos))
 		return 0;
-	ext = target.substr(pos + 1, target.size()); 
+	ext = target.substr(pos + 1, target.size());
 	std::cout << "extension : " << ext << "\n";
-	while (iss >> word)
-	{
-		if (ext == word)
-			return 1;
-	}
+	if (ext == loc.cgi_extension)
+		return 1;
 	return 0;
 }
 
-void Response::apply_cgi(Request &req, Location &loc)
+void Response::create_cgi_file(Request &req, Location &loc)
 {
 	std::cout << "Enterring CGI function\n";
 	int fd[2];
@@ -105,33 +101,34 @@ void Response::apply_cgi(Request &req, Location &loc)
 	char **cgi_env;
 	char **exec_arg;
 	int status;
-	std::string exec_path;
 	std::string script_name;
+	std::string exec_name;
 	std::string &target = req.request_line.target;
-	std::string cgi_file_path("/tmp/tmp_cgi");
 
-	exec_path = loc.cgi_path + target;
 	script_name = target.substr(target.find_last_of("/") + 1, target.size());
+	exec_name = loc.cgi_path + "/" + script_name;
+	exec_arg = create_exec_arg(exec_name.c_str(), script_name);
 	cgi_env = create_cgi_env(req, loc);
-	exec_arg = create_exec_arg(exec_path, script_name);
-	std::cout << "pipe creation\n";
 	if (pipe(fd) == -1)
 	{
 		code = INTERNAL_SERVER_ERROR;
 		return ;
 	}
-	std::cout << "forking : exc with : " << exec_path << "\n";
+	std::cout << "forking : exc with : " << target << "\n";
 	pid = fork();
 	if (!pid)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		cgi_file_fd = open(cgi_file_path.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		cgi_file_fd = open("/tmp/tmp_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (cgi_file_fd == -1)
 			exit(1);
+		std::cout << "execve param :\ntarget : " << exec_name << "\narg : " << 
+		exec_arg[0] << "  -  " << exec_arg[1] << "\n";
 		dup2(cgi_file_fd, STDOUT_FILENO);
 		dup2(cgi_file_fd, STDERR_FILENO);
-		execve(exec_path.c_str(), exec_arg, cgi_env);
+		if ((execve(exec_name.c_str(), exec_arg, cgi_env)) == -1)
+			exit(1);
 		close(STDIN_FILENO);
 		close(cgi_file_fd);
 		close(fd[0]);
@@ -145,8 +142,33 @@ void Response::apply_cgi(Request &req, Location &loc)
 	close(fd[0]);
 	close(fd[1]);
 	waitpid(pid, &status, 0);
+	if (WEXITSTATUS(status) == 1)
+		std::cout << "Error in exec process\n"; 
+	else if (WEXITSTATUS(status) == 0)
+		std::cout << "exec success\n"; 
 	free_arguments(exec_arg);
 	free_arguments(cgi_env);
-	std::cout << "request line target : " << req.request_line.target << "\n";
-	req.request_line.target = cgi_file_path;
+}
+
+void Response::extract_cgi_file(Request &req, Location &loc)
+{
+	std::ifstream in_file("/tmp/tmp_cgi");
+	std::ofstream out_file;
+	std::string str;
+	size_t pos_dpoint;
+
+	file_name = std::tmpnam(NULL);
+	std::cout << "\nresponse file name : "<< file_name << "\n";
+	out_file.open(file_name.c_str());
+	while (getline(in_file, str) && is_header_str(str))
+	{
+		pos_dpoint = str.find_first_of(":");
+		headers[str.substr(0, pos_dpoint)] = str.substr(pos_dpoint + 1, str.size());
+	}
+	while (getline(in_file, str))
+	{
+		std::cout << "extracted string : " << str;
+		out_file << str;
+	}
+	out_file.close();
 }

@@ -129,9 +129,10 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		{
 			std::cout << "Applying CGI\n";
 			response.is_cgi = true;
-			response.apply_cgi(req, loc);
+			response.create_cgi_file(req, loc);
+			response.extract_cgi_file(req, loc);
 		}
-		if (req.request_line.method == GET)
+		else if (req.request_line.method == GET)
 			response.method_get(req, loc);
 		else if (req.request_line.method == PUT || req.request_line.method == POST)
 			response.method_put(req, loc, sv);
