@@ -32,8 +32,9 @@ void display_location(Location &loc)
 	std::cout << "index : "<< loc.index << "\n";
 	std::cout << "upload path : "<< loc.upload_path << "\n";
 	std::cout << "cgi path : "<< loc.cgi_path << "\n";
-	std::cout << "cgi extension : "<< loc.cgi_extension << "\n";
-	std::cout << "redirection : "<< loc.redirection << "\n";
+	std::cout << "cgi extension : " << loc.cgi_extension << "\n";
+	std::cout << "redirection : " << loc.redirection.first << 
+	"  -  " << loc.redirection.second << "\n";
 
 	std::cout << "methods GET : "<< ((loc.methods[GET] == true) ? "true" : "false") << "\n";
 	std::cout << "methods PUT : "<< ((loc.methods[PUT] == true) ? "true" : "false") << "\n";

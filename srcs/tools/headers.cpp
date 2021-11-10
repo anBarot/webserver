@@ -65,7 +65,8 @@ int is_header_str(std::string str)
 
 	pos_dpoint = str.find(":");
 	pos_header_end = str.find_last_of("\r\n");
-	if (pos_header_end == str.size() - 1 && pos_dpoint != 0)
+	if (pos_header_end == str.size() - 1 && pos_dpoint != 0 &&
+		pos_dpoint != std::string::npos)
 		return 1;
 
 	return 0;

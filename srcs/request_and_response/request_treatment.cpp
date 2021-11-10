@@ -34,10 +34,10 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 */
 void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data)
 {
-	// std::cout << "\nextract with length\n";
-	// std::cout << "payload length : " << req.payload.length << "\n";
-	// std::cout << "string : " << str << "\n";
-	// std::cout << "file name : " << req.payload.tmp_file_name << "\n";
+	std::cout << "\nextract with length\n";
+	std::cout << "payload length : " << req.payload.length << "\n";
+	std::cout << "string : " << str << "\n";
+	std::cout << "file name : " << req.payload.tmp_file_name << "\n";
 	if (str.size() > req.payload.length)
 	{
 		file.close();
@@ -134,12 +134,10 @@ void extract_headers(Request &req, std::vector<char> &data)
 	std::string header;
 	std::string value;
 	
-	while ((pos = str.find_first_of("\r\n")) != std::string::npos)
+	while ((pos = str.find("\r\n")) != std::string::npos)
 	{
-		if (str.find_first_of("\r\n") == 0)
+		if (pos == 0)
 		{
-			// A voir : pb script correction
-			// data.erase(data.begin(), data.begin() + 1);
 			data.erase(data.begin(), data.begin() + 2);
 			req.status = HEADER_PARSED;
 			break;

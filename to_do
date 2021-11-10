@@ -1,3 +1,11 @@
--> correction bug cgi
--> chunked response if transfer encoding
+-> test post 
+POST /cgi-bin/testpy.py HTTP/1.1
+host: localhost
+content-type: application/x-www-form-urlencoded
+content-length: 25
+
+fname=azeaz&lname=xcwxw
+
 -> redirection
+-> error page
+-> siege

@@ -33,15 +33,16 @@ char **create_env_array(std::map<std::string, std::string> env_map)
 	{
 		tmp = it->first + "=" + it->second;
 		res[i] = strdup(tmp.c_str());
-		std::cout << "res " << i << " : " << res[i] << "\n";
+		// std::cout << "res " << i << " : " << res[i] << "\n";
 		it++;
 	}
 
 	return res;
 }
 
-std::string get_query(std::string file_name)
+std::string get_query(std::string &file_name)
 {
+	std::cout << "\nFile to extract queries : " << file_name << "\n";
 	std::ifstream payload_file(file_name.c_str());
 	std::string str;
 	std::string res;
@@ -49,7 +50,7 @@ std::string get_query(std::string file_name)
 	while (std::getline(payload_file, str))
 		res = res + str;
 
-	std::cout << "Query string : " << res << "\n";
+	std::cout << "get query : " << res << "\n";
 	return res;
 }
 
@@ -94,7 +95,7 @@ int	is_cgi_compatible(Request &req, Location &loc)
 
 void Response::create_cgi_file(Request &req, Location &loc)
 {
-	std::cout << "Enterring CGI function\n";
+	std::cout << "Enterring CGI function\nrequest tmp file name : " << req.payload.tmp_file_name << "\n";
 	int fd[2];
 	pid_t pid;
 	int cgi_file_fd;
@@ -168,7 +169,7 @@ void Response::extract_cgi_file(Request &req, Location &loc)
 	while (getline(in_file, str))
 	{
 		std::cout << "extracted string : " << str;
-		out_file << str;
+		out_file << str + "\n";
 	}
 	out_file.close();
 }

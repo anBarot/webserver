@@ -11,15 +11,15 @@
 class Location
 {
 	public:
-		std::string		path;
-		std::string		root;
-		std::string		index;
-		bool			auto_index;
-		std::string		upload_path;
-		bool			methods[5];
-		std::string		cgi_path;
-		std::string		cgi_extension;
-		std::string		redirection;
+		std::string								path;
+		std::string								root;
+		std::string								index;
+		bool									auto_index;
+		std::string								upload_path;
+		bool									methods[5];
+		std::string								cgi_path;
+		std::string								cgi_extension;
+		std::pair<e_response_code, std::string>	redirection;
 
 		Location() {
 			root = "";
@@ -34,7 +34,6 @@ class Location
 			auto_index = true;
 			cgi_path = "";
 			cgi_extension = "";
-			redirection = "";
 		}
 		~Location() {}
 };

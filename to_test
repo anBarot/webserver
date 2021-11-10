@@ -1,5 +1,3 @@
-// préciser host pour HTTP/1.1
-
 ***
 GET / HTTP/1.1
 host: localhost
@@ -104,8 +102,55 @@ content-length: 5
 }
 ***
 
+***
+POST /cgi-bin/testpy.py HTTP/1.1
+host: localhost
+content-type: application/x-www-form-urlencoded
+content-length: 26
 
-PUT payload length > content-length
+fname=azeaz&lname=xcwxw
+{
+HTTP/1.1 200 OK
+Server: nginx/1.18.0 (Ubuntu)
+Date: Tue, 09 Nov 2021 11:18:35 GMT
+Content-Type: text/html
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+9f
+
+<html>
+<head>
+<title>Hello - Second CGI Program</title>
+</head>
+<body>
+<h2>Hello azeaz xcwxw
+</h2>
+<h2>python keys ['lname', 'fname'] </h2>
+</body>
+</html>
+
+0
+}
+***
+POST / HTTP/1.1
+Host: localhost:5000
+User-Agent: Go-http-client/1.1
+Transfer-Encoding: chunked
+Content-Type: test/file
+Accept-Encoding: gzip
+{
+
+
+
+}
+***
+(PUT payload length > content-length)
+PUT / HTTP/1.1
+host: localhost:5000
+
+***
+
 
 
 PUT no payload length					

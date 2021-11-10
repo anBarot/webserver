@@ -35,7 +35,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	extract = extract_field(line, 2);
 
 	if (extract.first == "root" || extract.first == "index" || extract.first == "cgi_path"
-	|| extract.first == "cgi_extension" || extract.first == "upload_path" || extract.first == "return")
+	|| extract.first == "cgi_extension" || extract.first == "upload_path")
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
 				return CONFFILE_PARSE_ERR;
@@ -49,8 +49,16 @@ int		extract_location_field(std::string &line, Location &loc)
 			loc.cgi_extension = extract.second;			 
 		else if (extract.first == "upload_path")	
 			loc.upload_path = extract.second;			
-		else if (extract.first == "return")		
-			loc.redirection = extract.second;			 
+	}
+	else if (extract.first == "return")
+	{
+		std::istringstream iss(extract.second);
+		std::string str;
+
+		iss >> str;
+		loc.redirection.first = (e_response_code)atoi(str.c_str());
+		iss >> str;
+		loc.redirection.second = str;
 	}
 	else if (extract.first == "method")					
 	{															 

@@ -13,10 +13,7 @@ class Server_conf
 		std::map<std::string, Location> 	locations;
 		std::map<unsigned, std::string>		error_page;
 	
-		Server_conf() : listen_port(80), max_body_size(1) 
-		{
-			locations[""] = Location();
-		}
+		Server_conf() : listen_port(80), max_body_size(1) {}
 		Server_conf(int port) : listen_port(port) {}
 		~Server_conf() {}
 };

@@ -120,14 +120,18 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
-	if (response.code < 400 && loc.methods[req.request_line.method] == false) 
+	if (loc.redirection.first >= 300)
+	{
+		response.code = loc.redirection.first;
+		response.file_name = sv.error_page[response.code];
+		response.headers["Location"] = loc.redirection.second;
+	}
+	if (response.code < 300 && loc.methods[req.request_line.method] == false) 
 		response.code = METHOD_NOT_ALLOWED;
-	std::cout << "Checking response code : " << response.code << "\n";
-	if (response.code < 400)
+	if (response.code < 300)
 	{
 		if (is_cgi_compatible(req, loc))
 		{
-			std::cout << "Applying CGI\n";
 			response.is_cgi = true;
 			response.create_cgi_file(req, loc);
 			response.extract_cgi_file(req, loc);
@@ -141,9 +145,10 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 	}
 	if (response.code >= 400)
 	{
+		std::cout << "Checking response code : " << response.code << "\n";
 		if (response.code == METHOD_NOT_ALLOWED)
 			response.headers["Allow"] = get_allow(loc);
-		if (sv.error_page.count(response.code) && get_file_size(sv.error_page[response.code]) != "")
+		if (sv.error_page.count(response.code))
 			response.file_name = sv.error_page[response.code];
 		else
 			response.file_name = create_error_file(response.code);
