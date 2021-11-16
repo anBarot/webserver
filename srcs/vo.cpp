@@ -36,15 +36,15 @@ void 	read_from_clients_sockets(SocketPool &sp, std::vector<Client> &clients)
 {
 	char buffer[BUFFER_SIZE];
 	int last_read;
-	int DEBUG_c = 0;
-	int DEBUG_rd = 0;
+	// int DEBUG_c = 0;
+	// int DEBUG_rd = 0;
 
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
-		DEBUG_c++;
+		// DEBUG_c++;
 		if (FD_ISSET(it->socket, &(sp.reading_set)))
 		{
-			DEBUG_rd++;
+			// DEBUG_rd++;
 			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
 			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
 			{
@@ -70,12 +70,15 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 	int DEBUG_wt = 0;
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
-		DEBUG_c++;
-		if (FD_ISSET(it->socket, &(sp.writing_set)) && it->requests.front().status == FINISH_PARSING)
+		// DEBUG_c++;
+		if (FD_ISSET(it->socket, &(sp.writing_set)) && !it->requests.empty()
+			&& it->requests.front().status == FINISH_PARSING)
 		{
-			DEBUG_wt++;
+			// DEBUG_wt++;
 			it->fill_response(server_confs);
 			it->send_response();
+			pthread_mutex_unlock(&error_file_mutex);
+			pthread_mutex_unlock(&index_file_mutex);
 			it->response.clear();
 			if (it->status == 1)
 			{

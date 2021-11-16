@@ -6,6 +6,8 @@ content-length: 25
 
 fname=azeaz&lname=xcwxw
 
--> redirection
--> error page
--> siege
+-> setup multiple servers with different hostname (use something like: curl --resolve example.com:80:127.0.0.1
+-> siege : protection write/read  pages (index + error)
+	ex : 
+		sudo siege -b -t2 http://localhost:4000/html
+		sudo siege -b -t2 http://localhost:4000/azeazezaez

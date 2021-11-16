@@ -212,8 +212,8 @@ void Client::store_incoming_data(char *buffer, int size)
 
 	if (received_data_raw.size())
 	{
-		std::string str(received_data_raw.begin(), received_data_raw.end());
-		std::cout << "\nReceived data : " << str << "\n";
+		// std::string str(received_data_raw.begin(), received_data_raw.end());
+		// std::cout << "\nReceived data : " << str << "\n";
 		if (requests.size() && requests.back().status != FINISH_PARSING)
 			extract_request_from_data(received_data_raw);
 		else

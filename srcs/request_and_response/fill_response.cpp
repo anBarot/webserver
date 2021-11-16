@@ -2,6 +2,8 @@
 
 std::string	create_error_file(int code)
 {
+	pthread_mutex_lock(&error_file_mutex);
+
 	std::ifstream filein("./html/error.html");
 	std::ofstream fileout("./error_temp.html");
 	size_t pos_done;
