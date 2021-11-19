@@ -5,7 +5,7 @@
 	the first line is an hexadecimal value that tells the extraction length
 	of the second line
 */
-void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size_t pos, size_t sec_pos)
+void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size_t pos)
 {
 	size_t chunk_size;
 	
@@ -104,7 +104,7 @@ void extract_payload(Request &req, std::vector<char> &data)
 				(pos = str.find_first_of("\r\n")) != std::string::npos &&
 				(sec_pos = str.find_first_of("\r\n", pos + 2)) != std::string::npos)
 		{
-			extract_in_chunks(str, file, req, pos, sec_pos);
+			extract_in_chunks(str, file, req, pos);
 			data.erase(data.begin(), data.begin() + sec_pos + 2);
 		}
 	}

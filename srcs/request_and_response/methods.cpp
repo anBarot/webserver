@@ -24,8 +24,6 @@ void create_html_listing_file(std::string path, std::string listing_html)
 
 void Response::create_directory_listing(std::string path, std::string loc_root, std::string loc_path)
 {
-	pthread_mutex_lock(&index_file_mutex);
-
 	std::vector<std::string> files;
     struct dirent *entry;
 	DIR *dir;

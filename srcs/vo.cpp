@@ -35,7 +35,7 @@ void 	add_clients(SocketPool &sp, std::map<int, int> lsp, std::vector<Client> &c
 void 	read_from_clients_sockets(SocketPool &sp, std::vector<Client> &clients)
 {
 	char buffer[BUFFER_SIZE];
-	int last_read;
+	ssize_t last_read;
 	// int DEBUG_c = 0;
 	// int DEBUG_rd = 0;
 
@@ -66,8 +66,6 @@ void 	read_from_clients_sockets(SocketPool &sp, std::vector<Client> &clients)
  */
 void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std::vector<Server_conf> &server_confs)
 {
-	int DEBUG_c = 0;
-	int DEBUG_wt = 0;
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
 	{
 		// DEBUG_c++;
@@ -77,8 +75,6 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 			// DEBUG_wt++;
 			it->fill_response(server_confs);
 			it->send_response();
-			pthread_mutex_unlock(&error_file_mutex);
-			pthread_mutex_unlock(&index_file_mutex);
 			it->response.clear();
 			if (it->status == 1)
 			{

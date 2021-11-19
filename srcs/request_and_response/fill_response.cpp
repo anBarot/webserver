@@ -2,8 +2,6 @@
 
 std::string	create_error_file(int code)
 {
-	pthread_mutex_lock(&error_file_mutex);
-
 	std::ifstream filein("./html/error.html");
 	std::ofstream fileout("./error_temp.html");
 	size_t pos_done;
@@ -45,7 +43,7 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, int lsock)
+Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, unsigned int lsock)
 {
 	bool first_encounter = false;
 	Server_conf sv;
@@ -136,7 +134,7 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		{
 			response.is_cgi = true;
 			response.create_cgi_file(req, loc);
-			response.extract_cgi_file(req, loc);
+			response.extract_cgi_file();
 		}
 		else if (req.request_line.method == GET)
 			response.method_get(req, loc);

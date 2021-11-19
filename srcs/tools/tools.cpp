@@ -1,11 +1,11 @@
 #include "../../include/webserver.hpp"
 
 // Check if the signal is a break signal
-int has_telnet_breaksignal(int last_read, char *buffer)
+int has_telnet_breaksignal(ssize_t last_read, char *buffer)
 {
 	if (last_read >= 5)
 	{
-		for (size_t i = 0; i + 5 <= last_read; i++)
+		for (ssize_t i = 0; i + 5 <= last_read; i++)
 		{
 			if (buffer[i + 0] == (char)255 && buffer[i + 1] == (char)244 &&
 				buffer[i + 2] == (char)255 && buffer[i + 3] == (char)253 && buffer[i + 4] == (char)6)

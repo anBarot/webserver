@@ -9,7 +9,7 @@
 #include "SocketPool.hpp"
 
 // Tools
-int has_telnet_breaksignal(int last_read, char *buffer);
+int has_telnet_breaksignal(ssize_t last_read, char *buffer);
 void maps_init_reason_phrase(std::map<int, std::string> &reason_phrase);
 void maps_init_MIME_types(std::map<std::string, std::string> &MIME_types);
 void ws_trim(std::string& s);

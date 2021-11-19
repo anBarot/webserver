@@ -54,7 +54,7 @@ std::string get_query(std::string &file_name)
 	return res;
 }
 
-char **create_cgi_env(Request &req, Location &loc)
+char **create_cgi_env(Request &req)
 {
 	std::map<std::string, std::string> env_map;
 	std::string &req_path = req.request_line.target;
@@ -109,7 +109,7 @@ void Response::create_cgi_file(Request &req, Location &loc)
 	script_name = target.substr(target.find_last_of("/") + 1, target.size());
 	exec_name = loc.cgi_path + "/" + script_name;
 	exec_arg = create_exec_arg(exec_name.c_str(), script_name);
-	cgi_env = create_cgi_env(req, loc);
+	cgi_env = create_cgi_env(req);
 	if (pipe(fd) == -1)
 	{
 		code = INTERNAL_SERVER_ERROR;
@@ -144,14 +144,17 @@ void Response::create_cgi_file(Request &req, Location &loc)
 	close(fd[1]);
 	waitpid(pid, &status, 0);
 	if (WEXITSTATUS(status) == 1)
+	{
 		std::cout << "Error in exec process\n"; 
+		code = NOT_FOUND;
+	}
 	else if (WEXITSTATUS(status) == 0)
 		std::cout << "exec success\n"; 
 	free_arguments(exec_arg);
 	free_arguments(cgi_env);
 }
 
-void Response::extract_cgi_file(Request &req, Location &loc)
+void Response::extract_cgi_file()
 {
 	std::ifstream in_file("/tmp/tmp_cgi");
 	std::ofstream out_file;

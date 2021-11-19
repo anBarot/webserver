@@ -80,7 +80,5 @@ enum e_response_code {
 
 extern std::map<int, std::string> reason_phrase;
 extern std::map<std::string, std::string> MIME_types;
-extern pthread_mutex_t error_file_mutex;
-extern pthread_mutex_t index_file_mutex;
 
 #endif //SATOSHIS_DATA_STRUCT_HPP

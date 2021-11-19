@@ -20,7 +20,6 @@
 #include <netinet/in.h>
 #include <dirent.h>
 #include <errno.h>
-#include <pthread.h>
 
 // system lib
 #include <sys/types.h>
