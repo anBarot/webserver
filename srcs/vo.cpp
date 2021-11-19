@@ -14,7 +14,7 @@ void 	add_clients(SocketPool &sp, std::map<int, int> lsp, std::vector<Client> &c
 		{
 			new_sd = accept(it->first, 0, 0);
 			clients.push_back(Client(new_sd, it->second));
-			write(1, "added client in reading set\n", strlen("added client in reading set\n"));
+			std::cout << "added client in reading set\n" << std::endl;
 			return;
 		}
 
@@ -22,7 +22,7 @@ void 	add_clients(SocketPool &sp, std::map<int, int> lsp, std::vector<Client> &c
 		{
 			new_sd = accept(it->first, 0, 0);
 			clients.push_back(Client(new_sd, it->first));
-			write(1, "added client in writing set\n", strlen("added client in writing set\n"));
+			std::cout << "added client in writing set\n" << std::endl;
 			return;
 		}
 	}
