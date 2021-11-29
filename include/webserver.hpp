@@ -8,6 +8,8 @@
 #include "Client.hpp"
 #include "SocketPool.hpp"
 
+#include "Connections.hpp"
+
 // Tools
 int has_telnet_breaksignal(ssize_t last_read, char *buffer);
 void maps_init_reason_phrase(std::map<int, std::string> &reason_phrase);
