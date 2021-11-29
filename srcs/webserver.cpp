@@ -15,11 +15,11 @@ void sigint_handler(int signum)
 int main(int ac, char **av)
 {
 	std::vector<Server_conf> servers_conf;
-	
+	Connections connections;
+
 	// to put on the new class
 	std::vector<Client> clients_pool;
 	std::map<int, int> listen_sockets_pool;
-	
 	
 
 	int status = 1;
@@ -34,13 +34,16 @@ int main(int ac, char **av)
 	maps_init_MIME_types(MIME_types);
 	maps_init_reason_phrase(reason_phrase);
 	
-	
-	listen_sockets_pool = listen_sockets_from_servers(servers_conf);
-
 	signal(SIGINT, sigint_handler);
 
-	while(status)
-		status = socket_routine(listen_sockets_pool, clients_pool, servers_conf);
+	connections.init(servers_conf);
+	
+	// listen_sockets_pool = listen_sockets_from_servers(servers_conf);
+
+	connections.loop(servers_conf);
+
+	// while(status)
+	// 	status = socket_routine(listen_sockets_pool, clients_pool, servers_conf);
 
 	return (0);
 }
