@@ -15,14 +15,15 @@ void sigint_handler(int signum)
 int main(int ac, char **av)
 {
 	std::vector<Server_conf> servers_conf;
+	
 	Connections connections;
 
 	// to put on the new class
-	std::vector<Client> clients_pool;
-	std::map<int, int> listen_sockets_pool;
+	// std::vector<Client> clients_pool;
+	// std::map<int, int> listen_sockets_pool;
 	
 
-	int status = 1;
+	// int status = 1;
 
 	if (ac > 2)
 		return (error_and_exit(ARG_ERR));

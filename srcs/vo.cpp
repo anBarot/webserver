@@ -18,13 +18,13 @@ void 	add_clients(SocketPool &sp, std::map<int, int> lsp, std::vector<Client> &c
 			return;
 		}
 
-		if (FD_ISSET(it->first, &(sp.writing_set)))
-		{
-			new_sd = accept(it->first, 0, 0);
-			clients.push_back(Client(new_sd, it->first));
-			std::cout << "added client in writing set\n" << std::endl;
-			return;
-		}
+		// if (FD_ISSET(it->first, &(sp.writing_set)))
+		// {
+		// 	new_sd = accept(it->first, 0, 0);
+		// 	clients.push_back(Client(new_sd, it->first));
+		// 	std::cout << "added client in writing set\n" << std::endl;
+		// 	return;
+		// }
 	}
 }
 

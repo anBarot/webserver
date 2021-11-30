@@ -8,9 +8,10 @@ class Connections
 private:
 	
 	std::vector<Client> clients;
-	std::map<int, int> socket_pool;
+	std::map<int, int> listen_pool;
 
-	fd_set	active_set;
+	fd_set	active_rset;
+	fd_set	active_wset;
 	fd_set	ready_rset;
 	fd_set	ready_wset;
 	int		ready_fd;
@@ -22,10 +23,10 @@ public:
 	Connections& operator=(const Connections &c);
 	~Connections();
 
-	int init(std::vector<Server_conf> servers_conf);
-	// int add_client(Server &server);
-	// int check_clients();
-	void loop(std::vector<Server_conf> servers_conf);
+	int init(std::vector<Server_conf> &servers_conf);
+	int add_clients();
+	int check_clients(std::vector<Server_conf> &servers_conf);
+	void loop(std::vector<Server_conf> &servers_conf);
 
 	std::list<int> fd_list;
 };
