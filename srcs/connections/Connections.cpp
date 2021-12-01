@@ -58,7 +58,6 @@ int Connections::add_clients()
 
 	for (std::map<int, int>::iterator it = listen_pool.begin(); it != listen_pool.end(); it++)
 	{
-		std::cout << "iterating add_clients" << std::endl;
 		if (FD_ISSET(it->first, &ready_rset))
 		{
 			ready_fd--;
@@ -83,29 +82,25 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 	for (std::vector<Client>::iterator it = clients.begin();
 		it != clients.end(); it++)
 	{
-		std::cout << "iterating read dclients" << std::endl;
-
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
-			std::cout << "receiving" << std::endl;
 			ready_fd--;
 			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
 			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
 			{
-				FD_CLR(it->socket, &active_wset);
 				FD_CLR(it->socket, &active_rset);
-
 				fd_list.remove(it->socket);
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
-				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);
 				break;
 			}
-			FD_SET(it->socket, &active_wset);
-			if (it->requests.front().status == FINISH_PARSING)
-				FD_CLR(it->socket, &active_rset);
 			it->store_incoming_data(buffer, last_read);
+			if (it->requests.front().status == FINISH_PARSING)
+			{
+				FD_SET(it->socket, &active_wset);
+				FD_CLR(it->socket, &active_rset);
+			}
 			break;
 		}
 	}
@@ -113,29 +108,22 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 	for (std::vector<Client>::iterator it = clients.begin();
 		it != clients.end(); it++)
 	{
-		std::cout << "iterating write clients" << std::endl;
-
 		if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty()
 			&& it->requests.front().status == FINISH_PARSING)
 		{
-			std::cout << "sending" << std::endl;
 			it->fill_response(servers_conf);
 			it->send_response();
 			it->response.clear();
-			std::cout << "sent" << std::endl;
 			FD_CLR(it->socket, &active_wset);
-			FD_SET(it->socket, &active_rset);
 			if (it->status == 1)
 			{
-				FD_CLR(it->socket, &active_rset);
 				fd_list.remove(it->socket);
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
-				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);
 			}
+			FD_SET(it->socket, &active_rset);
 			break;
-
 		}
 	}
 	return 0;
@@ -144,16 +132,12 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 
 void Connections::loop(std::vector<Server_conf> &servers_conf)
 {
-	int status;
-
 	std::cout << "Waiting for connection." << std::endl;
-	status = 1;
-	while (status)
+	while (1)
 	{
-		std::cout <<"check1" << std::endl;
-		std::cout << "clients " << clients.size() << std::endl;
-		std::cout << "listen " << listen_pool.size() << std::endl;
-		std::cout << "max_fd " << max_fd << std::endl;
+		// std::cout << "clients " << clients.size() << std::endl;
+		// std::cout << "listen " << listen_pool.size() << std::endl;
+		// std::cout << "max_fd " << max_fd << std::endl;
 		ready_rset = active_rset;
 		ready_wset = active_wset;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, 0);
