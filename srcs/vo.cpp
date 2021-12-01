@@ -47,7 +47,8 @@ void 	read_from_clients_sockets(SocketPool &sp, std::vector<Client> &clients)
 			// DEBUG_rd++;
 			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
 			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
-			{
+			{				
+				std::cout << "request error\n";
 				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);
@@ -78,6 +79,7 @@ void 	write_to_clients_sockets(SocketPool &sp, std::vector<Client> &clients, std
 			it->response.clear();
 			if (it->status == 1)
 			{
+				std::cout << "response error\n";
 				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);

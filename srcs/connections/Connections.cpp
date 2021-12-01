@@ -90,18 +90,22 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
 			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
 			{
+				FD_CLR(it->socket, &active_rset);
+				FD_CLR(it->socket, &active_wset);
+				fd_list.remove(it->socket);
+				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);
 			}
 			it->store_incoming_data(buffer, last_read);
+			break;
 		}
 	}
 
 	for (std::vector<Client>::iterator it = clients.begin();
 		it != clients.end(); it++)
 	{
-		std::cout << "try" << std::endl;
 		if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty()
 			&& it->requests.front().status == FINISH_PARSING)
 		{
@@ -110,17 +114,19 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 			it->send_response();
 			it->response.clear();
 			std::cout << "sent" << std::endl;
-			FD_CLR(it->socket, &active_rset);
-			FD_CLR(it->socket, &active_wset);
-			fd_list.remove(it->socket);
-			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
-			clients.erase(it);
-			close(it->socket);
 
 			if (it->status == 1)
 			{
+				FD_CLR(it->socket, &active_rset);
+				FD_CLR(it->socket, &active_wset);
+				fd_list.remove(it->socket);
+				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				shutdown(it->socket, SHUT_RDWR);
+				close(it->socket);
+				clients.erase(it);
 			}
+			break;
+
 		}
 	}
 	return 0;
@@ -142,7 +148,6 @@ void Connections::loop(std::vector<Server_conf> &servers_conf)
 		ready_rset = active_rset;
 		ready_wset = active_wset;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, 0);
-		std::cout << "something happend" << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		add_clients();
