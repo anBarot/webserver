@@ -58,6 +58,7 @@ int Connections::add_clients()
 
 	for (std::map<int, int>::iterator it = listen_pool.begin(); it != listen_pool.end(); it++)
 	{
+		std::cout << "iterating add_clients" << std::endl;
 		if (FD_ISSET(it->first, &ready_rset))
 		{
 			ready_fd--;
@@ -65,7 +66,6 @@ int Connections::add_clients()
 			//implement error
 			std::cout << "Connection accepted." << std::endl;
 
-			FD_SET(fd, &active_wset);
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
@@ -83,6 +83,8 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 	for (std::vector<Client>::iterator it = clients.begin();
 		it != clients.end(); it++)
 	{
+		std::cout << "iterating read dclients" << std::endl;
+
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
 			std::cout << "receiving" << std::endl;
@@ -90,14 +92,19 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
 			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
 			{
-				FD_CLR(it->socket, &active_rset);
 				FD_CLR(it->socket, &active_wset);
+				FD_CLR(it->socket, &active_rset);
+
 				fd_list.remove(it->socket);
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				shutdown(it->socket, SHUT_RDWR);
 				close(it->socket);
 				clients.erase(it);
+				break;
 			}
+			FD_SET(it->socket, &active_wset);
+			if (it->requests.front().status == FINISH_PARSING)
+				FD_CLR(it->socket, &active_rset);
 			it->store_incoming_data(buffer, last_read);
 			break;
 		}
@@ -106,6 +113,8 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 	for (std::vector<Client>::iterator it = clients.begin();
 		it != clients.end(); it++)
 	{
+		std::cout << "iterating write clients" << std::endl;
+
 		if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty()
 			&& it->requests.front().status == FINISH_PARSING)
 		{
@@ -114,11 +123,11 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 			it->send_response();
 			it->response.clear();
 			std::cout << "sent" << std::endl;
-
+			FD_CLR(it->socket, &active_wset);
+			FD_SET(it->socket, &active_rset);
 			if (it->status == 1)
 			{
 				FD_CLR(it->socket, &active_rset);
-				FD_CLR(it->socket, &active_wset);
 				fd_list.remove(it->socket);
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				shutdown(it->socket, SHUT_RDWR);
