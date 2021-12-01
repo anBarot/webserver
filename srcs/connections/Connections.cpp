@@ -109,19 +109,18 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 			it->fill_response(servers_conf);
 			it->send_response();
 			it->response.clear();
+			std::cout << "sent" << std::endl;
+			FD_CLR(it->socket, &active_rset);
+			FD_CLR(it->socket, &active_wset);
+			fd_list.remove(it->socket);
+			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
+			clients.erase(it);
+			close(it->socket);
+
 			if (it->status == 1)
 			{
-				std::cout << "sent" << std::endl;
-				FD_CLR(it->socket, &active_rset);
-				FD_CLR(it->socket, &active_wset);
-				fd_list.remove(it->socket);
-				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
-
 				shutdown(it->socket, SHUT_RDWR);
-				close(it->socket);
-				clients.erase(it);
 			}
-			break;
 		}
 	}
 	return 0;
