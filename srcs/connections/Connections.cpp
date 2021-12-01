@@ -17,7 +17,7 @@ Connections::~Connections()
 {
 }
 
-int Connections::init(std::vector<Server_conf> &servers_conf)
+int Connections::init()
 {
 	struct sockaddr_in addr;
 	int optval;
@@ -64,7 +64,6 @@ int Connections::add_clients()
 			fd = accept(it->first, 0, 0);
 			//implement error
 			std::cout << "Connection accepted." << std::endl;
-
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
@@ -74,10 +73,10 @@ int Connections::add_clients()
 	return 0;
 }
 
-int Connections::check_clients(std::vector<Server_conf> &servers_conf)
+int Connections::check_clients()
 {
 	char buffer[BUFFER_SIZE];
-	ssize_t last_read;
+	ssize_t ret;
 
 	for (std::vector<Client>::iterator it = clients.begin();
 		it != clients.end(); it++)
@@ -85,8 +84,8 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
 			ready_fd--;
-			last_read = recv(it->socket, buffer, BUFFER_SIZE, 0);
-			if (last_read <= 0 || has_telnet_breaksignal(last_read, buffer))
+			ret = recv(it->socket, buffer, BUFFER_SIZE, 0);
+			if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
 			{
 				FD_CLR(it->socket, &active_rset);
 				fd_list.remove(it->socket);
@@ -95,13 +94,12 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 				clients.erase(it);
 				break;
 			}
-			it->store_incoming_data(buffer, last_read);
+			it->store_incoming_data(buffer, ret);
 			if (it->requests.front().status == FINISH_PARSING)
 			{
 				FD_SET(it->socket, &active_wset);
 				FD_CLR(it->socket, &active_rset);
 			}
-			break;
 		}
 	}
 
@@ -121,16 +119,16 @@ int Connections::check_clients(std::vector<Server_conf> &servers_conf)
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				close(it->socket);
 				clients.erase(it);
+				break;
 			}
 			FD_SET(it->socket, &active_rset);
-			break;
 		}
 	}
 	return 0;
 }
 
 
-void Connections::loop(std::vector<Server_conf> &servers_conf)
+void Connections::loop()
 {
 	std::cout << "Waiting for connection." << std::endl;
 	while (1)
@@ -144,6 +142,6 @@ void Connections::loop(std::vector<Server_conf> &servers_conf)
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		add_clients();
-		check_clients(servers_conf);
+		check_clients();
 	}
 }

@@ -16,6 +16,7 @@ private:
 	fd_set	ready_wset;
 	int		ready_fd;
 	int		max_fd;
+	std::list<int> fd_list;
 
 public:
 	Connections();
@@ -23,12 +24,12 @@ public:
 	Connections& operator=(const Connections &c);
 	~Connections();
 
-	int init(std::vector<Server_conf> &servers_conf);
+	int init();
 	int add_clients();
-	int check_clients(std::vector<Server_conf> &servers_conf);
-	void loop(std::vector<Server_conf> &servers_conf);
-
-	std::list<int> fd_list;
+	int check_clients();
+	void loop();
+	
+	std::vector<Server_conf> servers_conf;
 };
 
 #endif

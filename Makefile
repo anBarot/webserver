@@ -2,7 +2,6 @@ NAME	=	webserv
 
 SRCS = 	srcs/webserver.cpp \
 		srcs/conf_file_parsing/conf_file_parser.cpp  \
-		srcs/socket_initialization/socket_initialization.cpp \
 		srcs/request_and_response/request_checking.cpp \
 		srcs/request_and_response/fill_response.cpp \
 		srcs/request_and_response/request_treatment.cpp \
