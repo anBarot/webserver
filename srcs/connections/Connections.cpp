@@ -37,7 +37,7 @@ int Connections::init()
 		// implement error
 
 		// verify addresses: should we take them in consideration?
-		addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+		addr.sin_addr.s_addr = htonl(INADDR_ANY);
 		addr.sin_port = htons(it->listen_port);
 		bind(fd, (struct sockaddr *)&addr, sizeof(addr));
 		//implement error
@@ -91,23 +91,20 @@ int Connections::check_clients()
 				fd_list.remove(it->socket);
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				close(it->socket);
-				clients.erase(it);
-				break;
+				it = clients.erase(it);
+				it--;
 			}
-			it->store_incoming_data(buffer, ret);
-			if (it->requests.front().status == FINISH_PARSING)
+			else
 			{
-				FD_SET(it->socket, &active_wset);
-				FD_CLR(it->socket, &active_rset);
+				it->store_incoming_data(buffer, ret);
+				if (it->requests.front().status == FINISH_PARSING)
+				{
+					FD_SET(it->socket, &active_wset);
+					FD_CLR(it->socket, &active_rset);
+				}
 			}
 		}
-	}
-
-	for (std::vector<Client>::iterator it = clients.begin();
-		it != clients.end(); it++)
-	{
-		if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty()
-			&& it->requests.front().status == FINISH_PARSING)
+		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
 		{
 			it->fill_response(servers_conf);
 			it->send_response();
@@ -118,10 +115,11 @@ int Connections::check_clients()
 				fd_list.remove(it->socket);
 				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				close(it->socket);
-				clients.erase(it);
-				break;
+				it = clients.erase(it);
+				it--;
 			}
-			FD_SET(it->socket, &active_rset);
+			else
+				FD_SET(it->socket, &active_rset);
 		}
 	}
 	return 0;
