@@ -5,7 +5,7 @@
 #ifndef SATOSHIS_LOCATION_HPP
 #define SATOSHIS_LOCATION_HPP
 
-#include "cpp_libraries.hpp"
+#include "libraries.hpp"
 #include "data_struct.hpp"
 
 class Location
