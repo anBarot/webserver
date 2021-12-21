@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:59 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 21:09:41 by abarot           ###   ########.fr       */
+/*   Updated: 2021/12/21 21:52:38 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ int	check_http_version(std::string version)
 	if (pos == std::string::npos)
 		return (1);
 
-	std::string value_part = version.substr(pos + 1, version.size());
+	std::string value_part = version.substr(pos + 3, version.size());
 
-    if (version.substr(0, pos + 1) != "HTTP/" || std::atof(value_part.c_str()) > 1.100001
-        || std::atof(value_part.c_str()) <= 0.0000000)
+    if (value_part.find_first_not_of("0123456789") != std::string::npos
+        || version.substr(0, pos + 3) != "HTTP/1.")
         return 1;
 
     return 0;
