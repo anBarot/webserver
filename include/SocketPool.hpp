@@ -1,9 +1,17 @@
-//
-// Created by lubenica on 21/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   SocketPool.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:23:51 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:24:35 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef WEBSERVER_SOCKETPOOL_HPP
-#define WEBSERVER_SOCKETPOOL_HPP
+#ifndef SOCKETPOOL_HPP
+#define SOCKETPOOL_HPP
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
@@ -37,7 +45,4 @@ public:
 	private:
 };
 
-
-
-
-#endif //WEBSERVER_SOCKETPOOL_HPP
+#endif //SOCKETPOOL_HPP

@@ -1,4 +1,4 @@
-#include "../../include/webserver.hpp"
+#include "webserver.hpp"
 
 void create_html_listing_file(std::string path, std::string listing_html)
 {

@@ -1,9 +1,17 @@
-//
-// Created by lubenica on 21/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Client.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:20:52 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:21:15 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef WEBSERVER_CLIENT_HPP
-#define WEBSERVER_CLIENT_HPP
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
 #include "Request.hpp"
 #include "Response.hpp"
@@ -38,4 +46,4 @@ public:
 	void send_response();
 };
 
-#endif //WEBSERVER_CLIENT_HPP
+#endif //CLIENT_HPP

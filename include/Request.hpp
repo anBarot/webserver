@@ -1,9 +1,17 @@
-//
-// Created by lubenica on 24/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Request.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:23:00 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:23:02 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef WEBSERVER_REQUEST_HPP
-#define WEBSERVER_REQUEST_HPP
+#ifndef REQUEST_HPP
+#define REQUEST_HPP
 
 #include "cpp_libraries.hpp"
 
@@ -42,4 +50,4 @@ class Request
 		}
 };
 
-#endif //WEBSERVER_REQUEST_HPP
+#endif //REQUEST_HPP

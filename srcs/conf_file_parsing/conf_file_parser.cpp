@@ -1,8 +1,16 @@
-#include "../../include/webserver.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   conf_file_parser.cpp                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:36:25 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-# define S_LOCATION			"\tlocation "
-# define FIELD_DELIMITER	" = "
-# define DIGITS				"0123456789"
+#include "webserver.hpp"
 
 std::pair<std::string, std::string> extract_field(std::string &line, unsigned tab_nb)
 {

@@ -1,9 +1,17 @@
-//
-// Created by lubenica on 20/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Location.hpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:22:41 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:22:43 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef SATOSHIS_LOCATION_HPP
-#define SATOSHIS_LOCATION_HPP
+#ifndef LOCATION_HPP
+#define LOCATION_HPP
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
@@ -38,4 +46,4 @@ class Location
 		~Location() {}
 };
 
-#endif //SATOSHIS_LOCATION_HPP
+#endif //LOCATION_HPP

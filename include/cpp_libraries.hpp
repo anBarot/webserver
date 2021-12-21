@@ -1,9 +1,17 @@
-//
-// Created by lubenica on 20/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   cpp_libraries.hpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:21:26 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:21:57 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef SATOSHIS_CPP_LIBRARIES_HPP
-#define SATOSHIS_CPP_LIBRARIES_HPP
+#ifndef CPP_LIBRARIES_HPP
+#define CPP_LIBRARIES_HPP
 
 #include <iostream>
 #include <fstream>
@@ -37,4 +45,4 @@
 #include <map>
 #include <set>
 
-#endif //SATOSHIS_CPP_LIBRARIES_HPP
+#endif //CPP_LIBRARIES_HPP

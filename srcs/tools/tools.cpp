@@ -1,4 +1,16 @@
-#include "../../include/webserver.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tools.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:34:38 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:34:40 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "webserver.hpp"
 
 // Check if the signal is a break signal
 int has_telnet_breaksignal(ssize_t last_read, char *buffer)

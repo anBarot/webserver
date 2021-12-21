@@ -1,9 +1,17 @@
-//
-// Created by lubenica on 26/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Response.hpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:23:09 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:23:18 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef WEBSERVER_RESPONSE_HPP
-#define WEBSERVER_RESPONSE_HPP
+#ifndef RESPONSE_HPP
+#define RESPONSE_HPP
 
 #include "cpp_libraries.hpp"
 #include "data_struct.hpp"
@@ -41,4 +49,4 @@ class Response
 		void extract_cgi_file();
 };
 
-#endif //WEBSERVER_RESPONSE_HPP
+#endif //RESPONSE_HPP

@@ -1,4 +1,16 @@
-#include "../include/webserver.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   webserver.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:35:13 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:35:23 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "webserver.hpp"
 
 std::map<int, std::string> reason_phrase;
 std::map<std::string, std::string> MIME_types;

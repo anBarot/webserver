@@ -1,4 +1,16 @@
-#include "../../include/webserver.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   request_checking.cpp                               :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:32:59 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:33:01 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "webserver.hpp"
 
 // check if the request line is valid. If not, an reponse error code is set.
 void	Client::check_line()

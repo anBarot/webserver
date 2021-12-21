@@ -1,5 +1,17 @@
-#ifndef SATOSHIS_SERVER_HPP
-#define SATOSHIS_SERVER_HPP
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server_conf.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:23:34 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:23:44 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef SERVER_HPP
+#define SERVER_HPP
 
 #include "cpp_libraries.hpp"
 #include "Location.hpp"
@@ -18,4 +30,4 @@ class Server_conf
 		~Server_conf() {}
 };
 
-#endif //SATOSHIS_SERVER_HPP
+#endif //SERVER_HPP

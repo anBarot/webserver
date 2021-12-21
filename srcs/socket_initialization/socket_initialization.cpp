@@ -1,4 +1,16 @@
-#include "../../include/webserver.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   socket_initialization.cpp                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:32:30 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:32:32 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "webserver.hpp"
 
 int socket_from_server(Server_conf &server_conf)
 {

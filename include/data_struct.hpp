@@ -1,12 +1,23 @@
-//
-// Created by lubenica on 20/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   data_struct.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:22:07 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:37:20 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#ifndef SATOSHIS_DATA_STRUCT_HPP
-#define SATOSHIS_DATA_STRUCT_HPP
+#ifndef DATA_STRUCT_HPP
+#define DATA_STRUCT_HPP
 
 # define BACKLOG 			32
 # define BUFFER_SIZE 		1000
+# define S_LOCATION			"\tlocation "
+# define FIELD_DELIMITER	" = "
+# define DIGITS				"0123456789"
 
 enum e_methods {
 	GET,
@@ -81,4 +92,4 @@ enum e_response_code {
 extern std::map<int, std::string> reason_phrase;
 extern std::map<std::string, std::string> MIME_types;
 
-#endif //SATOSHIS_DATA_STRUCT_HPP
+#endif //DATA_STRUCT_HPP

@@ -1,8 +1,16 @@
-//
-// Created by lubenica on 23/09/2021.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   debug_display.cpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:33:17 by abarot            #+#    #+#             */
+/*   Updated: 2021/12/21 15:34:44 by abarot           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include "../../include/webserver.hpp"
+#include "webserver.hpp"
 
 void display_server(Server_conf &sv)
 {
