@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:24:15 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:24:19 by abarot           ###   ########.fr       */
+/*   Updated: 2021/12/21 16:47:29 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 # include "Server_conf.hpp"
 # include "Location.hpp"
 # include "Client.hpp"
-
 # include "Connections.hpp"
 
 // Tools

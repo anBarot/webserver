@@ -6,16 +6,32 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:59 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:33:01 by abarot           ###   ########.fr       */
+/*   Updated: 2021/12/21 21:09:41 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserver.hpp"
 
+int	check_http_version(std::string version)
+{
+	size_t pos = version.find_first_of("/");
+	
+	if (pos == std::string::npos)
+		return (1);
+
+	std::string value_part = version.substr(pos + 1, version.size());
+
+    if (version.substr(0, pos + 1) != "HTTP/" || std::atof(value_part.c_str()) > 1.100001
+        || std::atof(value_part.c_str()) <= 0.0000000)
+        return 1;
+
+    return 0;
+}
+
 // check if the request line is valid. If not, an reponse error code is set.
 void	Client::check_line()
 {
-	if (requests.back().request_line.version != "HTTP/1.1")
+	if (check_http_version(requests.back().request_line.version))
 		response.code = HTTP_VERSION_NOT_SUPPORTED;
 	else if (requests.back().request_line.method == NOT_A_METHOD || 
 				requests.back().request_line.target[0] != '/')
@@ -32,13 +48,6 @@ void	Client::check_line()
 */
 void	Client::check_payload()
 {
-	if (requests.back().headers.count("host") == 0)
-	{
-		requests.back().status = FINISH_PARSING;
-		response.code = BAD_REQUEST;
-		return ;
-	}
-
 	if (requests.back().request_line.method == PUT ||
 		requests.back().request_line.method == POST)
 	{
