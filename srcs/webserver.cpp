@@ -25,27 +25,22 @@ void sigint_handler(int signum)
 }
 
 int main(int ac, char **av)
-{
-	std::vector<Server_conf> servers_conf;
-	std::vector<Client> clients_pool;
-	std::map<int, int> listen_sockets_pool;
-	int status = 1;
+{	
+	Connections connections;
 
 	if (ac > 2)
 		return (error_and_exit(ARG_ERR));
 
-	if (conf_parser(av[1], servers_conf))
+	if (conf_parser(av[1], connections.servers_conf))
 		return (error_and_exit(CONFFILE_PARSE_ERR));
 
-	// display_servers(servers_conf);
 	maps_init_MIME_types(MIME_types);
 	maps_init_reason_phrase(reason_phrase);
-	listen_sockets_pool = listen_sockets_from_servers(servers_conf);
-
+	
 	signal(SIGINT, sigint_handler);
 
-	while(status)
-		status = socket_routine(listen_sockets_pool, clients_pool, servers_conf);
+	connections.init();
+	connections.loop();
 
 	return (0);
 }

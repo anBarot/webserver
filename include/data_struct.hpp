@@ -13,7 +13,6 @@
 #ifndef DATA_STRUCT_HPP
 #define DATA_STRUCT_HPP
 
-# define BACKLOG 			32
 # define BUFFER_SIZE 		1000
 # define S_LOCATION			"\tlocation "
 # define FIELD_DELIMITER	" = "

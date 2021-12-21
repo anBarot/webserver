@@ -11,14 +11,15 @@
 /* ************************************************************************** */
 
 #ifndef WEBSERVER_HPP
-#define WEBSERVER_HPP
+# define WEBSERVER_HPP
 
-#include "cpp_libraries.hpp"
-#include "data_struct.hpp"
-#include "Server_conf.hpp"
-#include "Location.hpp"
-#include "Client.hpp"
-#include "SocketPool.hpp"
+# include "libraries.hpp"
+# include "data_struct.hpp"
+# include "Server_conf.hpp"
+# include "Location.hpp"
+# include "Client.hpp"
+
+# include "Connections.hpp"
 
 // Tools
 int has_telnet_breaksignal(ssize_t last_read, char *buffer);
@@ -50,10 +51,6 @@ int is_header_str(std::string str);
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 
 // Sockets
-int socket_from_server(Server_conf &server);
-int listen_from_server(Server_conf &server);
-std::map<int, int> listen_sockets_from_servers(std::vector<Server_conf> servers);
-int socket_routine(std::map<int, int> &listen_sockets_pool, std::vector<Client> &clients_pool, std::vector<Server_conf> &server_confs);
 void send_response(Client &client, int csock);
 
 // CGI
