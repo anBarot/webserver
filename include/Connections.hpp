@@ -1,7 +1,7 @@
 #ifndef CONNECTIONS_H
 # define CONNECTIONS_H
 
-# include "../include/webserver.hpp"
+# include "webserver.hpp"
 
 class Connections
 {

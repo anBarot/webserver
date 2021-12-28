@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:32:48 by abarot           ###   ########.fr       */
+/*   Updated: 2021/12/28 19:50:16 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -198,6 +198,11 @@ void Client::extract_request_from_data(std::vector<char> &data)
 {
 	if (requests.back().status == STARTING_PARSING)
 	{
+		if (data[0] == '\r' && data[1] == '\n')
+		{
+			data.erase(data.begin(), data.begin() + 2);
+			return ;
+		}
 		extract_request_line(requests.back(), data);
 		if (requests.back().status == LINE_PARSED) 
 			check_line();

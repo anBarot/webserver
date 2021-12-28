@@ -19,7 +19,7 @@ CC		=	clang++
 FLAGS	=	-Wall -Werror -Wextra -g -std=c++98	
 
 %.o:		%.cpp
-			$(CC) $(FLAGS) -c $< -o $@ -Iinclude
+			$(CC) $(FLAGS) -c $< -o $@ -I./include
 
 all:		$(NAME)
 
