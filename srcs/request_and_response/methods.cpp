@@ -151,7 +151,7 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 	std::stringstream sst;
 	sst << "http://" << sv.names.front() << ":" << sv.listen_port << req.request_line.target;
 	location_path.append(sst.str());
-	
+
 	path = loc.root + req.request_line.target;
 
 	if (is_dir(path) || path[path.size() - 1] == '/')
