@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:20:52 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:21:15 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/05 17:12:01 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,15 @@ public:
 	int socket;
 	int lsocket;
 	int status;
+	Server_conf client_sv;
 	Response response;
 	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
-	Client(int sock, int lsock): socket(sock), lsocket(lsock), status(0)
+	Client(int sock, int lsock, std::vector<Server_conf> &confs): socket(sock), lsocket(lsock), status(0)
 	{
-		requests.push_back(Request());
+		client_sv = get_server_conf(confs, lsocket);
+		requests.push_back(Request(client_sv.max_body_size));
 	}
 
 	~Client(){};
@@ -41,7 +43,7 @@ public:
 	void check_payload();
 	void check_trailer();
 	void check_line();
-	void fill_response(std::vector<Server_conf> &confs);
+	void fill_response(/*std::vector<Server_conf> &confs*/);
 	void fill_error_response();
 	void send_response();
 };

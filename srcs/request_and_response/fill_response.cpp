@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:31:24 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:31:26 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/05 17:02:30 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, unsigned int lsock)
+Server_conf get_server_conf(/*Request &req, */std::vector<Server_conf> &confs, unsigned int lsock)
 {
 	bool first_encounter = false;
 	Server_conf sv;
@@ -69,17 +69,16 @@ Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, unsig
 				sv = *conf;
 				first_encounter = true;
 			}
-			else
+			/*else
 			{
 				for (std::list<std::string>::iterator sv_name = conf->names.begin(); sv_name != conf->names.end(); sv_name++)
 				{
 					if (*sv_name == req.headers["host"])
 						return (*conf);
 				}
-			}
+			}*/
 		}
 	}
-
 	return (sv);
 }
 
@@ -124,18 +123,18 @@ void Client::send_response()
 	file.close();
 }
 
-void Client::fill_response(std::vector<Server_conf> &confs)
+void Client::fill_response(/*std::vector<Server_conf> &confs*/)
 {
 	Request &req = requests.front();
-	Server_conf sv = get_server_conf(req, confs, lsocket);
-	Location &loc = get_location(sv.locations, req.request_line.target);
+	//Server_conf sv = get_server_conf(/*req, */confs, lsocket);
+	Location &loc = get_location(client_sv.locations, req.request_line.target);
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
 	if (loc.redirection.first >= 300)
 	{
 		response.code = loc.redirection.first;
-		response.file_name = sv.error_page[response.code];
+		response.file_name = client_sv.error_page[response.code];
 		response.headers["Location"] = loc.redirection.second;
 	}
 	if (response.code < 300 && loc.methods[req.request_line.method] == false) 
@@ -151,7 +150,7 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		else if (req.request_line.method == GET)
 			response.method_get(req, loc);
 		else if (req.request_line.method == PUT || req.request_line.method == POST)
-			response.method_put(req, loc, sv);
+			response.method_put(req, loc, client_sv);
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
 	}
@@ -160,8 +159,8 @@ void Client::fill_response(std::vector<Server_conf> &confs)
 		std::cout << "Checking response code : " << response.code << "\n";
 		if (response.code == METHOD_NOT_ALLOWED)
 			response.headers["Allow"] = get_allow(loc);
-		if (sv.error_page.count(response.code))
-			response.file_name = sv.error_page[response.code];
+		if (client_sv.error_page.count(response.code))
+			response.file_name = client_sv.error_page[response.code];
 		else
 			response.file_name = create_error_file(response.code);
 	}

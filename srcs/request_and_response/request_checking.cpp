@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:59 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/03 18:13:12 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/05 17:12:21 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,29 +48,36 @@ void	Client::check_line()
 */
 void	Client::check_payload()
 {
-	if (requests.back().request_line.method == PUT ||
-		requests.back().request_line.method == POST)
+	Request &req = requests.back();
+
+	if (req.request_line.method == PUT ||
+		req.request_line.method == POST)
 	{
-		if (requests.back().headers.count("transfer-encoding") &&
-			requests.back().headers["transfer-encoding"].find("chunked") != std::string::npos)
-			requests.back().payload.is_chunked = true;
-		else if (requests.back().headers.count("content-length"))
+		if (req.headers.count("transfer-encoding") &&
+			req.headers["transfer-encoding"].find("chunked") != std::string::npos)
+			req.payload.is_chunked = true;
+		else if (req.headers.count("content-length"))
 		{
-			requests.back().payload.length = atoi(requests.back().headers["content-length"].c_str());
-			if (requests.back().payload.length < 0)
+			req.payload.length = atoi(req.headers["content-length"].c_str());
+			if (req.payload.length < 0)
 			{
-				requests.back().status = FINISH_PARSING;
+				req.status = FINISH_PARSING;
 				response.code = BAD_REQUEST;
+			}
+			else if (req.payload.length_restriction < req.payload.length)
+			{
+				req.status = FINISH_PARSING;
+				response.code = PAYLOAD_TOO_LARGE;
 			}
 		}
 		else
 		{
 			response.code = LENGTH_REQUIRED;
-			requests.back().status = FINISH_PARSING;
+			req.status = FINISH_PARSING;
 		}
 	}
 	else
-		requests.back().status = FINISH_PARSING;
+		req.status = FINISH_PARSING;
 }
 
 /*

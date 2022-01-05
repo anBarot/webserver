@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:00 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/03 21:09:59 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/05 17:05:24 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,12 @@ class Request
 		bool has_trailer;
 		std::set<std::string> expected_trailers;
 
-		Request() 
+		Request(size_t max_body_size)
 		{
 			status = STARTING_PARSING; 
 			payload.is_chunked = false;
 			payload.length = 0;
+			payload.length_restriction = max_body_size;
 			payload.tmp_file_name = "";
 			has_trailer = false;
 		}

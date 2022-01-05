@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/28 19:56:53 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/05 17:04:02 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,6 +232,6 @@ void Client::store_incoming_data(char *buffer, int size)
 		if (requests.size() && requests.back().status != FINISH_PARSING)
 			extract_request_from_data(received_data_raw);
 		else
-			requests.push_back(Request());
+			requests.push_back(Request(client_sv.max_body_size));
 	}
 }
