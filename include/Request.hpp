@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:00 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:23:02 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/04 17:56:37 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ typedef struct s_payload
 {
 	bool		is_chunked;
 	size_t		length;
+	size_t		max_upload_length;
 	std::string tmp_file_name;
 }				t_payload;
 

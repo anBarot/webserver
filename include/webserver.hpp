@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:24:15 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 16:47:29 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/04 18:37:21 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ int is_header_str(std::string str);
 
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
+Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, unsigned int lsock);
 
 // Sockets
 void send_response(Client &client, int csock);
