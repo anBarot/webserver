@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:09 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:23:18 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/03 21:13:56 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ class Response
 		void create_response_line();
 		void create_header_string();
 		void create_directory_listing(std::string path, std::string loc_root, std::string loc_path);
+		
 		void method_get(Request &req, Location &loc);
 		void method_delete(Request &req, Location &loc);
 		void method_put(Request &req, Location &loc, Server_conf &sv);

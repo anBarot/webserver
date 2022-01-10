@@ -67,7 +67,7 @@ int Connections::add_clients()
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
-			clients.push_back(Client(fd, it->second));
+			clients.push_back(Client(fd, it->second, servers_conf));
 		}
 	}
 	return 0;
@@ -106,7 +106,7 @@ int Connections::check_clients()
 		}
 		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
 		{
-			it->fill_response(servers_conf);
+			it->fill_response(/*servers_conf*/);
 			it->send_response();
 			it->response.clear();
 			FD_CLR(it->socket, &active_wset);

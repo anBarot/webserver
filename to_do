@@ -8,10 +8,21 @@ fname=azeaz&lname=xcwxw
 
 -> setup multiple servers with different hostname (use something like: curl --resolve example.com:80:127.0.0.1
 -> siege : protection write/read  pages (index + error)
-	ex : 
+	ex :
 		sudo siege -b -t2 http://localhost:4000/html
 		sudo siege -b -t2 http://localhost:4000/azeazezaez
 
 -> waiting time for closed connection
+<<<<<<< HEAD
 -> file uploading route
 -> server configuration
+=======
+
+-> file uploading route POST PUT : -> pb Invalid cross-device link
+PUT /test.txt HTTP/1.1
+content-length: 10
+
+-> error header PUT POST without length
+-> error 401 POST PUT : WWW-Authenticate: <type> realm=<realm> header
+-> upload restriction : test nginx with content length > restriction
+>>>>>>> ef0d386e6335dedf4e675645a6faef7564d50ef4
