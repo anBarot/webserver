@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:20:52 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/05 17:12:01 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/06 14:27:47 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ public:
 	void check_payload();
 	void check_trailer();
 	void check_line();
-	void fill_response(/*std::vector<Server_conf> &confs*/);
+	void fill_response();
 	void fill_error_response();
 	void send_response();
 };

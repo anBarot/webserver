@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:09 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/03 21:13:56 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/06 14:45:12 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,7 @@ class Response
 		void method_put(Request &req, Location &loc, Server_conf &sv);
 		void method_post(Request &req, Location &loc);
 		void create_cgi_file(Request &req, Location &loc);
+		int	exec_cgi(std::string exec_name, char **exec_arg, char **cgi_env);
 		void extract_cgi_file();
 };
 

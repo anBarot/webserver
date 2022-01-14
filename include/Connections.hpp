@@ -28,7 +28,7 @@ public:
 	int add_clients();
 	int check_clients();
 	void loop();
-	
+
 	std::vector<Server_conf> servers_conf;
 };
 

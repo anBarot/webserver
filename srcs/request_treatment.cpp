@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/05 17:04:02 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/14 18:54:05 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,10 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 	if (chunk_size == 0)
 		req.status = PAYLOAD_PARSED;
 	else if ((pos = str.find_first_of("\r\n")) >= chunk_size)
+	{
+		std::cout << "chunked size " << chunk_size << " : " << str.substr(0, chunk_size) << "\n";  
 		file << str.substr(0, chunk_size);
+	}
 	else
 		file << str.substr(0, pos);
 
@@ -103,7 +106,9 @@ void extract_payload(Request &req, std::vector<char> &data)
 	std::string str(data.begin(), data.end());
 
 	if (req.payload.tmp_file_name == "")
+	{
 		req.payload.tmp_file_name = std::tmpnam(NULL);
+	}
 
 	std::ofstream file(req.payload.tmp_file_name.c_str(), std::ios::out | std::ios::app);
 

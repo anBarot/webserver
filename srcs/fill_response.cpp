@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:31:24 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/05 17:02:30 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/06 15:10:27 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-Server_conf get_server_conf(/*Request &req, */std::vector<Server_conf> &confs, unsigned int lsock)
+Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned int lsock)
 {
 	bool first_encounter = false;
 	Server_conf sv;
@@ -69,14 +69,6 @@ Server_conf get_server_conf(/*Request &req, */std::vector<Server_conf> &confs, u
 				sv = *conf;
 				first_encounter = true;
 			}
-			/*else
-			{
-				for (std::list<std::string>::iterator sv_name = conf->names.begin(); sv_name != conf->names.end(); sv_name++)
-				{
-					if (*sv_name == req.headers["host"])
-						return (*conf);
-				}
-			}*/
 		}
 	}
 	return (sv);
@@ -123,10 +115,9 @@ void Client::send_response()
 	file.close();
 }
 
-void Client::fill_response(/*std::vector<Server_conf> &confs*/)
+void Client::fill_response()
 {
 	Request &req = requests.front();
-	//Server_conf sv = get_server_conf(/*req, */confs, lsocket);
 	Location &loc = get_location(client_sv.locations, req.request_line.target);
 
 	response.headers["Server"] = "webserver";
@@ -156,7 +147,6 @@ void Client::fill_response(/*std::vector<Server_conf> &confs*/)
 	}
 	if (response.code >= 400)
 	{
-		std::cout << "Checking response code : " << response.code << "\n";
 		if (response.code == METHOD_NOT_ALLOWED)
 			response.headers["Allow"] = get_allow(loc);
 		if (client_sv.error_page.count(response.code))

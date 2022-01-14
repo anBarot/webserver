@@ -60,8 +60,6 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 
 void Response::method_get(Request &req, Location &loc)
 {
-	std::cout << "Enterring method GET with path \n";
-	std::cout << req.request_line.target << "\n";
 	struct stat st;
 	std::string path(req.request_line.target);
 	std::string path_index;
@@ -74,7 +72,6 @@ void Response::method_get(Request &req, Location &loc)
 		return ;
 	}
 
-	std::cout << "";
 	if (path[path.size() - 1] == '/')
 		path.erase(path.size() - 1, 1);
 	path = loc.root + path;
@@ -82,7 +79,6 @@ void Response::method_get(Request &req, Location &loc)
 	path_index.append("/").append(loc.index);
 
 	code = OK;
-	std::cout << "Method get with path : " << path << "\n";
 	if (stat(path.c_str(), &st))
 		code = NOT_FOUND;
 	else if (S_ISDIR(st.st_mode))
@@ -168,7 +164,10 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 		code = NO_CONTENT;
 
 	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
+	{
+		std::cout << strerror(errno) << "\n"; 
 		code = UNAUTHORIZED;
+	}
 	else
 	{
 		headers["Location"] = location_path;
