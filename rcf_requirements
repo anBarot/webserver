@@ -262,4 +262,91 @@ of 400 (Bad Request).
      Content-Length := length
      Remove "chunked" from Transfer-Encoding
      Remove Trailer from existing header fields
+     
+     // Message routing
+     
+        A server MUST respond with a 400 (Bad Request) status code to any
+   HTTP/1.1 request message that lacks a Host header field and to any
+   request message that contains more than one Host header field or a
+   Host header field with an invalid field-value.
+   
+     Since the request-target often contains only part of the user agent's
+   target URI, a server reconstructs the intended target as an
+   "effective request URI" to properly service the request.  This
+   reconstruction involves both the server's local configuration and
+   information communicated in the request-target, Host header field,
+   and connection context.
 
+   If the request-target is in absolute-form, the effective request URI
+   is the same as the request-target.  Otherwise, the effective request
+   URI is constructed as follows:
+
+      If the server's configuration (or outbound gateway) provides a
+      fixed URI scheme, that scheme is used for the effective request
+      URI.  Otherwise, if the request is received over a TLS-secured TCP
+      connection, the effective request URI's scheme is "https"; if not,
+      the scheme is "http".
+
+   Example 1: the following message received over an insecure TCP
+   connection
+
+     GET /pub/WWW/TheProject.html HTTP/1.1
+     Host: www.example.org:8080
+
+   has an effective request URI of
+
+     http://www.example.org:8080/pub/WWW/TheProject.html
+     
+    //Conection
+      A client that does not support persistent connections MUST send the
+   "close" connection option in every request message.
+
+   A server that does not support persistent connections MUST send the
+   "close" connection option in every response message that does not
+   have a 1xx (Informational) status code. [...]  HTTP
+   implementations SHOULD support persistent connections.
+
+   A recipient determines whether a connection is persistent or not
+   based on the most recently received message's protocol version and
+   Connection header field (if any):
+
+   o  If the "close" connection option is present, the connection will
+      not persist after the current response; else,
+
+   o  If the received protocol is HTTP/1.1 (or later), the connection
+      will persist after the current response
+      
+         In order to remain persistent, all messages on a connection need to
+   have a self-defined message length (i.e., one not defined by closure
+   of the connection), as described in Section 3.3.  A server MUST read
+   the entire request message body or close the connection after sending
+   its response, since otherwise the remaining data on a persistent
+   connection would be misinterpreted as the next request.  Likewise, a
+   client MUST read the entire response message body if it intends to
+   reuse the same connection for a subsequent request.
+   
+   //timeout
+   
+      Servers will usually have some timeout value beyond which they will
+   no longer maintain an inactive connection.  [...]The use of
+   persistent connections places no requirements on the length (or
+   existence) of this timeout for either the client or the server.
+
+   A client or server that wishes to time out SHOULD issue a graceful
+   close on the connection.  Implementations SHOULD constantly monitor
+   open connections for a received closure signal and respond to it as
+   appropriate, since prompt closure of both sides of a connection
+   enables allocated system resources to be reclaimed.
+   
+      A server that sends a "close" connection option MUST initiate a close
+   of the connection (see below) after it sends the response containing
+   "close".  The server MUST NOT process any further requests received
+   on that connection.
+   To avoid the TCP reset problem, servers typically close a connection
+   in stages.  First, the server performs a half-close by closing only
+   the write side of the read/write connection.  The server then
+   continues to read from the connection until it receives a
+   corresponding close by the client, or until the server is reasonably
+   certain that its own TCP stack has received the client's
+   acknowledgement of the packet(s) containing the server's last
+   response.  Finally, the server fully closes the connection.
