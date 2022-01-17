@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/14 18:54:05 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/17 14:57:47 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,9 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 	std::stringstream sstr;
 	sstr << str.substr(0, pos);
 	sstr >> std::hex >> chunk_size;
+
+	std::cout << "chunked substr : " << str.substr(0, pos) << "\n";
+	std::cout << "chunked size : " << chunk_size << "\n";
 
 	file << str.substr(0, pos + 2);
 	str.erase(0, pos + 2);

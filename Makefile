@@ -1,7 +1,7 @@
 NAME	=	webserv
 
 SRCS = 	srcs/webserver.cpp \
-		srcs/conf_file_parsing/conf_file_parser.cpp  \
+		srcs/conf_file_parser.cpp  \
 		srcs/request_checking.cpp \
 		srcs/fill_response.cpp \
 		srcs/request_treatment.cpp \

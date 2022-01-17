@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:00 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/05 17:05:24 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/10 14:44:46 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ typedef struct s_request_line
 	e_methods method;
 	std::string target;
 	std::string version;
-
 }				t_request_line;
 
 typedef struct s_payload
