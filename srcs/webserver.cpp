@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "webserver.hpp"
+#include "Connections.hpp"
 
 std::map<int, std::string> reason_phrase;
 std::map<std::string, std::string> MIME_types;

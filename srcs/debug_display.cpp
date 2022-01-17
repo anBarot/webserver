@@ -12,24 +12,6 @@
 
 #include "webserver.hpp"
 
-void display_server(Server_conf &sv)
-{
-	std::cout << "Check server content :\n";
-
-	for (std::list<std::string>::iterator i_name = sv.names.begin(); i_name != sv.names.end(); ++i_name)
-		std::cout << "server name : "<< *i_name << "\n";
-
-	std::cout << "listen port : "<< sv.listen_port << "\n";
-	std::cout << "max upload size : "<< sv.max_body_size << "\n";
-	try {
-		std::cout << "error page 404 : "<< sv.error_page[404] << "\n";
-	}
-	catch(std::exception e) { std::cout << "no error page 404\n"; }
-
-	for (std::map<std::string, Location>::iterator loc = sv.locations.begin(); loc != sv.locations.end(); ++loc)
-		display_location(loc->second);
-}
-
 void display_location(Location &loc)
 {
 	std::cout << "\n\n---   Check location content :   ---\n";
@@ -49,6 +31,25 @@ void display_location(Location &loc)
 	std::cout << "methods DELETE : "<< ((loc.methods[DELETE] == true) ? "true" : "false") << "\n";
 	std::cout << "methods POST : "<< ((loc.methods[POST] == true) ? "true" : "false") << "\n";
 }
+
+void display_server(Server_conf &sv)
+{
+	std::cout << "Check server content :\n";
+
+	for (std::list<std::string>::iterator i_name = sv.names.begin(); i_name != sv.names.end(); ++i_name)
+		std::cout << "server name : "<< *i_name << "\n";
+
+	std::cout << "listen port : "<< sv.listen_port << "\n";
+	std::cout << "max upload size : "<< sv.max_body_size << "\n";
+	try {
+		std::cout << "error page 404 : "<< sv.error_page[404] << "\n";
+	}
+	catch(std::exception e) { std::cout << "no error page 404\n"; }
+
+	for (std::map<std::string, Location>::iterator loc = sv.locations.begin(); loc != sv.locations.end(); ++loc)
+		display_location(loc->second);
+}
+
 
 void	display_servers(std::vector<Server_conf> &servers)
 {

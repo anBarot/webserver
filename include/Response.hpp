@@ -15,6 +15,9 @@
 
 #include "libraries.hpp"
 #include "data_struct.hpp"
+#include "Location.hpp"
+#include "Server_conf.hpp"
+#include "webserver.hpp"
 
 class Response
 {

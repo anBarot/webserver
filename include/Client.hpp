@@ -11,13 +11,12 @@
 /* ************************************************************************** */
 
 #ifndef CLIENT_HPP
-#define CLIENT_HPP
+# define CLIENT_HPP
 
-#include "Request.hpp"
+# include "webserver.hpp"
 #include "Response.hpp"
-#include "Location.hpp"
-#include "Server_conf.hpp"
-#include "libraries.hpp"
+
+// # include "Response.hpp"
 
 class Client
 {
@@ -47,5 +46,6 @@ public:
 	void fill_error_response();
 	void send_response();
 };
+
 
 #endif //CLIENT_HPP

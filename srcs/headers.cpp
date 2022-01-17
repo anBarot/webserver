@@ -10,7 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "webserver.hpp"
+#include "libraries.hpp"
+#include "Location.hpp"
 
 std::string get_date(time_t now)
 {

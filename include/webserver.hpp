@@ -13,12 +13,12 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 
-# include "libraries.hpp"
-# include "data_struct.hpp"
-# include "Server_conf.hpp"
-# include "Location.hpp"
-# include "Client.hpp"
-# include "Connections.hpp"
+#include "libraries.hpp"
+#include "data_struct.hpp"
+
+class Request;
+class Location;
+class Server_conf;
 
 // Tools
 int has_telnet_breaksignal(ssize_t last_read, char *buffer);
@@ -33,11 +33,11 @@ e_methods get_method_enum(std::string word);
 std::string get_method_string(e_methods enm);
 
 // Debug
-void display_servers(std::vector<Server_conf> &servers);
-void display_server(Server_conf &servers);
-void display_location(Location &loc);
-void display_request(Request &req);
-void display_response(Response &res);
+// void display_servers(std::vector<Server_conf> &servers);
+// void display_server(Server_conf &servers);
+// void display_location(Location &loc);
+// void display_request(Request &req);
+// void display_response(Response &res);
 
 // Headers
 std::string get_date(time_t now);
@@ -48,12 +48,20 @@ int is_header_str(std::string str);
 
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
-Server_conf get_server_conf(Request &req, std::vector<Server_conf> &confs, unsigned int lsock);
-
-// Sockets
-void send_response(Client &client, int csock);
 
 // CGI
 int	is_cgi_compatible(Request &req, Location &loc);
+
+//extract
+void extract_request_line(Request &req, std::vector<char> &data);
+void extract_headers(Request &req, std::vector<char> &data);
+void extract_payload(Request &req, std::vector<char> &data);
+void extract_trailer(Request &req, std::vector<char> &data);
+void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data);
+void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size_t pos);
+
+#include "Request.hpp"
+#include "Location.hpp"
+#include "Server_conf.hpp"
 
 #endif

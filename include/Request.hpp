@@ -14,6 +14,7 @@
 #define REQUEST_HPP
 
 #include "libraries.hpp"
+#include "data_struct.hpp"
 
 typedef struct s_request_line
 {
