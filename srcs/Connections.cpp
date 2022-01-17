@@ -20,6 +20,7 @@ Connections::~Connections()
 int Connections::init()
 {
 	struct sockaddr_in addr;
+	struct in_addr ip;
 	int optval;
 
 	FD_ZERO(&active_rset);
@@ -37,13 +38,26 @@ int Connections::init()
 		// implement error
 
 		// verify addresses: should we take them in consideration?
-		addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		addr.sin_port = htons(it->listen_port);
-		bind(fd, (struct sockaddr *)&addr, sizeof(addr));
-		//implement error
+		if (!(it->listen_ip.empty()))
+		{
+			inet_aton(it->listen_ip.c_str(), &ip);
+			addr.sin_addr = ip;
+		}
+		else
+			addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-		listen(fd, SOMAXCONN);
-		//implemen error
+		addr.sin_port = htons(it->listen_port);
+		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+		{
+			close(fd);
+			continue ;
+		}
+
+		if (listen(fd, SOMAXCONN) == -1)
+		{
+			close(fd);
+			continue ;
+		}
 		FD_SET(fd, &active_rset);
 		fd_list.push_back(fd);
 		listen_pool[fd].first = it->listen_ip;
