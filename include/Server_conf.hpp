@@ -19,7 +19,8 @@
 class Server_conf
 {
 	public:
-		unsigned							listen_port;
+		unsigned short						listen_port;
+		std::string							listen_ip;
 		std::list<std::string>				names;
 		unsigned							max_body_size;
 		std::map<std::string, Location> 	locations;

@@ -22,16 +22,16 @@ class Client
 {
 public:
 	int socket;
-	int lsocket;
+	unsigned short port;
+	std::string ip_address;
 	int status;
-	Server_conf client_sv;
 	Response response;
 	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
-	Client(int sock, int lsock, std::vector<Server_conf> &confs): socket(sock), lsocket(lsock), status(0)
+	Client(int sock, unsigned short lsock, std::vector<Server_conf> &confs): socket(sock), port(lsock), status(0)
 	{
-		client_sv = get_server_conf(confs, lsocket);
+		// client_sv = get_server_conf(confs, port);
 		requests.push_back(Request(client_sv.max_body_size));
 	}
 
