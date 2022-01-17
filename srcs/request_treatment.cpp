@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/17 14:57:47 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/17 17:44:03 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,24 +20,15 @@
 void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size_t pos)
 {
 	size_t chunk_size;
-	
-	std::stringstream sstr;
-	sstr << str.substr(0, pos);
-	sstr >> std::hex >> chunk_size;
+	std::istringstream iss(str.substr(0, pos));
 
-	std::cout << "chunked substr : " << str.substr(0, pos) << "\n";
-	std::cout << "chunked size : " << chunk_size << "\n";
-
-	file << str.substr(0, pos + 2);
+	iss >> std::hex >> chunk_size;
 	str.erase(0, pos + 2);
 
 	if (chunk_size == 0)
 		req.status = PAYLOAD_PARSED;
 	else if ((pos = str.find_first_of("\r\n")) >= chunk_size)
-	{
-		std::cout << "chunked size " << chunk_size << " : " << str.substr(0, chunk_size) << "\n";  
 		file << str.substr(0, chunk_size);
-	}
 	else
 		file << str.substr(0, pos);
 
@@ -52,10 +43,6 @@ void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size
 */
 void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data)
 {
-	std::cout << "\nextract with length\n";
-	std::cout << "payload length : " << req.payload.length << "\n";
-	std::cout << "string : " << str << "\n";
-	std::cout << "file name : " << req.payload.tmp_file_name << "\n";
 	if (str.size() > req.payload.length)
 	{
 		file.close();
@@ -109,9 +96,7 @@ void extract_payload(Request &req, std::vector<char> &data)
 	std::string str(data.begin(), data.end());
 
 	if (req.payload.tmp_file_name == "")
-	{
 		req.payload.tmp_file_name = std::tmpnam(NULL);
-	}
 
 	std::ofstream file(req.payload.tmp_file_name.c_str(), std::ios::out | std::ios::app);
 

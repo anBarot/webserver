@@ -8,7 +8,7 @@ class Connections
 private:
 	
 	std::vector<Client> clients;
-	std::map<int, int> listen_pool;
+	std::map<int, std::pair<std::string, int> > listen_pool;
 
 	fd_set	active_rset;
 	fd_set	active_wset;

@@ -109,25 +109,6 @@ char **create_exec_arg(std::string exec_path, std::string script)
 	return res;
 }
 
-Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned int lsock)
-{
-	bool first_encounter = false;
-	Server_conf sv;
-
-	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); conf++)
-	{
-		if (conf->listen_port == lsock)
-		{
-			if (first_encounter == false)
-			{
-				sv = *conf;
-				first_encounter = true;
-			}
-		}
-	}
-	return (sv);
-}
-
 void Response::create_directory_listing(std::string path, std::string loc_root, std::string loc_path)
 {
 	std::vector<std::string> files;

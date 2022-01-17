@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/14 20:35:47 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/17 17:47:01 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,15 +47,15 @@ int		extract_location_field(std::string &line, Location &loc)
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
 				return CONFFILE_PARSE_ERR;
-		if (extract.first == "root")				 
+		if (extract.first == "root")		 
 			loc.root = extract.second; 					 
-		else if (extract.first == "index") 
+		else if (extract.first == "index")
 			loc.index = extract.second;					 
-		else if (extract.first == "cgi_path")	
+		else if (extract.first == "cgi_path")
 			loc.cgi_path = extract.second;				
 		else if (extract.first == "cgi_extension")
 			loc.cgi_extension = extract.second;			 
-		else if (extract.first == "upload_path")	
+		else if (extract.first == "upload_path")
 			loc.upload_path = extract.second;			
 	}
 	else if (extract.first == "return")
@@ -73,11 +73,11 @@ int		extract_location_field(std::string &line, Location &loc)
 		if (set_and_check_methods(extract.second, loc))
 			return (CONFFILE_PARSE_ERR);
 	}
-	else if (extract.first == "autoindex")			
+	else if (extract.first == "autoindex")
 	{
-		if (extract.second == "on")				
+		if (extract.second == "on")		
 			loc.auto_index = true;
-		else if (extract.second == "off")	
+		else if (extract.second == "off")
 			loc.auto_index = false;
 		else
 			return CONFFILE_PARSE_ERR;
@@ -97,10 +97,12 @@ int		extract_server_field(std::string &line, Server_conf &server)
 	if (extract.first == "listen")
 	{
 		std::istringstream iss(extract.second);
-		std::string num;
-		iss >> num;
-
-		server.listen_port = atoi(num.c_str());
+		std::string word;
+		
+		iss >> word;
+		server.listen_port = atoi(word.c_str());
+		iss >> word;
+		server.listen_ip = word;
 	}
 	else if (extract.first == "server_name")
 	{

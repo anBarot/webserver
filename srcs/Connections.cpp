@@ -46,7 +46,9 @@ int Connections::init()
 		//implemen error
 		FD_SET(fd, &active_rset);
 		fd_list.push_back(fd);
-		listen_pool[fd] = it->listen_port;
+		listen_pool[fd].first = it->listen_ip;
+		listen_pool[fd].second = it->listen_port;
+
 	}
 	max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 	return 0;
@@ -56,7 +58,7 @@ int Connections::add_clients()
 {
 	int fd;
 
-	for (std::map<int, int>::iterator it = listen_pool.begin(); it != listen_pool.end(); it++)
+	for (std::map<int, std::pair<std::string, int> >::iterator it = listen_pool.begin(); it != listen_pool.end(); it++)
 	{
 		if (FD_ISSET(it->first, &ready_rset))
 		{
@@ -67,7 +69,7 @@ int Connections::add_clients()
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
-			clients.push_back(Client(fd, it->second, servers_conf));
+			clients.push_back(Client(fd, it->second.second, it->second.first));
 		}
 	}
 	return 0;
@@ -106,7 +108,7 @@ int Connections::check_clients()
 		}
 		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
 		{
-			it->fill_response();
+			it->fill_response(servers_conf);
 			it->send_response();
 			it->response.clear();
 			FD_CLR(it->socket, &active_wset);

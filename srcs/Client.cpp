@@ -24,6 +24,43 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 	return (loc_map[loc_path]);
 }
 
+Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port, std::string ip, std::string sv_name)
+{
+	bool first_encounter = false;
+	std::string host_name;
+	Server_conf sv;
+
+	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); conf++)
+	{
+		std::cout << "check conf listen port : " << conf->listen_port << "\n";
+		std::cout << "check browser listen port : " << port << "\n";
+		std::cout << "check conf listen ip : " << conf->listen_ip << "\n";
+		std::cout << "check browser listen ip : " << ip << "\n";
+		std::cout << "check browser sv name : " << sv_name << "\n";
+
+		if (conf->listen_port == port && conf->listen_ip == ip)
+		{
+			if (first_encounter == false)
+			{
+				sv = *conf;
+				first_encounter = true;
+			}
+			else
+			{
+				for (std::list<std::string>::iterator it = conf->names.begin(); it != conf->names.end(); it++)
+				{
+					if (*it == sv_name)
+					{
+						sv = *conf;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return (sv);
+}
+
 std::string	create_error_file(int code)
 {
 	std::ifstream filein("./html/error.html");
@@ -83,17 +120,18 @@ void Client::send_response()
 	file.close();
 }
 
-void Client::fill_response()
+void Client::fill_response(std::vector<Server_conf> confs)
 {
 	Request &req = requests.front();
-	Location &loc = get_location(client_sv.locations, req.request_line.target);
+	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
+	Location &loc = get_location(sv.locations, req.request_line.target);
 
 	response.headers["Server"] = "webserver";
 	response.headers["Date"] = get_date(time(NULL));
 	if (loc.redirection.first >= 300)
 	{
 		response.code = loc.redirection.first;
-		response.file_name = client_sv.error_page[response.code];
+		response.file_name = sv.error_page[response.code];
 		response.headers["Location"] = loc.redirection.second;
 	}
 	if (response.code < 300 && loc.methods[req.request_line.method] == false) 
@@ -109,7 +147,7 @@ void Client::fill_response()
 		else if (req.request_line.method == GET)
 			response.method_get(req, loc);
 		else if (req.request_line.method == PUT || req.request_line.method == POST)
-			response.method_put(req, loc, client_sv);
+			response.method_put(req, loc, sv);
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
 	}
@@ -117,8 +155,8 @@ void Client::fill_response()
 	{
 		if (response.code == METHOD_NOT_ALLOWED)
 			response.headers["Allow"] = get_allow(loc);
-		if (client_sv.error_page.count(response.code))
-			response.file_name = client_sv.error_page[response.code];
+		if (sv.error_page.count(response.code))
+			response.file_name = sv.error_page[response.code];
 		else
 			response.file_name = create_error_file(response.code);
 	}
@@ -126,7 +164,6 @@ void Client::fill_response()
 		response.headers["Content-Length"] = get_file_size(response.file_name);
 	response.create_response_line();
 	response.create_header_string();
-	// display_response(response);
 	requests.pop_front();
 }
 
@@ -165,11 +202,6 @@ void	Client::check_payload()
 			{
 				req.status = FINISH_PARSING;
 				response.code = BAD_REQUEST;
-			}
-			else if (req.payload.length_restriction < req.payload.length)
-			{
-				req.status = FINISH_PARSING;
-				response.code = PAYLOAD_TOO_LARGE;
 			}
 		}
 		else
@@ -250,6 +282,6 @@ void Client::store_incoming_data(char *buffer, int size)
 		if (requests.size() && requests.back().status != FINISH_PARSING)
 			extract_request_from_data(received_data_raw);
 		else
-			requests.push_back(Request(client_sv.max_body_size));
+			requests.push_back(Request());
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:20:52 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/17 14:21:41 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/17 19:09:32 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,7 @@
 # define CLIENT_HPP
 
 # include "webserver.hpp"
-#include "Response.hpp"
-
-// # include "Response.hpp"
+# include "Response.hpp"
 
 class Client
 {
@@ -29,10 +27,9 @@ public:
 	std::deque<Request> requests;
 	std::vector<char> received_data_raw;
 
-	Client(int sock, unsigned short lsock, std::vector<Server_conf> &confs): socket(sock), port(lsock), status(0)
+	Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), port(lsock), ip_address(n_ip_add), status(0)
 	{
-		// client_sv = get_server_conf(confs, port);
-		requests.push_back(Request(client_sv.max_body_size));
+		requests.push_back(Request());
 	}
 
 	~Client(){};
@@ -42,10 +39,9 @@ public:
 	void check_payload();
 	void check_trailer();
 	void check_line();
-	void fill_response();
+	void fill_response(std::vector<Server_conf> confs);
 	void fill_error_response();
 	void send_response();
 };
-
 
 #endif //CLIENT_HPP

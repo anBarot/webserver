@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:00 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/10 14:44:46 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/17 17:42:36 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ typedef struct s_payload
 {
 	bool		is_chunked;
 	size_t		length;
-	size_t		length_restriction;
 	std::string tmp_file_name;
 }				t_payload;
 
@@ -41,12 +40,11 @@ class Request
 		bool has_trailer;
 		std::set<std::string> expected_trailers;
 
-		Request(size_t max_body_size)
+		Request()
 		{
 			status = STARTING_PARSING; 
 			payload.is_chunked = false;
 			payload.length = 0;
-			payload.length_restriction = max_body_size;
 			payload.tmp_file_name = "";
 			has_trailer = false;
 		}
