@@ -118,7 +118,6 @@ void Client::store_incoming_data(char *buffer, int size)
 	}
 }
 
-
 /*
 	When receiving raw data, this function allow extraction
 	depending on the request status :
@@ -133,13 +132,13 @@ void Client::extract_request_from_data(std::vector<char> &data)
 			data.erase(data.begin(), data.begin() + 2);
 			return ;
 		}
-		extract_request_line(requests.back(), data);
+		requests.back().extract_request_line(data);
 		if (requests.back().status == LINE_PARSED) 
 			check_line();
 	}
 	if (requests.back().status == LINE_PARSED)
 	{
-		extract_headers(requests.back(), data);
+		requests.back().extract_headers(data);
 		if (requests.back().status == HEADER_PARSED)
 		{
 			check_payload();
@@ -147,9 +146,9 @@ void Client::extract_request_from_data(std::vector<char> &data)
 		}
 	}
 	if (requests.back().status == HEADER_PARSED)
-		extract_payload(requests.back(), data);
+		requests.back().extract_payload(data);
 	if (requests.back().status == PAYLOAD_PARSED)
-		extract_trailer(requests.back(), data);
+		requests.back().extract_trailer(data);
 }
 
 void Client::fill_response(std::vector<Server_conf> confs)

@@ -23,8 +23,8 @@ public:
 	unsigned short port;
 	std::string ip_address;
 	int status;
-	Response response;
 	std::deque<Request> requests;
+	Response response;
 	std::vector<char> received_data_raw;
 
 	Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), port(lsock), ip_address(n_ip_add), status(0)
