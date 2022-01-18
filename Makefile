@@ -2,12 +2,12 @@ NAME	=	webserv
 
 SRCS = 	srcs/webserver.cpp \
 		srcs/conf_file_parser.cpp  \
-		srcs/request_treatment.cpp \
 		srcs/headers.cpp \
 		srcs/tools.cpp \
 		srcs/Connections.cpp \
 		srcs/Client.cpp \
-		srcs/Response.cpp
+		srcs/Response.cpp \
+		srcs/Request.cpp
 		# srcs/debug_display.cpp
 
 OBJS	=	$(SRCS:.cpp=.o)
