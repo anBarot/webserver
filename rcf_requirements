@@ -50,7 +50,7 @@ HTTP-message   = start-line
               CRLF
               [ message-body ]
 
-                 The normal procedure for parsing an HTTP message is to read the
+The normal procedure for parsing an HTTP message is to read the
 start-line into a structure, read each header field into a hash table
 by field name until the empty line, and then use the parsed data to
 determine if a message body is expected.  If a message body has been
@@ -60,7 +60,7 @@ equal to the message body length is read or the connection is closed.
 A recipient MUST parse an HTTP message as a sequence of octets in an
 encoding that is a superset of US-ASCII [USASCII].  Parsing an HTTP
 
-A sender MUST NOT send whitespace between the start-line and the
+A sender MUST NOT send whitespace between C'ethe start-line and the
 first header field.  A recipient that receives whitespace between the
 start-line and the first header field MUST either reject the message
 as invalid or consume each whitespace-preceded line without further

@@ -103,21 +103,53 @@ int	check_http_version(std::string version)
     return 0;
 }
 
-void Client::send_response()
-{
-	std::ifstream file(response.file_name.c_str());
-	std::stringstream buf;
-	std::string str;
 
-	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
-		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
-		status = 1;
-	buf << file.rdbuf();
-	str = buf.str();
-	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
-		send(socket, "\r\n", 2, 0) == -1)
-		status = 1;
-	file.close();
+void Client::store_incoming_data(char *buffer, int size)
+{
+	for (int i = 0; i < size ; i++)
+		received_data_raw.push_back(buffer[i]);
+
+	if (received_data_raw.size())
+	{
+		if (requests.size() && requests.back().status != FINISH_PARSING)
+			extract_request_from_data(received_data_raw);
+		else
+			requests.push_back(Request());
+	}
+}
+
+
+/*
+	When receiving raw data, this function allow extraction
+	depending on the request status :
+	starting -> line parsed -> header parsed -> payload parsed -> finish
+*/
+void Client::extract_request_from_data(std::vector<char> &data)
+{
+	if (requests.back().status == STARTING_PARSING)
+	{
+		if (data[0] == '\r' && data[1] == '\n')
+		{
+			data.erase(data.begin(), data.begin() + 2);
+			return ;
+		}
+		extract_request_line(requests.back(), data);
+		if (requests.back().status == LINE_PARSED) 
+			check_line();
+	}
+	if (requests.back().status == LINE_PARSED)
+	{
+		extract_headers(requests.back(), data);
+		if (requests.back().status == HEADER_PARSED)
+		{
+			check_payload();
+			check_trailer();
+		}
+	}
+	if (requests.back().status == HEADER_PARSED)
+		extract_payload(requests.back(), data);
+	if (requests.back().status == PAYLOAD_PARSED)
+		extract_trailer(requests.back(), data);
 }
 
 void Client::fill_response(std::vector<Server_conf> confs)
@@ -165,6 +197,23 @@ void Client::fill_response(std::vector<Server_conf> confs)
 	response.create_response_line();
 	response.create_header_string();
 	requests.pop_front();
+}
+
+void Client::send_response()
+{
+	std::ifstream file(response.file_name.c_str());
+	std::stringstream buf;
+	std::string str;
+
+	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
+		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
+		status = 1;
+	buf << file.rdbuf();
+	str = buf.str();
+	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
+		send(socket, "\r\n", 2, 0) == -1)
+		status = 1;
+	file.close();
 }
 
 // check if the request line is valid. If not, an reponse error code is set.
@@ -236,52 +285,5 @@ void	Client::check_trailer()
 			if (disallowed_trailer.find(word) == disallowed_trailer.end())
 				requests.back().expected_trailers.insert(word);
 		}
-	}
-}
-
-/*
-	When receiving raw data, this function allow extraction
-	depending on the request status :
-	starting -> line parsed -> header parsed -> payload parsed -> finish
-*/
-void Client::extract_request_from_data(std::vector<char> &data)
-{
-	if (requests.back().status == STARTING_PARSING)
-	{
-		if (data[0] == '\r' && data[1] == '\n')
-		{
-			data.erase(data.begin(), data.begin() + 2);
-			return ;
-		}
-		extract_request_line(requests.back(), data);
-		if (requests.back().status == LINE_PARSED) 
-			check_line();
-	}
-	if (requests.back().status == LINE_PARSED)
-	{
-		extract_headers(requests.back(), data);
-		if (requests.back().status == HEADER_PARSED)
-		{
-			check_payload();
-			check_trailer();
-		}
-	}
-	if (requests.back().status == HEADER_PARSED)
-		extract_payload(requests.back(), data);
-	if (requests.back().status == PAYLOAD_PARSED)
-		extract_trailer(requests.back(), data);
-}
-
-void Client::store_incoming_data(char *buffer, int size)
-{
-	for (int i = 0; i < size ; i++)
-		received_data_raw.push_back(buffer[i]);
-
-	if (received_data_raw.size())
-	{
-		if (requests.size() && requests.back().status != FINISH_PARSING)
-			extract_request_from_data(received_data_raw);
-		else
-			requests.push_back(Request());
 	}
 }
