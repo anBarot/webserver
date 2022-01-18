@@ -152,7 +152,7 @@ A server MUST reject any received request message that contains
 whitespace between a header field-name and colon with a response code
 of 400 (Bad Request).
 
--> 
+-> KO : "host    : " possible
 
    A field value might be preceded and/or followed by optional
    whitespace (OWS); a single SP preceding the field-value is preferred
@@ -161,7 +161,9 @@ of 400 (Bad Request).
    first non-whitespace octet of the field value or after the last
    non-whitespace octet of the field value ought to be excluded by
    parsers when extracting the field value from a header field.
-   
+
+->   KO, no triming of headers
+
    Historically, HTTP header field values could be extended over
    multiple lines by preceding each extra line with at least one space
    or horizontal tab (obs-fold). [...] 
@@ -172,6 +174,8 @@ of 400 (Bad Request).
    each received obs-fold with one or more SP octets prior to
    interpreting the field value or forwarding the message downstream.
 
+-> OK ? obsolete requests not managed
+
 // Field limits
 
    A server that receives a request header field, or set of fields,
@@ -180,12 +184,16 @@ of 400 (Bad Request).
    increase the server's vulnerability to request smuggling attacks
    (Section 9.5).
    
+-> KO : can set a lim number of headers
+
   //Message body
   
      All 1xx (Informational), 204 (No Content), and 304 (Not Modified)
    responses do not include a message body.  All other responses do
    include a message body, although the body might be of zero length.
-   
+
+-> KO : error message each time
+
  // Transfer-Encoding
 
    The Transfer-Encoding header field lists the transfer coding names
@@ -195,7 +203,9 @@ of 400 (Bad Request).
    A recipient MUST be able to parse the chunked transfer coding
    (Section 4.1) because it plays a crucial role in framing messages
    when the payload body size is not known in advance.
-   
+
+-> OK for TE chunked
+
    (more on page 28)
  // Content-Length
 
@@ -213,11 +223,15 @@ of 400 (Bad Request).
    duplicated field-values with a single valid Content-Length field
    containing that decimal value prior to determining the message body
    length or forwarding the message.
-   
+
+-> KO
+
       3.  If a Transfer-Encoding header field is present and the chunked
        transfer coding (Section 4.1) is the final encoding, the message
        body length is determined by reading and decoding the chunked
        data until the transfer coding indicates the data is complete.
+       
+-> OK
        
               If a Transfer-Encoding header field is present in a response and
        the chunked transfer coding is not the final encoding, the
@@ -228,13 +242,17 @@ of 400 (Bad Request).
        reliably; the server MUST respond with the 400 (Bad Request)
        status code and then close the connection.
 
+-> KO : not closing connexion
+
        If a message is received with both a Transfer-Encoding and a
        Content-Length header field, the Transfer-Encoding overrides the
        Content-Length.  
-       
+
           6.  If this is a request message and none of the above are true, then
        the message body length is zero (no message body is present).
        
+-> OK
+
           A message body that uses the chunked transfer coding is incomplete if
    the zero-sized chunk that terminates the encoding has not been
    received.  A message that uses a valid Content-Length is incomplete
@@ -244,6 +262,8 @@ of 400 (Bad Request).
    connection and, thus, is considered complete regardless of the number
    of message body octets received, provided that the header section was
    received intact.
+
+-> OK : request finish parsing 
 
 4.  Transfer Codings
 
@@ -284,19 +304,25 @@ of 400 (Bad Request).
      Remove "chunked" from Transfer-Encoding
      Remove Trailer from existing header fields
      
+-> OK : check trailer
+
      // Message routing
      
         A server MUST respond with a 400 (Bad Request) status code to any
    HTTP/1.1 request message that lacks a Host header field and to any
    request message that contains more than one Host header field or a
    Host header field with an invalid field-value.
-   
+
+-> KO : to implement
+
      Since the request-target often contains only part of the user agent's
    target URI, a server reconstructs the intended target as an
    "effective request URI" to properly service the request.  This
    reconstruction involves both the server's local configuration and
    information communicated in the request-target, Host header field,
    and connection context.
+
+-> OK
 
    If the request-target is in absolute-form, the effective request URI
    is the same as the request-target.  Otherwise, the effective request
@@ -317,7 +343,9 @@ of 400 (Bad Request).
    has an effective request URI of
 
      http://www.example.org:8080/pub/WWW/TheProject.html
-     
+
+-> OK
+
     //Conection
       A client that does not support persistent connections MUST send the
    "close" connection option in every request message.
@@ -326,6 +354,8 @@ of 400 (Bad Request).
    "close" connection option in every response message that does not
    have a 1xx (Informational) status code. [...]  HTTP
    implementations SHOULD support persistent connections.
+
+-> OK
 
    A recipient determines whether a connection is persistent or not
    based on the most recently received message's protocol version and
@@ -345,7 +375,9 @@ of 400 (Bad Request).
    connection would be misinterpreted as the next request.  Likewise, a
    client MUST read the entire response message body if it intends to
    reuse the same connection for a subsequent request.
-   
+
+-> OK
+
    //timeout
    
       Servers will usually have some timeout value beyond which they will
@@ -359,6 +391,8 @@ of 400 (Bad Request).
    appropriate, since prompt closure of both sides of a connection
    enables allocated system resources to be reclaimed.
    
+-> KO : verifier insertion timeout
+
       A server that sends a "close" connection option MUST initiate a close
    of the connection (see below) after it sends the response containing
    "close".  The server MUST NOT process any further requests received
@@ -371,3 +405,5 @@ of 400 (Bad Request).
    certain that its own TCP stack has received the client's
    acknowledgement of the packet(s) containing the server's last
    response.  Finally, the server fully closes the connection.
+
+
