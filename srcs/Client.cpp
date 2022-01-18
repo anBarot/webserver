@@ -32,12 +32,6 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); conf++)
 	{
-		std::cout << "check conf listen port : " << conf->listen_port << "\n";
-		std::cout << "check browser listen port : " << port << "\n";
-		std::cout << "check conf listen ip : " << conf->listen_ip << "\n";
-		std::cout << "check browser listen ip : " << ip << "\n";
-		std::cout << "check browser sv name : " << sv_name << "\n";
-
 		if (conf->listen_port == port && conf->listen_ip == ip)
 		{
 			if (first_encounter == false)

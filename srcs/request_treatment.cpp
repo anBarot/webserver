@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/17 17:44:03 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/18 16:11:44 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ void extract_headers(Request &req, std::vector<char> &data)
 		}
 		pos_dpoint = str.find_first_of(": ");
 		header = str.substr(0, pos_dpoint);
-		value = str.substr(pos_dpoint + 2, pos - pos_dpoint - 1);
+		value = str.substr(pos_dpoint + 2, pos - pos_dpoint - 2);
 		strlower(header);
 
 		req.headers[header] = value;
