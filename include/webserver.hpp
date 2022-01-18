@@ -52,14 +52,6 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 // CGI
 int	is_cgi_compatible(Request &req, Location &loc);
 
-//extract
-void extract_request_line(Request &req, std::vector<char> &data);
-void extract_headers(Request &req, std::vector<char> &data);
-void extract_payload(Request &req, std::vector<char> &data);
-void extract_trailer(Request &req, std::vector<char> &data);
-void extract_with_length(std::string &str, std::ofstream &file, Request &req, std::vector<char> &data);
-void extract_in_chunks(std::string &str, std::ofstream &file, Request &req, size_t pos);
-
 #include "Request.hpp"
 #include "Location.hpp"
 #include "Server_conf.hpp"

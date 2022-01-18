@@ -27,21 +27,19 @@ public:
 	Response response;
 	std::vector<char> received_data_raw;
 
-	Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), port(lsock), ip_address(n_ip_add), status(0)
-	{
-		requests.push_back(Request());
-	}
-
-	~Client(){};
+	Client(int sock, unsigned short lsock, std::string n_ip_add);
+	~Client();
 
 	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
-	void extract_request_from_data(std::vector<char> &data);
+	void extract_request_from_data();
 	void check_payload();
 	void check_trailer();
 	void check_line();
 	void fill_response(std::vector<Server_conf> confs);
 	void fill_error_response();
 	void send_response();
+	void respond(std::vector<Server_conf> &confs);
+
 };
 
 #endif //CLIENT_HPP

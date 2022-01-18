@@ -1,5 +1,13 @@
 #include "Client.hpp"
 
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), port(lsock), ip_address(n_ip_add), status(0)
+{
+	requests.push_back(Request());
+}
+
+Client::~Client()
+{ }
+
 Location &get_location(std::map<std::string, Location> &loc_map, std::string path)
 {
 	size_t i_max_matching;
@@ -97,16 +105,15 @@ int	check_http_version(std::string version)
     return 0;
 }
 
-
 void Client::store_incoming_data(char *buffer, int size)
 {
-	for (int i = 0; i < size ; i++)
+	for (int i = 0; i < size ; ++i)
 		received_data_raw.push_back(buffer[i]);
 
 	if (received_data_raw.size())
 	{
 		if (requests.size() && requests.back().status != FINISH_PARSING)
-			extract_request_from_data(received_data_raw);
+			extract_request_from_data();
 		else
 			requests.push_back(Request());
 	}
@@ -117,22 +124,22 @@ void Client::store_incoming_data(char *buffer, int size)
 	depending on the request status :
 	starting -> line parsed -> header parsed -> payload parsed -> finish
 */
-void Client::extract_request_from_data(std::vector<char> &data)
+void Client::extract_request_from_data()
 {
 	if (requests.back().status == STARTING_PARSING)
 	{
-		if (data[0] == '\r' && data[1] == '\n')
+		if (received_data_raw[0] == '\r' && received_data_raw[1] == '\n')
 		{
-			data.erase(data.begin(), data.begin() + 2);
+			received_data_raw.erase(received_data_raw.begin(), received_data_raw.begin() + 2);
 			return ;
 		}
-		requests.back().extract_request_line(data);
+		requests.back().extract_request_line(received_data_raw);
 		if (requests.back().status == LINE_PARSED) 
 			check_line();
 	}
 	if (requests.back().status == LINE_PARSED)
 	{
-		requests.back().extract_headers(data);
+		requests.back().extract_headers(received_data_raw);
 		if (requests.back().status == HEADER_PARSED)
 		{
 			check_payload();
@@ -140,9 +147,89 @@ void Client::extract_request_from_data(std::vector<char> &data)
 		}
 	}
 	if (requests.back().status == HEADER_PARSED)
-		requests.back().extract_payload(data);
+		requests.back().extract_payload(received_data_raw);
 	if (requests.back().status == PAYLOAD_PARSED)
-		requests.back().extract_trailer(data);
+		requests.back().extract_trailer(received_data_raw);
+}
+
+
+// check if the request line is valid. If not, an reponse error code is set.
+void	Client::check_line()
+{
+	if (check_http_version(requests.back().request_line.version))
+		response.code = HTTP_VERSION_NOT_SUPPORTED;
+	else if (requests.back().request_line.method == NOT_A_METHOD || 
+			requests.back().request_line.target[0] != '/')
+		response.code = BAD_REQUEST;
+
+	if (response.code >= 400)
+		requests.back().status = FINISH_PARSING;
+}
+
+/*
+	check if host header is provided, as required in HTTP/1.1 protocol
+	check if a payload must be extracted and how (length or chunked).
+	If not, the request status is set as finised.
+*/
+void	Client::check_payload()
+{
+	Request &req = requests.back();
+
+	if (req.request_line.method == PUT ||
+		req.request_line.method == POST)
+	{
+		if (req.headers.count("transfer-encoding") &&
+			req.headers["transfer-encoding"].find("chunked") != std::string::npos)
+			req.payload.is_chunked = true;
+		else if (req.headers.count("content-length"))
+		{
+			req.payload.length = atoi(req.headers["content-length"].c_str());
+			if (req.payload.length < 0)
+			{
+				req.status = FINISH_PARSING;
+				response.code = BAD_REQUEST;
+			}
+		}
+		else
+		{
+			response.code = LENGTH_REQUIRED;
+			req.status = FINISH_PARSING;
+		}
+	}
+	else
+		req.status = FINISH_PARSING;
+}
+
+/*
+	Check if a trailer is expected and header values are allowed.
+	The expected header in trailer are put in the expected_trailers set.
+*/
+void	Client::check_trailer()
+{
+	std::string s[] = {"transfer-encoding", "content-length", "host", 
+	"cache-control", "max-forwards", "te", "authorization", "set-cookie",
+	"content-encoding", "content-type", "content-range", "trailer"};
+	std::set<std::string> disallowed_trailer(s, s + 12);
+
+	if (requests.back().payload.is_chunked == true && requests.back().headers.count("trailer"))
+	{
+		std::istringstream iss(requests.back().headers["trailer"]);
+		std::string word;
+		
+		while (iss >> word)
+		{
+			strlower(word);
+			if (disallowed_trailer.find(word) == disallowed_trailer.end())
+				requests.back().expected_trailers.insert(word);
+		}
+	}
+}
+
+void Client::respond(std::vector<Server_conf> &confs)
+{
+	fill_response(confs);
+	send_response();
+	response.clear();
 }
 
 void Client::fill_response(std::vector<Server_conf> confs)
@@ -215,76 +302,4 @@ void Client::send_response()
 		send(socket, "\r\n", 2, 0) == -1)
 		status = 1;
 	file.close();
-}
-
-// check if the request line is valid. If not, an reponse error code is set.
-void	Client::check_line()
-{
-	if (check_http_version(requests.back().request_line.version))
-		response.code = HTTP_VERSION_NOT_SUPPORTED;
-	else if (requests.back().request_line.method == NOT_A_METHOD || 
-				requests.back().request_line.target[0] != '/')
-		response.code = BAD_REQUEST;
-
-	if (response.code >= 400)
-		requests.back().status = FINISH_PARSING;
-}
-
-/*
-	check if host header is provided, as required in HTTP/1.1 protocol
-	check if a payload must be extracted and how (length or chunked).
-	If not, the request status is set as finised.
-*/
-void	Client::check_payload()
-{
-	Request &req = requests.back();
-
-	if (req.request_line.method == PUT ||
-		req.request_line.method == POST)
-	{
-		if (req.headers.count("transfer-encoding") &&
-			req.headers["transfer-encoding"].find("chunked") != std::string::npos)
-			req.payload.is_chunked = true;
-		else if (req.headers.count("content-length"))
-		{
-			req.payload.length = atoi(req.headers["content-length"].c_str());
-			if (req.payload.length < 0)
-			{
-				req.status = FINISH_PARSING;
-				response.code = BAD_REQUEST;
-			}
-		}
-		else
-		{
-			response.code = LENGTH_REQUIRED;
-			req.status = FINISH_PARSING;
-		}
-	}
-	else
-		req.status = FINISH_PARSING;
-}
-
-/*
-	Check if a trailer is expected and header values are allowed.
-	The expected header in trailer are put in the expected_trailers set.
-*/
-void	Client::check_trailer()
-{
-	std::string s[] = {"transfer-encoding", "content-length", "host", 
-	"cache-control", "max-forwards", "te", "authorization", "set-cookie",
-	"content-encoding", "content-type", "content-range", "trailer"};
-	std::set<std::string> disallowed_trailer(s, s + 12);
-
-	if (requests.back().payload.is_chunked == true && requests.back().headers.count("trailer"))
-	{
-		std::istringstream iss(requests.back().headers["trailer"]);
-		std::string word;
-		
-		while (iss >> word)
-		{
-			strlower(word);
-			if (disallowed_trailer.find(word) == disallowed_trailer.end())
-				requests.back().expected_trailers.insert(word);
-		}
-	}
 }

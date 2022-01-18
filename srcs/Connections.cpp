@@ -122,9 +122,7 @@ int Connections::check_clients()
 		}
 		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
 		{
-			it->fill_response(servers_conf);
-			it->send_response();
-			it->response.clear();
+			it->respond(servers_conf);
 			FD_CLR(it->socket, &active_wset);
 			if (it->status == 1)
 			{
