@@ -1,12 +1,9 @@
 #include "Client.hpp"
 
-Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), port(lsock), ip_address(n_ip_add), status(0)
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), ip_address(n_ip_add), port(lsock), status(0)
 {
 	requests.push_back(Request());
 }
-
-Client::~Client()
-{ }
 
 Location &get_location(std::map<std::string, Location> &loc_map, std::string path)
 {
@@ -38,7 +35,7 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 	std::string host_name;
 	Server_conf sv;
 
-	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); conf++)
+	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
 	{
 		if (conf->listen_port == port && conf->listen_ip == ip)
 		{
@@ -105,9 +102,9 @@ int	check_http_version(std::string version)
     return 0;
 }
 
-void Client::store_incoming_data(char *buffer, int size)
+void Client::store_incoming_data(char *buffer)
 {
-	for (int i = 0; i < size ; ++i)
+	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);
 
 	if (received_data_raw.size())
@@ -126,30 +123,32 @@ void Client::store_incoming_data(char *buffer, int size)
 */
 void Client::extract_request_from_data()
 {
-	if (requests.back().status == STARTING_PARSING)
+	Request &req = requests.back();
+
+	if (req.status == STARTING_PARSING)
 	{
 		if (received_data_raw[0] == '\r' && received_data_raw[1] == '\n')
 		{
 			received_data_raw.erase(received_data_raw.begin(), received_data_raw.begin() + 2);
 			return ;
 		}
-		requests.back().extract_request_line(received_data_raw);
-		if (requests.back().status == LINE_PARSED) 
+		req.extract_request_line(received_data_raw);
+		if (req.status == LINE_PARSED) 
 			check_line();
 	}
-	if (requests.back().status == LINE_PARSED)
+	if (req.status == LINE_PARSED)
 	{
-		requests.back().extract_headers(received_data_raw);
-		if (requests.back().status == HEADER_PARSED)
+		req.extract_headers(received_data_raw);
+		if (req.status == HEADER_PARSED)
 		{
 			check_payload();
 			check_trailer();
 		}
 	}
-	if (requests.back().status == HEADER_PARSED)
-		requests.back().extract_payload(received_data_raw);
-	if (requests.back().status == PAYLOAD_PARSED)
-		requests.back().extract_trailer(received_data_raw);
+	if (req.status == HEADER_PARSED)
+		req.extract_payload(received_data_raw);
+	if (req.status == PAYLOAD_PARSED)
+		req.extract_trailer(received_data_raw);
 }
 
 
@@ -161,7 +160,6 @@ void	Client::check_line()
 	else if (requests.back().request_line.method == NOT_A_METHOD || 
 			requests.back().request_line.target[0] != '/')
 		response.code = BAD_REQUEST;
-
 	if (response.code >= 400)
 		requests.back().status = FINISH_PARSING;
 }
