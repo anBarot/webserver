@@ -149,6 +149,14 @@ void Client::extract_request_from_data(std::vector<char> &data)
 void Client::fill_response(std::vector<Server_conf> confs)
 {
 	Request &req = requests.front();
+
+	std::cout << "headers sent :\n";
+	for (std::map<std::string, std::string>::iterator it = req.headers.begin();
+	it != req.headers.end(); it++)
+	{
+		std::cout << it->first << " : " << it->second << "\n";
+	}
+
 	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
 	Location &loc = get_location(sv.locations, req.request_line.target);
 
