@@ -18,19 +18,22 @@
 
 class Client
 {
+
+private:
+
+
 public:
 	int socket;
-	unsigned short port;
 	std::string ip_address;
+	unsigned short port;
 	int status;
 	std::deque<Request> requests;
 	Response response;
 	std::vector<char> received_data_raw;
 
 	Client(int sock, unsigned short lsock, std::string n_ip_add);
-	~Client();
 
-	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
+	void store_incoming_data(char buffer[BUFFER_SIZE]);
 	void extract_request_from_data();
 	void check_payload();
 	void check_trailer();
@@ -38,6 +41,7 @@ public:
 	void fill_response(std::vector<Server_conf> confs);
 	void fill_error_response();
 	void send_response();
+
 	void respond(std::vector<Server_conf> &confs);
 
 };

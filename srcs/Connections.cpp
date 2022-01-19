@@ -1,8 +1,8 @@
 #include "Connections.hpp"
 
-Connections::Connections()
-{
-}
+// Connections::Connections()
+// {
+// }
 
 // Connections::Connections(const Connections &c)
 // {
@@ -13,9 +13,9 @@ Connections::Connections()
 // 	return *this;
 // }
 
-Connections::~Connections()
-{
-}
+// Connections::~Connections()
+// {
+// }
 
 int Connections::init()
 {
@@ -37,7 +37,6 @@ int Connections::init()
 		setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 		// implement error
 
-		// verify addresses: should we take them in consideration?
 		if (!(it->listen_ip.empty()))
 		{
 			inet_aton(it->listen_ip.c_str(), &ip);
@@ -100,7 +99,7 @@ int Connections::check_clients()
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
 			ready_fd--;
-			ret = recv(it->socket, buffer, BUFFER_SIZE, 0);
+			ret = recv(it->socket, buffer, BUFFER_SIZE - 1, 0);
 			if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
 			{
 				FD_CLR(it->socket, &active_rset);
@@ -112,7 +111,8 @@ int Connections::check_clients()
 			}
 			else
 			{
-				it->store_incoming_data(buffer, ret);
+				buffer[ret] = 0;
+				it->store_incoming_data(buffer);
 				if (it->requests.front().status == FINISH_PARSING)
 				{
 					FD_SET(it->socket, &active_wset);
