@@ -120,7 +120,7 @@ A server that receives a request-target longer than any URI it wishes
 to parse MUST respond  with a 414 (URI Too Long) status code (see 
 Section 6.5.12 of [RFC7231]).
 
--> KO : not implemented
+-> OK : URI max 256
 
 RESPONSE LINE:
 
@@ -152,7 +152,7 @@ A server MUST reject any received request message that contains
 whitespace between a header field-name and colon with a response code
 of 400 (Bad Request).
 
--> KO : "host    : " possible
+-> OK : "host    : " is bad request response
 
    A field value might be preceded and/or followed by optional
    whitespace (OWS); a single SP preceding the field-value is preferred
@@ -162,7 +162,7 @@ of 400 (Bad Request).
    non-whitespace octet of the field value ought to be excluded by
    parsers when extracting the field value from a header field.
 
-->   KO, no triming of headers
+-> KO, no triming of headers
 
    Historically, HTTP header field values could be extended over
    multiple lines by preceding each extra line with at least one space
@@ -184,7 +184,7 @@ of 400 (Bad Request).
    increase the server's vulnerability to request smuggling attacks
    (Section 9.5).
    
--> KO : can set a lim number of headers
+-> OK : lim number of headers -> 32 
 
   //Message body
   
@@ -192,7 +192,7 @@ of 400 (Bad Request).
    responses do not include a message body.  All other responses do
    include a message body, although the body might be of zero length.
 
--> KO : error message each time
+-> OK 
 
  // Transfer-Encoding
 
@@ -313,7 +313,7 @@ of 400 (Bad Request).
    request message that contains more than one Host header field or a
    Host header field with an invalid field-value.
 
--> KO : to implement
+-> OK : if no host -> error 400, multiple host allowed with google.com
 
      Since the request-target often contains only part of the user agent's
    target URI, a server reconstructs the intended target as an
@@ -391,7 +391,7 @@ of 400 (Bad Request).
    appropriate, since prompt closure of both sides of a connection
    enables allocated system resources to be reclaimed.
    
--> KO : verifier insertion timeout
+-> KO : verifier insertion timeout -> 5min par default
 
       A server that sends a "close" connection option MUST initiate a close
    of the connection (see below) after it sends the response containing

@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/18 18:24:44 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/19 14:22:00 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,12 +64,15 @@ void Request::extract_headers(std::vector<char> &data)
 			status = HEADER_PARSED;
 			break;
 		}
-		pos_dpoint = str.find_first_of(": ");
-		header = str.substr(0, pos_dpoint);
-		value = str.substr(pos_dpoint + 2, pos - pos_dpoint - 1);
-		strlower(header);
+		pos_dpoint = str.find_first_of(":");
+		if (pos_dpoint != 0)
+		{
+			header = str.substr(0, pos_dpoint);
+			value = str.substr(pos_dpoint + 2, pos - pos_dpoint - 2);
+			strlower(header);
+			headers[header] = value;
+		}
 
-		headers[header] = value;
 		str.erase(0, pos + 2);
 		data.erase(data.begin(), data.begin() + pos + 2);
 	}

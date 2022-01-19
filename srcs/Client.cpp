@@ -149,7 +149,6 @@ void Client::fill_response(std::vector<Server_conf> confs)
 {
 	Request &req = requests.front();
 
-	std::cout << "headers sent :\n";
 	for (std::map<std::string, std::string>::iterator it = req.headers.begin();
 	it != req.headers.end(); it++)
 	{
@@ -225,6 +224,8 @@ void	Client::check_line()
 	else if (requests.back().request_line.method == NOT_A_METHOD || 
 				requests.back().request_line.target[0] != '/')
 		response.code = BAD_REQUEST;
+	else if (requests.back().request_line.target.size() >= 256)
+		response.code = URI_TOO_LONG;
 
 	if (response.code >= 400)
 		requests.back().status = FINISH_PARSING;
@@ -238,6 +239,24 @@ void	Client::check_line()
 void	Client::check_payload()
 {
 	Request &req = requests.back();
+
+	if (req.headers.size() > 32 || req.headers.count("host") == 0)
+	{
+		req.status = FINISH_PARSING;
+		response.code = BAD_REQUEST;
+		return ;
+	}
+
+	for (std::map<std::string, std::string>::iterator it = req.headers.begin(); 
+	it != req.headers.end(); it++)
+	{
+		if (it->first.find_first_of("\t\r ") != std::string::npos)
+		{
+			req.status = FINISH_PARSING;
+			response.code = BAD_REQUEST;
+			return ;
+		}
+	}
 
 	if (req.request_line.method == PUT ||
 		req.request_line.method == POST)
