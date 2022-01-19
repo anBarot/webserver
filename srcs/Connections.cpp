@@ -143,6 +143,11 @@ int Connections::check_clients()
 void Connections::loop()
 {
 	std::cout << "Waiting for connection." << std::endl;
+	struct timeval timeout;
+
+	timeout.tv_sec = 300;
+	timeout.tv_usec = 0;
+	
 	while (1)
 	{
 		// std::cout << "clients " << clients.size() << std::endl;
@@ -150,10 +155,26 @@ void Connections::loop()
 		// std::cout << "max_fd " << max_fd << std::endl;
 		ready_rset = active_rset;
 		ready_wset = active_wset;
-		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, 0);
+		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
-		add_clients();
-		check_clients();
-	}
+		if (ready_fd != 0)
+		{
+			add_clients();
+			check_clients();
+		}
+		else
+		{
+			for (std::vector<Client>::iterator it = clients.begin();
+				it != clients.end(); it++)
+			{
+				FD_CLR(it->socket, &active_rset);
+				fd_list.remove(it->socket);
+				close(it->socket);
+				it = clients.erase(it);
+				it--;
+			}
+			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
+		}
+	}	
 }
