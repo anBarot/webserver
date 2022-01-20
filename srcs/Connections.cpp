@@ -1,23 +1,5 @@
 #include "Connections.hpp"
 
-// Connections::Connections()
-// {
-// }
-
-// Connections::Connections(const Connections &c)
-// {
-// }
-
-// Connections& Connections::operator=(const Connections &c)
-// {
-// 	return *this;
-// }
-
-// Connections::~Connections()
-// {
-// }
-
-
 int Connections::init()
 {
 	struct sockaddr_in addr;
@@ -91,13 +73,13 @@ int Connections::check_clients()
 {
 	char buffer[BUFFER_SIZE];
 	ssize_t ret;
+	std::vector<Client>::iterator it = clients.begin();
 
-	for (std::vector<Client>::iterator it = clients.begin();
-		it != clients.end(); ++it)
+	while (ready_fd)
 	{
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
-			ready_fd--;
+			--ready_fd;
 			ret = recv(it->socket, buffer, BUFFER_SIZE - 1, 0);
 			if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
 			{
@@ -105,7 +87,6 @@ int Connections::check_clients()
 				fd_list.remove(it->socket);
 				close(it->socket);
 				it = clients.erase(it);
-				it--;
 			}
 			else
 			{
@@ -116,10 +97,12 @@ int Connections::check_clients()
 					FD_SET(it->socket, &active_wset);
 					FD_CLR(it->socket, &active_rset);
 				}
+				++it;
 			}
 		}
 		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
 		{
+			--ready_fd;
 			it->respond(servers_conf);
 			FD_CLR(it->socket, &active_wset);
 			if (it->status == 1)
@@ -127,11 +110,15 @@ int Connections::check_clients()
 				fd_list.remove(it->socket);
 				close(it->socket);
 				it = clients.erase(it);
-				it--;
 			}
 			else
+			{
 				FD_SET(it->socket, &active_rset);
+				++it;
+			}
 		}
+		else
+			++it;
 	}
 	return 0;
 }
@@ -156,7 +143,7 @@ void Connections::loop()
 		ready_rset = active_rset;
 		ready_wset = active_wset;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
-		std::cout << ready_fd << std::endl;
+		// std::cout << ready_fd << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
@@ -170,12 +157,11 @@ void Connections::loop()
 			while (it != clients.end())
 			{
 				FD_CLR(it->socket, &active_rset);
+				FD_CLR(it->socket, &active_wset);
 				fd_list.remove(it->socket);
 				close(it->socket);
-				it = clients.erase(it);
-				if (it != clients.end())
-					++it;
 			}
+			clients.clear();
 		}
 	}	
 }
