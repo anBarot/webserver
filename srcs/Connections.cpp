@@ -17,6 +17,7 @@
 // {
 // }
 
+
 int Connections::init()
 {
 	struct sockaddr_in addr;
@@ -63,7 +64,6 @@ int Connections::init()
 		listen_pool[fd].second = it->listen_port;
 
 	}
-	max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 	return 0;
 }
 
@@ -81,7 +81,6 @@ int Connections::add_clients()
 			std::cout << "Connection accepted." << std::endl;
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
-			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 			clients.push_back(Client(fd, it->second.second, it->second.first));
 		}
 	}
@@ -94,7 +93,7 @@ int Connections::check_clients()
 	ssize_t ret;
 
 	for (std::vector<Client>::iterator it = clients.begin();
-		it != clients.end(); it++)
+		it != clients.end(); ++it)
 	{
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
@@ -104,7 +103,6 @@ int Connections::check_clients()
 			{
 				FD_CLR(it->socket, &active_rset);
 				fd_list.remove(it->socket);
-				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				close(it->socket);
 				it = clients.erase(it);
 				it--;
@@ -127,7 +125,6 @@ int Connections::check_clients()
 			if (it->status == 1)
 			{
 				fd_list.remove(it->socket);
-				max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 				close(it->socket);
 				it = clients.erase(it);
 				it--;
@@ -139,23 +136,27 @@ int Connections::check_clients()
 	return 0;
 }
 
+// void Connections::remove_client(int fd)
+// {
+// 	close(fd);
+// 	fd_list.remove(fd);
+// }
 
 void Connections::loop()
 {
 	std::cout << "Waiting for connection." << std::endl;
 	struct timeval timeout;
 
-	timeout.tv_sec = 300;
-	timeout.tv_usec = 0;
 	
 	while (1)
 	{
-		// std::cout << "clients " << clients.size() << std::endl;
-		// std::cout << "listen " << listen_pool.size() << std::endl;
-		// std::cout << "max_fd " << max_fd << std::endl;
+		timeout.tv_sec = 30;
+		timeout.tv_usec = 0;
+		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
 		ready_wset = active_wset;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
+		std::cout << ready_fd << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
@@ -165,16 +166,16 @@ void Connections::loop()
 		}
 		else
 		{
-			for (std::vector<Client>::iterator it = clients.begin();
-				it != clients.end(); it++)
+			std::vector<Client>::iterator it = clients.begin();
+			while (it != clients.end())
 			{
 				FD_CLR(it->socket, &active_rset);
 				fd_list.remove(it->socket);
 				close(it->socket);
 				it = clients.erase(it);
-				it--;
+				if (it != clients.end())
+					++it;
 			}
-			max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		}
 	}	
 }
