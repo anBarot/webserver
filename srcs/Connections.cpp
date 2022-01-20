@@ -100,7 +100,7 @@ int Connections::check_clients()
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
 			ready_fd--;
-			ret = recv(it->socket, buffer, BUFFER_SIZE, 0);
+			ret = recv(it->socket, buffer, BUFFER_SIZE - 1, 0);
 			if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
 			{
 				FD_CLR(it->socket, &active_rset);
@@ -112,7 +112,9 @@ int Connections::check_clients()
 			}
 			else
 			{
-				it->store_incoming_data(buffer, ret);
+				buffer[ret] = 0;
+				std::cout << buffer << std::endl;
+				it->store_incoming_data(buffer, ret, servers_conf);
 				if (it->requests.front().status == FINISH_PARSING)
 				{
 					FD_SET(it->socket, &active_wset);

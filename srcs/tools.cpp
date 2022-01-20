@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:34:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/05 15:57:51 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/20 12:26:13 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,6 @@ int	is_dir(std::string path)
 // Return 1 if the path is a file, 0 else
 int is_reg(std::string path)
 {
-	std::cout << "Index file : " << path << "\n";
 	struct stat st;
 
 	if (stat(path.c_str(), &st))

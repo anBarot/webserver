@@ -98,7 +98,7 @@ int	check_http_version(std::string version)
 }
 
 
-void Client::store_incoming_data(char *buffer, int size)
+void Client::store_incoming_data(char *buffer, int size, std::vector<Server_conf> confs)
 {
 	for (int i = 0; i < size ; i++)
 		received_data_raw.push_back(buffer[i]);
@@ -106,7 +106,7 @@ void Client::store_incoming_data(char *buffer, int size)
 	if (received_data_raw.size())
 	{
 		if (requests.size() && requests.back().status != FINISH_PARSING)
-			extract_request_from_data(received_data_raw);
+			extract_request_from_data(received_data_raw, confs);
 		else
 			requests.push_back(Request());
 	}
@@ -117,7 +117,7 @@ void Client::store_incoming_data(char *buffer, int size)
 	depending on the request status :
 	starting -> line parsed -> header parsed -> payload parsed -> finish
 */
-void Client::extract_request_from_data(std::vector<char> &data)
+void Client::extract_request_from_data(std::vector<char> &data, std::vector<Server_conf> confs)
 {
 	if (requests.back().status == STARTING_PARSING)
 	{
@@ -135,7 +135,7 @@ void Client::extract_request_from_data(std::vector<char> &data)
 		requests.back().extract_headers(data);
 		if (requests.back().status == HEADER_PARSED)
 		{
-			check_payload();
+			check_payload(confs);
 			check_trailer();
 		}
 	}
@@ -236,7 +236,7 @@ void	Client::check_line()
 	check if a payload must be extracted and how (length or chunked).
 	If not, the request status is set as finised.
 */
-void	Client::check_payload()
+void	Client::check_payload(std::vector<Server_conf> confs)
 {
 	Request &req = requests.back();
 
@@ -258,6 +258,8 @@ void	Client::check_payload()
 		}
 	}
 
+	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
+
 	if (req.request_line.method == PUT ||
 		req.request_line.method == POST)
 	{
@@ -271,6 +273,11 @@ void	Client::check_payload()
 			{
 				req.status = FINISH_PARSING;
 				response.code = BAD_REQUEST;
+			}
+			else if (req.payload.length > sv.max_body_size)
+			{
+				req.status = FINISH_PARSING;
+				response.code = PAYLOAD_TOO_LARGE;
 			}
 		}
 		else

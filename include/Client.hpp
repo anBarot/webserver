@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:20:52 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/17 19:09:32 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/20 12:13:43 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@ public:
 
 	~Client(){};
 
-	void store_incoming_data(char buffer[BUFFER_SIZE], int size);
-	void extract_request_from_data(std::vector<char> &data);
-	void check_payload();
+	void store_incoming_data(char buffer[BUFFER_SIZE], int size, std::vector<Server_conf> confs);
+	void extract_request_from_data(std::vector<char> &data, std::vector<Server_conf> confs);
+	void check_payload(std::vector<Server_conf> confs);
 	void check_trailer();
 	void check_line();
 	void fill_response(std::vector<Server_conf> confs);
