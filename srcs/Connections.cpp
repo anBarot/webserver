@@ -60,7 +60,7 @@ int Connections::add_clients()
 			ready_fd--;
 			fd = accept(it->first, 0, 0);
 			//implement error
-			std::cout << "Connection accepted." << std::endl;
+			std::cout << "Connection accepted on fd " << fd << " based on listen fd " << it->first << std::endl;
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			clients.push_back(Client(fd, it->second.second, it->second.first));
@@ -71,18 +71,20 @@ int Connections::add_clients()
 
 int Connections::check_clients()
 {
-	char buffer[BUFFER_SIZE];
-	ssize_t ret;
 	std::vector<Client>::iterator it = clients.begin();
 
 	while (ready_fd)
 	{
+		std::cout << "Checking clients"<< std::endl;
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
+			std::cout << it->socket << " is ready for reading"<< std::endl;
+
 			--ready_fd;
-			ret = recv(it->socket, buffer, BUFFER_SIZE - 1, 0);
-			if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
+			if (it->receive_request(servers_conf) == -1)
 			{
+				std::cout << "Closing connection because of ret 0 on fd " << it->socket << std::endl;
+
 				FD_CLR(it->socket, &active_rset);
 				fd_list.remove(it->socket);
 				close(it->socket);
@@ -90,7 +92,6 @@ int Connections::check_clients()
 			}
 			else
 			{
-				it->store_incoming_data(buffer, servers_conf);
 				if (it->requests.front().status == FINISH_PARSING)
 				{
 					FD_SET(it->socket, &active_wset);
@@ -101,14 +102,19 @@ int Connections::check_clients()
 		}
 		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
 		{
+
+			std::cout << it->socket << " is ready for writing"<< std::endl;
+
 			--ready_fd;
 			it->respond(servers_conf);
 			FD_CLR(it->socket, &active_wset);
 			if (it->status == 1)
 			{
+				std::cout << "Closing connection because of error on fd " << it->socket << std::endl;
 				fd_list.remove(it->socket);
 				close(it->socket);
 				it = clients.erase(it);
+				
 			}
 			else
 			{
@@ -130,19 +136,18 @@ int Connections::check_clients()
 
 void Connections::loop()
 {
-	std::cout << "Waiting for connection." << std::endl;
 	struct timeval timeout;
-
+	std::cout << "Waiting for connection." << std::endl;
 	
 	while (1)
 	{
-		timeout.tv_sec = 30;
+		timeout.tv_sec = 300;
 		timeout.tv_usec = 0;
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
 		ready_wset = active_wset;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
-		// std::cout << ready_fd << std::endl;
+		std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
@@ -157,8 +162,9 @@ void Connections::loop()
 			{
 				FD_CLR(it->socket, &active_rset);
 				FD_CLR(it->socket, &active_wset);
-				fd_list.remove(it->socket);
 				close(it->socket);
+				fd_list.remove(it->socket);
+				++it;
 			}
 			clients.clear();
 		}

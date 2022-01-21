@@ -102,12 +102,19 @@ int	check_http_version(std::string version)
     return 0;
 }
 
-
-void Client::store_incoming_data(char *buffer, std::vector<Server_conf> confs)
+int Client::receive_request(std::vector<Server_conf> &confs)
 {
+	char buffer[BUFFER_SIZE];
+	ssize_t ret;
+
+	ret = recv(socket, buffer, BUFFER_SIZE - 1, 0);
+	if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
+		return -1;
+	buffer[ret] = 0;
+	std::cout << socket << " received " << ret << " bytes:\n" << buffer << std::endl;
+
 	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);
-
 	if (received_data_raw.size())
 	{
 		if (requests.size() && requests.back().status != FINISH_PARSING)
@@ -115,6 +122,7 @@ void Client::store_incoming_data(char *buffer, std::vector<Server_conf> confs)
 		else
 			requests.push_back(Request());
 	}
+	return 0;
 }
 
 /*
@@ -253,8 +261,24 @@ void	Client::check_trailer()
 
 void Client::respond(std::vector<Server_conf> &confs)
 {
+	std::stringstream buf;
+	std::string str;
+	std::ifstream file;
+
 	fill_response(confs);
-	send_response();
+	file.open(response.file_name.c_str());
+	std::cout << "response:\n" << response.line << response.header_string << std::endl;
+	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
+		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
+		status = 1;
+	buf << file.rdbuf();
+	str = buf.str();
+	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
+		send(socket, "\r\n", 2, 0) == -1)
+		status = 1;
+	file.close();
+	std::cout << "Response sent to " << socket << std::endl;
+
 	response.clear();
 }
 
@@ -303,21 +327,4 @@ void Client::fill_response(std::vector<Server_conf> confs)
 	response.create_response_line();
 	response.create_header_string();
 	requests.pop_front();
-}
-
-void Client::send_response()
-{
-	std::ifstream file(response.file_name.c_str());
-	std::stringstream buf;
-	std::string str;
-
-	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
-		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
-		status = 1;
-	buf << file.rdbuf();
-	str = buf.str();
-	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
-		send(socket, "\r\n", 2, 0) == -1)
-		status = 1;
-	file.close();
 }
