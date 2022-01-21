@@ -19,14 +19,15 @@ private:
 	std::list<int> fd_list;
 
 public:
-	Connections();
-	Connections(const Connections &c);
-	Connections& operator=(const Connections &c);
-	~Connections();
+	// Connections();
+	// Connections(const Connections &c);
+	// Connections& operator=(const Connections &c);
+	// ~Connections();
 
 	int init();
 	int add_clients();
 	int check_clients();
+	void remove_client();
 	void loop();
 
 	std::vector<Server_conf> servers_conf;

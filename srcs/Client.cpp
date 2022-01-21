@@ -1,5 +1,10 @@
 #include "Client.hpp"
 
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), ip_address(n_ip_add), port(lsock), status(0)
+{
+	requests.push_back(Request());
+}
+
 Location &get_location(std::map<std::string, Location> &loc_map, std::string path)
 {
 	size_t i_max_matching;
@@ -30,7 +35,7 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 	std::string host_name;
 	Server_conf sv;
 
-	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); conf++)
+	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
 	{
 		if (conf->listen_port == port && conf->listen_ip == ip)
 		{
@@ -98,15 +103,15 @@ int	check_http_version(std::string version)
 }
 
 
-void Client::store_incoming_data(char *buffer, int size, std::vector<Server_conf> confs)
+void Client::store_incoming_data(char *buffer, std::vector<Server_conf> confs)
 {
-	for (int i = 0; i < size ; i++)
+	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);
 
 	if (received_data_raw.size())
 	{
 		if (requests.size() && requests.back().status != FINISH_PARSING)
-			extract_request_from_data(received_data_raw, confs);
+			extract_request_from_data(confs);
 		else
 			requests.push_back(Request());
 	}
@@ -117,103 +122,34 @@ void Client::store_incoming_data(char *buffer, int size, std::vector<Server_conf
 	depending on the request status :
 	starting -> line parsed -> header parsed -> payload parsed -> finish
 */
-void Client::extract_request_from_data(std::vector<char> &data, std::vector<Server_conf> confs)
+void Client::extract_request_from_data(std::vector<Server_conf> confs)
 {
-	if (requests.back().status == STARTING_PARSING)
+	Request &req = requests.back();
+
+	if (req.status == STARTING_PARSING)
 	{
-		if (data[0] == '\r' && data[1] == '\n')
+		if (received_data_raw[0] == '\r' && received_data_raw[1] == '\n')
 		{
-			data.erase(data.begin(), data.begin() + 2);
+			received_data_raw.erase(received_data_raw.begin(), received_data_raw.begin() + 2);
 			return ;
 		}
-		requests.back().extract_request_line(data);
-		if (requests.back().status == LINE_PARSED) 
+		req.extract_request_line(received_data_raw);
+		if (req.status == LINE_PARSED) 
 			check_line();
 	}
-	if (requests.back().status == LINE_PARSED)
+	if (req.status == LINE_PARSED)
 	{
-		requests.back().extract_headers(data);
-		if (requests.back().status == HEADER_PARSED)
+		req.extract_headers(received_data_raw);
+		if (req.status == HEADER_PARSED)
 		{
 			check_payload(confs);
 			check_trailer();
 		}
 	}
-	if (requests.back().status == HEADER_PARSED)
-		requests.back().extract_payload(data);
-	if (requests.back().status == PAYLOAD_PARSED)
-		requests.back().extract_trailer(data);
-}
-
-void Client::fill_response(std::vector<Server_conf> confs)
-{
-	Request &req = requests.front();
-
-	for (std::map<std::string, std::string>::iterator it = req.headers.begin();
-	it != req.headers.end(); it++)
-	{
-		std::cout << it->first << " : " << it->second << "\n";
-	}
-
-	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
-	Location &loc = get_location(sv.locations, req.request_line.target);
-
-	response.headers["Server"] = "webserver";
-	response.headers["Date"] = get_date(time(NULL));
-	if (loc.redirection.first >= 300)
-	{
-		response.code = loc.redirection.first;
-		response.file_name = sv.error_page[response.code];
-		response.headers["Location"] = loc.redirection.second;
-	}
-	if (response.code < 300 && loc.methods[req.request_line.method] == false) 
-		response.code = METHOD_NOT_ALLOWED;
-	if (response.code < 300)
-	{
-		if (is_cgi_compatible(req, loc))
-		{
-			response.is_cgi = true;
-			response.create_cgi_file(req, loc);
-			response.extract_cgi_file();
-		}
-		else if (req.request_line.method == GET)
-			response.method_get(req, loc);
-		else if (req.request_line.method == PUT || req.request_line.method == POST)
-			response.method_put(req, loc, sv);
-		else if (req.request_line.method == DELETE)
-			response.method_delete(req, loc);
-	}
-	if (response.code >= 400)
-	{
-		if (response.code == METHOD_NOT_ALLOWED)
-			response.headers["Allow"] = get_allow(loc);
-		if (sv.error_page.count(response.code))
-			response.file_name = sv.error_page[response.code];
-		else
-			response.file_name = create_error_file(response.code);
-	}
-	if (response.file_name != "")
-		response.headers["Content-Length"] = get_file_size(response.file_name);
-	response.create_response_line();
-	response.create_header_string();
-	requests.pop_front();
-}
-
-void Client::send_response()
-{
-	std::ifstream file(response.file_name.c_str());
-	std::stringstream buf;
-	std::string str;
-
-	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
-		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
-		status = 1;
-	buf << file.rdbuf();
-	str = buf.str();
-	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
-		send(socket, "\r\n", 2, 0) == -1)
-		status = 1;
-	file.close();
+	if (req.status == HEADER_PARSED)
+		req.extract_payload(received_data_raw);
+	if (req.status == PAYLOAD_PARSED)
+		req.extract_trailer(received_data_raw);
 }
 
 // check if the request line is valid. If not, an reponse error code is set.
@@ -313,4 +249,75 @@ void	Client::check_trailer()
 				requests.back().expected_trailers.insert(word);
 		}
 	}
+}
+
+void Client::respond(std::vector<Server_conf> &confs)
+{
+	fill_response(confs);
+	send_response();
+	response.clear();
+}
+
+void Client::fill_response(std::vector<Server_conf> confs)
+{
+	Request &req = requests.front();
+	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
+	Location &loc = get_location(sv.locations, req.request_line.target);
+
+	response.headers["Server"] = "webserver";
+	response.headers["Date"] = get_date(time(NULL));
+	if (loc.redirection.first >= 300)
+	{
+		response.code = loc.redirection.first;
+		response.file_name = sv.error_page[response.code];
+		response.headers["Location"] = loc.redirection.second;
+	}
+	if (response.code < 300 && loc.methods[req.request_line.method] == false) 
+		response.code = METHOD_NOT_ALLOWED;
+	if (response.code < 300)
+	{
+		if (is_cgi_compatible(req, loc))
+		{
+			response.is_cgi = true;
+			response.create_cgi_file(req, loc);
+			response.extract_cgi_file();
+		}
+		else if (req.request_line.method == GET)
+			response.method_get(req, loc);
+		else if (req.request_line.method == PUT || req.request_line.method == POST)
+			response.method_put(req, loc, sv);
+		else if (req.request_line.method == DELETE)
+			response.method_delete(req, loc);
+	}
+	if (response.code >= 400)
+	{
+		if (response.code == METHOD_NOT_ALLOWED)
+			response.headers["Allow"] = get_allow(loc);
+		if (sv.error_page.count(response.code))
+			response.file_name = sv.error_page[response.code];
+		else
+			response.file_name = create_error_file(response.code);
+	}
+	if (response.file_name != "")
+		response.headers["Content-Length"] = get_file_size(response.file_name);
+	response.create_response_line();
+	response.create_header_string();
+	requests.pop_front();
+}
+
+void Client::send_response()
+{
+	std::ifstream file(response.file_name.c_str());
+	std::stringstream buf;
+	std::string str;
+
+	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
+		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
+		status = 1;
+	buf << file.rdbuf();
+	str = buf.str();
+	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
+		send(socket, "\r\n", 2, 0) == -1)
+		status = 1;
+	file.close();
 }
