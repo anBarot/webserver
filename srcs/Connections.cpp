@@ -5,6 +5,7 @@ int Connections::init()
 	struct sockaddr_in addr;
 	struct in_addr ip;
 	int optval;
+	int fd;
 
 	FD_ZERO(&active_rset);
 	FD_ZERO(&active_wset);
@@ -13,13 +14,17 @@ int Connections::init()
 	addr.sin_family= AF_INET;
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
-		int fd;
-
 		fd = socket(AF_INET, SOCK_STREAM, 0);
-		// implement error
-		setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-		// implement error
-
+		if (fd == -1)
+		{
+			perror(0);
+			continue ;
+		}
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+		{
+			perror(0);
+			continue ;
+		}
 		if (!(it->listen_ip.empty()))
 		{
 			inet_aton(it->listen_ip.c_str(), &ip);
@@ -27,16 +32,16 @@ int Connections::init()
 		}
 		else
 			addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
 		addr.sin_port = htons(it->listen_port);
 		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		{
+			perror(0);
 			close(fd);
 			continue ;
 		}
-
 		if (listen(fd, SOMAXCONN) == -1)
 		{
+			perror(0);
 			close(fd);
 			continue ;
 		}
@@ -44,7 +49,6 @@ int Connections::init()
 		fd_list.push_back(fd);
 		listen_pool[fd].first = it->listen_ip;
 		listen_pool[fd].second = it->listen_port;
-
 	}
 	return 0;
 }
@@ -59,7 +63,11 @@ int Connections::add_clients()
 		{
 			ready_fd--;
 			fd = accept(it->first, 0, 0);
-			//implement error
+			if (fd == -1)
+			{
+				perror(0);
+				continue ;
+			}
 			std::cout << "Connection accepted on fd " << fd << " based on listen fd " << it->first << std::endl;
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
@@ -79,12 +87,10 @@ int Connections::check_clients()
 		if (FD_ISSET(it->socket, &ready_rset))
 		{
 			std::cout << it->socket << " is ready for reading"<< std::endl;
-
 			--ready_fd;
 			if (it->receive_request(servers_conf) == -1)
 			{
 				std::cout << "Closing connection because of ret 0 on fd " << it->socket << std::endl;
-
 				FD_CLR(it->socket, &active_rset);
 				fd_list.remove(it->socket);
 				close(it->socket);
@@ -104,17 +110,14 @@ int Connections::check_clients()
 		{
 
 			std::cout << it->socket << " is ready for writing"<< std::endl;
-
 			--ready_fd;
-			it->respond(servers_conf);
 			FD_CLR(it->socket, &active_wset);
-			if (it->status == 1)
+			if (it->respond(servers_conf) == -1)
 			{
 				std::cout << "Closing connection because of error on fd " << it->socket << std::endl;
 				fd_list.remove(it->socket);
 				close(it->socket);
 				it = clients.erase(it);
-				
 			}
 			else
 			{

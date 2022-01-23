@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), ip_address(n_ip_add), port(lsock), status(0)
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), ip_address(n_ip_add), port(lsock)
 {
 	requests.push_back(Request());
 }
@@ -259,7 +259,7 @@ void	Client::check_trailer()
 	}
 }
 
-void Client::respond(std::vector<Server_conf> &confs)
+int Client::respond(std::vector<Server_conf> &confs)
 {
 	std::stringstream buf;
 	std::string str;
@@ -267,19 +267,15 @@ void Client::respond(std::vector<Server_conf> &confs)
 
 	fill_response(confs);
 	file.open(response.file_name.c_str());
-	std::cout << "response:\n" << response.line << response.header_string << std::endl;
-	if (send(socket, response.line.c_str(), response.line.size(), 0) == -1 ||
-		send(socket, response.header_string.c_str(),  response.header_string.size(), 0) == -1)
-		status = 1;
-	buf << file.rdbuf();
+	buf << response.line.c_str() << response.header_string.c_str() << file.rdbuf() << "\r\n";
 	str = buf.str();
-	if (send(socket, str.c_str(),  str.size(), 0) == -1 ||
-		send(socket, "\r\n", 2, 0) == -1)
-		status = 1;
-	file.close();
-	std::cout << "Response sent to " << socket << std::endl;
-
+	std::cout << "Response:\n" << str << std::endl;
 	response.clear();
+	file.close();
+	if (send(socket, str.c_str(), str.size(), 0) == -1)
+		return -1;
+	std::cout << "Response sent to " << socket << std::endl;
+	return 0;
 }
 
 void Client::fill_response(std::vector<Server_conf> confs)

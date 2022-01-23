@@ -23,7 +23,6 @@ public:
 	int socket;
 	std::string ip_address;
 	unsigned short port;
-	int status;
 	std::deque<Request> requests;
 	Response response;
 	std::vector<char> received_data_raw;
@@ -31,7 +30,7 @@ public:
 	Client(int sock, unsigned short lsock, std::string n_ip_add);
 
 	int		receive_request(std::vector<Server_conf> &confs);
-	void	respond(std::vector<Server_conf> &confs);
+	int		respond(std::vector<Server_conf> &confs);
 
 private:
 	void extract_request_from_data(std::vector<Server_conf> confs);
