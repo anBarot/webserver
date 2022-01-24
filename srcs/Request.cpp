@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/19 14:22:00 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/24 19:15:21 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,10 @@ void Request::extract_request_line(std::vector<char> &data)
 		request_line.method = get_method_enum(word);
 		iss >> request_line.target;
 		iss >> request_line.version;
+
+		std::cout << "debug method : " << request_line.method << "\n";
+		std::cout << "debug target : " << request_line.target << "\n";
+		std::cout << "debug version : " << request_line.version << "\n";
 
 		data.erase(data.begin(), data.begin() + pos + 2);
 		status = LINE_PARSED;

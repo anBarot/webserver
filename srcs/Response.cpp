@@ -219,7 +219,7 @@ void Response::method_delete(Request &req, Location &loc)
 	code = NO_CONTENT;
 }
 
-void Response::method_put(Request &req, Location &loc, Server_conf &sv)
+void Response::method_post(Request &req, Location &loc, Server_conf &sv)
 {
 	struct stat st;
 	std::string path;
@@ -252,7 +252,7 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 
 	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
 	{
-		std::cout << strerror(errno) << "\n"; 
+		std::cout << strerror(errno) << "\n";
 		code = UNAUTHORIZED;
 	}
 	else

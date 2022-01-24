@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:34:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/20 12:26:13 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/24 14:10:49 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,8 +84,6 @@ e_methods	get_method_enum(std::string word)
 		return (GET);
 	else if (word == "POST")
 		return POST;
-	else if (word == "PUT")
-		return PUT;
 	else if (word == "DELETE")
 		return DELETE;
 	else
@@ -99,8 +97,6 @@ std::string get_method_string(e_methods enm)
 		return ("GET");
 	else if (enm == POST)
 		return "POST";
-	else if (enm == PUT)
-		return "PUT";
 	else if (enm == DELETE)
 		return "DELETE";
 	else
