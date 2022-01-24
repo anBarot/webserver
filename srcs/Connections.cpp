@@ -1,28 +1,11 @@
 #include "Connections.hpp"
 
-// Connections::Connections()
-// {
-// }
-
-// Connections::Connections(const Connections &c)
-// {
-// }
-
-// Connections& Connections::operator=(const Connections &c)
-// {
-// 	return *this;
-// }
-
-// Connections::~Connections()
-// {
-// }
-
-
 int Connections::init()
 {
 	struct sockaddr_in addr;
 	struct in_addr ip;
 	int optval;
+	int fd;
 
 	FD_ZERO(&active_rset);
 	FD_ZERO(&active_wset);
@@ -31,13 +14,17 @@ int Connections::init()
 	addr.sin_family= AF_INET;
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
-		int fd;
-
 		fd = socket(AF_INET, SOCK_STREAM, 0);
-		// implement error
-		setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
-		// implement error
-
+		if (fd == -1)
+		{
+			perror(0);
+			continue ;
+		}
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+		{
+			perror(0);
+			continue ;
+		}
 		if (!(it->listen_ip.empty()))
 		{
 			inet_aton(it->listen_ip.c_str(), &ip);
@@ -45,16 +32,16 @@ int Connections::init()
 		}
 		else
 			addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
 		addr.sin_port = htons(it->listen_port);
 		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		{
+			perror(0);
 			close(fd);
 			continue ;
 		}
-
 		if (listen(fd, SOMAXCONN) == -1)
 		{
+			perror(0);
 			close(fd);
 			continue ;
 		}
@@ -62,7 +49,6 @@ int Connections::init()
 		fd_list.push_back(fd);
 		listen_pool[fd].first = it->listen_ip;
 		listen_pool[fd].second = it->listen_port;
-
 	}
 	return 0;
 }
@@ -77,8 +63,12 @@ int Connections::add_clients()
 		{
 			ready_fd--;
 			fd = accept(it->first, 0, 0);
-			//implement error
-			std::cout << "Connection accepted." << std::endl;
+			if (fd == -1)
+			{
+				perror(0);
+				continue ;
+			}
+			// std::cout << "Connection accepted on fd " << fd << " based on listen fd " << it->first << std::endl;
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			clients.push_back(Client(fd, it->second.second, it->second.first));
@@ -89,73 +79,75 @@ int Connections::add_clients()
 
 int Connections::check_clients()
 {
-	char buffer[BUFFER_SIZE];
-	ssize_t ret;
+	int i;
 
-	for (std::vector<Client>::iterator it = clients.begin();
-		it != clients.end(); ++it)
+	i = 0;
+	while (ready_fd)
 	{
-		if (FD_ISSET(it->socket, &ready_rset))
+		// std::cout << "Checking clients"<< std::endl;
+		if (FD_ISSET(clients[i].socket, &ready_rset))
 		{
-			ready_fd--;
-			ret = recv(it->socket, buffer, BUFFER_SIZE - 1, 0);
-			if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
+			// std::cout << clients[i].socket << " is ready for reading"<< std::endl;
+			--ready_fd;
+			if (clients[i].receive_request(servers_conf) == -1)
 			{
-				FD_CLR(it->socket, &active_rset);
-				fd_list.remove(it->socket);
-				close(it->socket);
-				it = clients.erase(it);
-				it--;
+				// std::cout << "Closing connection because of ret 0 on fd " << clients[i].socket << std::endl;
+				FD_CLR(clients[i].socket, &active_rset);
+				remove_client(i);
 			}
 			else
 			{
-				it->store_incoming_data(buffer, servers_conf);
-				if (it->requests.front().status == FINISH_PARSING)
+				if (clients[i].requests.front().status == FINISH_PARSING)
 				{
-					FD_SET(it->socket, &active_wset);
-					FD_CLR(it->socket, &active_rset);
+					FD_SET(clients[i].socket, &active_wset);
+					FD_CLR(clients[i].socket, &active_rset);
 				}
+				++i;
 			}
 		}
-		else if (FD_ISSET(it->socket, &ready_wset) && !it->requests.empty())
+		else if (FD_ISSET(clients[i].socket, &ready_wset))
 		{
-			it->respond(servers_conf);
-			FD_CLR(it->socket, &active_wset);
-			if (it->status == 1)
+			// std::cout << clients[i].socket << " is ready for writing"<< std::endl;
+			--ready_fd;
+			FD_CLR(clients[i].socket, &active_wset);
+			if (clients[i].respond(servers_conf) == -1)
 			{
-				fd_list.remove(it->socket);
-				close(it->socket);
-				it = clients.erase(it);
-				it--;
+				// std::cout << "Closing connection because of error on fd " << clients[i].socket << std::endl;
+				remove_client(i);
 			}
 			else
-				FD_SET(it->socket, &active_rset);
+			{
+				FD_SET(clients[i].socket, &active_rset);
+				++i;
+			}
 		}
+		else
+			++i;
 	}
 	return 0;
 }
 
-// void Connections::remove_client(int fd)
-// {
-// 	close(fd);
-// 	fd_list.remove(fd);
-// }
+void Connections::remove_client(int i)
+{
+	fd_list.remove(clients[i].socket);
+	close(clients[i].socket);
+	clients.erase(clients.begin() + i);
+}
 
 void Connections::loop()
 {
-	std::cout << "Waiting for connection." << std::endl;
 	struct timeval timeout;
-
 	
+	// std::cout << "Waiting for connection." << std::endl;
 	while (1)
 	{
-		timeout.tv_sec = 30;
+		timeout.tv_sec = 300;
 		timeout.tv_usec = 0;
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
 		ready_wset = active_wset;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
-		std::cout << ready_fd << std::endl;
+		// std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
@@ -169,12 +161,12 @@ void Connections::loop()
 			while (it != clients.end())
 			{
 				FD_CLR(it->socket, &active_rset);
-				fd_list.remove(it->socket);
+				FD_CLR(it->socket, &active_wset);
 				close(it->socket);
-				it = clients.erase(it);
-				if (it != clients.end())
-					++it;
+				fd_list.remove(it->socket);
+				++it;
 			}
+			clients.clear();
 		}
 	}	
 }

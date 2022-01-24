@@ -251,10 +251,7 @@ void Response::method_post(Request &req, Location &loc, Server_conf &sv)
 		code = NO_CONTENT;
 
 	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
-	{
-		std::cout << strerror(errno) << "\n";
 		code = UNAUTHORIZED;
-	}
 	else
 	{
 		headers["Location"] = location_path;

@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:22:41 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 17:43:07 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/24 19:23:10 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ class Location
 			methods[GET] = false;
 			methods[POST] = false;
 			methods[DELETE] = false;
-			methods[PUT] = false;
 			methods[NOT_A_METHOD] = false;
 			auto_index = true;
 			cgi_path = "";
