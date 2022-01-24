@@ -252,7 +252,7 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 
 	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
 	{
-		std::cout << strerror(errno) << "\n"; 
+		perror(0);
 		code = UNAUTHORIZED;
 	}
 	else
