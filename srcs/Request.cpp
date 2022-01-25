@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/25 21:06:41 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/25 22:44:30 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,11 +85,8 @@ void Request::extract_headers(std::vector<char> &data)
 void Request::extract_payload(std::vector<char> &data)
 {
 	std::string str(data.begin(), data.end());
-
 	if (payload.tmp_file_name == "")
-		payload.tmp_file_name = mkstemp(MKSTEMP_TEMPLATE);
-		// payload.tmp_file_name = std::tmpnam(NULL);
-
+		payload.tmp_file_name = random_filename();
 	std::ofstream file(payload.tmp_file_name.c_str(), std::ios::out | std::ios::app);
 
 	if (payload.is_chunked)

@@ -1,10 +1,10 @@
 NAME			= webserv
 SRCS_DIR 		= srcs
 SRCS_FILES		= \
+					tools.cpp \
 					webserver.cpp \
 					conf_file_parser.cpp  \
 					headers.cpp \
-					tools.cpp \
 					Connections.cpp \
 					Client.cpp \
 					Response.cpp \

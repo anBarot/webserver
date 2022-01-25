@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tools.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:34:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/24 14:10:49 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/25 22:43:22 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,6 +124,13 @@ int is_reg(std::string path)
 		return 0;
 	else
 		return 1;
+}
+
+std::string random_filename(void)
+{
+	char filename_template[] = MKSTEMP_DEFAULT_TEMPLATE;
+	mkstemp(filename_template); // Will change XXXXX by a random string
+	return std::string(filename_template);
 }
 
 // Init reason_phrase map 
