@@ -22,8 +22,12 @@ int	is_cgi_compatible(Request &req, Location &loc)
 		((pos = target.find_last_of(".")) == std::string::npos))
 		return 0;
 	ext = target.substr(pos + 1, target.size());
-	if (ext == loc.cgi_extension)
-		return 1;
+	for (std::vector<std::string>::iterator it = loc.cgi_extension.begin();
+	it != loc.cgi_extension.end(); it++)
+	{
+		if (ext == *it)
+			return 1;
+	}
 	return 0;
 }
 

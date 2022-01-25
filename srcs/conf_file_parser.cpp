@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/24 15:52:29 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/25 23:15:24 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	extract = extract_field(line, 2);
 
 	if (extract.first == "root" || extract.first == "index" || extract.first == "cgi_path"
-	|| extract.first == "cgi_extension" || extract.first == "upload_path")
+	|| extract.first == "upload_path")
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
 				return CONFFILE_PARSE_ERR;
@@ -53,11 +53,18 @@ int		extract_location_field(std::string &line, Location &loc)
 			loc.index = extract.second;					 
 		else if (extract.first == "cgi_path")
 			loc.cgi_path = extract.second;				
-		else if (extract.first == "cgi_extension")
-			loc.cgi_extension = extract.second;			 
+		 
 		else if (extract.first == "upload_path")
 			loc.upload_path = extract.second;			
 	}
+	else if (extract.first == "cgi_extension")
+	{
+		std::istringstream iss(extract.second);
+		std::string str;
+
+		while (iss >> str)
+			loc.cgi_extension.push_back(str);
+	}	
 	else if (extract.first == "return")
 	{
 		std::istringstream iss(extract.second);

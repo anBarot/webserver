@@ -6,13 +6,13 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/24 19:15:21 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/25 18:19:42 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Request.hpp"
 
-Request::Request() : status(STARTING_PARSING), has_trailer(false)
+Request::Request() : status(STARTING_PARSING)
 {
 	payload.is_chunked = false;
 	payload.length = 0;
@@ -38,10 +38,6 @@ void Request::extract_request_line(std::vector<char> &data)
 		iss >> request_line.target;
 		iss >> request_line.version;
 
-		std::cout << "debug method : " << request_line.method << "\n";
-		std::cout << "debug target : " << request_line.target << "\n";
-		std::cout << "debug version : " << request_line.version << "\n";
-
 		data.erase(data.begin(), data.begin() + pos + 2);
 		status = LINE_PARSED;
 	}
@@ -49,7 +45,7 @@ void Request::extract_request_line(std::vector<char> &data)
 
 /*
 	Function that extract the request headers, and check if 
-	there is an expected payload and trailer. 
+	there is an expected payload. 
 	Headers are case insensitive and thus are put to lowercase.
 */
 void Request::extract_headers(std::vector<char> &data)
@@ -115,7 +111,7 @@ void Request::extract_payload(std::vector<char> &data)
 			status = PAYLOAD_PARSED;
 	}
 
-	if (status == PAYLOAD_PARSED && has_trailer == false)
+	if (status == PAYLOAD_PARSED)
 		status = FINISH_PARSING;
 	
 	file.close();
@@ -165,33 +161,5 @@ void Request::extract_with_length(std::string &str, std::ofstream &file, std::ve
 		file << str.substr(0, str.size());
 		data.erase(data.begin(), data.begin() + str.size());
 		payload.length -= str.size();
-	}
-}
-
-/*
-	If there is an expected trailers, function that extract the required headers.
-	The line that contains unexpected headers or are unvalid are ignored.
-*/
-void Request::extract_trailer(std::vector<char> &data)
-{
-	std::string str(data.begin(), data.end());
-	size_t pos;
-	size_t pos_dpoint;
-	std::string header;
-	std::string value;
-
-	while ((pos = str.find_first_of("\r\n")) != std::string::npos)
-	{
-		if ((pos_dpoint = str.find_first_of(":")) != std::string::npos)
-		{
-			header = str.substr(0, pos_dpoint);
-			value = str.substr(str.find_first_of(": ") + 2, pos - pos_dpoint - 1);
-			strlower(header);
-
-			if (expected_trailers.find(header) != expected_trailers.end())
-				headers[header] = value;
-		}
-		str.erase(0, pos + 2);
-		data.erase(data.begin(), data.begin() + pos + 2);
 	}
 }
