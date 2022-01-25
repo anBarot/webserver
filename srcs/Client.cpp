@@ -32,9 +32,9 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port, std::string ip, std::string sv_name)
 {
 	bool first_encounter = false;
-	std::string host_name;
 	Server_conf sv;
 
+	sv_name.erase(sv_name.find_first_of(":"));
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
 	{
 		if (conf->listen_port == port && conf->listen_ip == ip)
@@ -111,7 +111,7 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 	if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
 		return -1;
 	buffer[ret] = 0;
-	// std::cout << socket << " received " << ret << " bytes:\n" << buffer << std::endl;
+	std::cout << socket << " received " << ret << " bytes:\n" << buffer << std::endl;
 
 	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);
