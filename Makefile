@@ -1,4 +1,4 @@
-NAME			=	webserv
+NAME			= webserv
 SRCS_DIR 		= srcs
 SRCS_FILES		= \
 					webserver.cpp \
@@ -17,7 +17,7 @@ SRCS			= $(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
 
 OBJS			= $(SRCS:.cpp=.o)
 
-CCXX			= clang++
+CXX				= clang++
 
 CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD
 
