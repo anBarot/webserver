@@ -1,33 +1,42 @@
-NAME	=	webserv
+NAME			=	webserv
+SRCS_DIR 		= srcs
+SRCS_FILES		= \
+					webserver.cpp \
+					conf_file_parser.cpp  \
+					headers.cpp \
+					tools.cpp \
+					Connections.cpp \
+					Client.cpp \
+					Response.cpp \
+					Request.cpp
+					# srcs/debug_display.cpp
 
-SRCS = 	srcs/webserver.cpp \
-		srcs/conf_file_parser.cpp  \
-		srcs/headers.cpp \
-		srcs/tools.cpp \
-		srcs/Connections.cpp \
-		srcs/Client.cpp \
-		srcs/Response.cpp \
-		srcs/Request.cpp
-		# srcs/debug_display.cpp
+DEP 			= $(OBJS:.o=.d)
 
-OBJS	=	$(SRCS:.cpp=.o)
+SRCS			= $(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
 
-CC		=	clang++
+OBJS			= $(SRCS:.cpp=.o)
 
-FLAGS	=	-Wall -Werror -Wextra -g -std=c++98	
+CCXX			= clang++
 
-%.o:		%.cpp
-			$(CC) $(FLAGS) -c $< -o $@ -I./include
+CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD
 
-all:		$(NAME)
+-include $(DEP)
 
-$(NAME):	$(OBJS)
-			$(CC) $(FLAGS) -o $(NAME) $(OBJS)
+%.o:			%.cpp
+				$(CXX) $(CXXFLAGS) -c $< -o $@ -I./include
+
+all:			$(NAME)
+
+$(NAME):		$(OBJS)
+				$(CC) $(FLAGS) -o $(NAME) $(OBJS)
 
 clean:
-			rm -f $(OBJS)
+				rm -f $(OBJS)
 
-fclean:		clean
-			rm -f $(NAME)
+fclean:			clean
+				rm -f $(NAME)
 
-re:			fclean all
+re:				fclean all
+
+.PHONY:			all clean fclean re
