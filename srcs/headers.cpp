@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:33:41 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:33:43 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/24 19:22:34 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,8 +64,6 @@ std::string get_allow(Location &loc)
 		res.append("GET ");
 	if (loc.methods[POST] == true)
 		res.append("POST ");
-	if (loc.methods[PUT] == true)
-		res.append("PUT ");
 	if (loc.methods[DELETE] == true)
 		res.append("DELETE");
 	return (res);

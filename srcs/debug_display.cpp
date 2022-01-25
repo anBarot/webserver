@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:33:17 by abarot            #+#    #+#             */
-/*   Updated: 2021/12/21 15:34:44 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/24 19:22:58 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ void display_location(Location &loc)
 	"  -  " << loc.redirection.second << "\n";
 
 	std::cout << "methods GET : "<< ((loc.methods[GET] == true) ? "true" : "false") << "\n";
-	std::cout << "methods PUT : "<< ((loc.methods[PUT] == true) ? "true" : "false") << "\n";
 	std::cout << "methods DELETE : "<< ((loc.methods[DELETE] == true) ? "true" : "false") << "\n";
 	std::cout << "methods POST : "<< ((loc.methods[POST] == true) ? "true" : "false") << "\n";
 }

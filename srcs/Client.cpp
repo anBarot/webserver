@@ -165,8 +165,9 @@ void	Client::check_line()
 {
 	if (check_http_version(requests.back().request_line.version))
 		response.code = HTTP_VERSION_NOT_SUPPORTED;
-	else if (requests.back().request_line.method == NOT_A_METHOD || 
-				requests.back().request_line.target[0] != '/')
+	else if (requests.back().request_line.method == NOT_A_METHOD)
+		response.code = NOT_IMPLEMENTED;
+	else if	(requests.back().request_line.target[0] != '/')
 		response.code = BAD_REQUEST;
 	else if (requests.back().request_line.target.size() >= 256)
 		response.code = URI_TOO_LONG;
@@ -204,8 +205,7 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 
 	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
 
-	if (req.request_line.method == PUT ||
-		req.request_line.method == POST)
+	if (req.request_line.method == POST)
 	{
 		if (req.headers.count("transfer-encoding") &&
 			req.headers["transfer-encoding"].find("chunked") != std::string::npos)
@@ -304,8 +304,8 @@ void Client::fill_response(std::vector<Server_conf> confs)
 		}
 		else if (req.request_line.method == GET)
 			response.method_get(req, loc);
-		else if (req.request_line.method == PUT || req.request_line.method == POST)
-			response.method_put(req, loc, sv);
+		else if (req.request_line.method == POST)
+			response.method_post(req, loc, sv);
 		else if (req.request_line.method == DELETE)
 			response.method_delete(req, loc);
 	}
