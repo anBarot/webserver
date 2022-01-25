@@ -7,8 +7,7 @@ std::string get_query(std::string &file_name)
 	std::string res;
 
 	while (std::getline(payload_file, str))
-		res = res + str;
-
+		res += str;
 	return res;
 }
 
@@ -158,13 +157,11 @@ void Response::method_get(Request &req, Location &loc)
 		headers["Connection"] = "keep-alive";
 		return ;
 	}
-
 	if (path[path.size() - 1] == '/')
 		path.erase(path.size() - 1, 1);
 	path = loc.root + path;
 	path_index = path;
 	path_index.append("/").append(loc.index);
-
 	code = OK;
 	if (stat(path.c_str(), &st))
 		code = NOT_FOUND;
@@ -181,7 +178,6 @@ void Response::method_get(Request &req, Location &loc)
 	else if (S_ISREG(st.st_mode))
 	{
 		headers["Last-Modified"] = get_date(st.st_mtime);
-
 		std::ifstream file(path.c_str());
 		if (file.good() == false)
 			code = FORBIDDEN;
@@ -200,7 +196,6 @@ void Response::method_delete(Request &req, Location &loc)
 	std::string path;
 
 	path = loc.root + req.request_line.target;
-
 	if (is_dir(path))
 		code = CONFLICT;
 	else if (stat(path.c_str(), &st))
@@ -252,7 +247,7 @@ void Response::method_put(Request &req, Location &loc, Server_conf &sv)
 
 	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
 	{
-		perror(0);
+		std::cout << strerror(errno) << "\n"; 
 		code = UNAUTHORIZED;
 	}
 	else
@@ -279,44 +274,30 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-int Response::exec_cgi(std::string exec_name, char **exec_arg, char **cgi_env)
+int Response::exec_cgi(char **exec_arg, char **cgi_env)
 {
-	int fd[2];
 	pid_t pid;
 	int cgi_file_fd;
 	int status;
 
-	if (pipe(fd) == -1)
-	{
-		code = INTERNAL_SERVER_ERROR;
-		return -1;
-	}
 	pid = fork();
 	if (!pid)
 	{
-		close(fd[1]);
-		dup2(fd[0], STDIN_FILENO);
+		close(STDIN_FILENO);
 		cgi_file_fd = open("/tmp/tmp_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (cgi_file_fd == -1)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
 		dup2(cgi_file_fd, STDERR_FILENO);
-		if ((execve(exec_name.c_str(), exec_arg, cgi_env)) == -1)
+		if ((execve(exec_arg[0], exec_arg, cgi_env)) == -1)
 			exit(1);
-		close(STDIN_FILENO);
-		close(cgi_file_fd);
-		close(fd[0]);
-		exit(0);
 	}
 	else if (pid == -1)
 	{
 		code = INTERNAL_SERVER_ERROR;
 		return -1;
 	}
-	close(fd[0]);
-	close(fd[1]);
 	waitpid(pid, &status, 0);
-
 	return WEXITSTATUS(status);
 }
 
@@ -334,8 +315,7 @@ void Response::create_cgi_file(Request &req, Location &loc)
 	exec_name = loc.cgi_path + "/" + script_name;
 	exec_arg = create_exec_arg(exec_name.c_str(), script_name);
 	cgi_env = create_cgi_env(req);
-
-	status = exec_cgi(exec_name, exec_arg, cgi_env);
+	status = exec_cgi(exec_arg, cgi_env);
 	if (status == 1)
 		code = NOT_FOUND;
 	free_arguments(exec_arg);
