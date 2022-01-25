@@ -29,7 +29,7 @@ CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD
 all:			$(NAME)
 
 $(NAME):		$(OBJS)
-				$(CC) $(FLAGS) -o $(NAME) $(OBJS)
+				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
 
 clean:
 				rm -f $(OBJS)
