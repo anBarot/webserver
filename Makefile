@@ -21,6 +21,8 @@ CXX				= clang++
 
 CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD
 
+ARGS			= ./conf_files/correct.conf
+
 -include $(DEP)
 
 %.o:			%.cpp
@@ -28,8 +30,12 @@ CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD
 
 all:			$(NAME)
 
+
 $(NAME):		$(OBJS)
 				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+
+run:			all
+				./$(NAME) $(ARGS)
 
 clean:
 				rm -f $(OBJS)
@@ -39,4 +45,4 @@ fclean:			clean
 
 re:				fclean all
 
-.PHONY:			all clean fclean re
+.PHONY:			all clean fclean re run
