@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:32:38 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/25 16:46:06 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/25 21:06:41 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,8 @@ void Request::extract_payload(std::vector<char> &data)
 	std::string str(data.begin(), data.end());
 
 	if (payload.tmp_file_name == "")
-		payload.tmp_file_name = std::tmpnam(NULL);
+		payload.tmp_file_name = mkstemp(MKSTEMP_TEMPLATE);
+		// payload.tmp_file_name = std::tmpnam(NULL);
 
 	std::ofstream file(payload.tmp_file_name.c_str(), std::ios::out | std::ios::app);
 

@@ -8,7 +8,8 @@ SRCS_FILES		= \
 					Connections.cpp \
 					Client.cpp \
 					Response.cpp \
-					Request.cpp
+					Request.cpp \
+					\
 					# srcs/debug_display.cpp
 
 DEP 			= $(OBJS:.o=.d)
@@ -19,14 +20,11 @@ OBJS			= $(SRCS:.cpp=.o)
 
 CXX				= clang++
 
-CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD
+CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include
 
-ARGS			= ./conf_files/correct.conf
+ARGS			= ./conf_files/example2.conf
 
 -include $(DEP)
-
-%.o:			%.cpp
-				$(CXX) $(CXXFLAGS) -c $< -o $@ -I./include
 
 all:			$(NAME)
 
@@ -39,6 +37,7 @@ run:			all
 
 clean:
 				rm -f $(OBJS)
+				rm -f $(DEP)
 
 fclean:			clean
 				rm -f $(NAME)
