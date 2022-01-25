@@ -133,7 +133,6 @@ void Connections::loop()
 {
 	struct timeval timeout;
 	
-	// std::cout << "Waiting for connection." << std::endl;
 	while (1)
 	{
 		timeout.tv_sec = 300;
@@ -141,6 +140,7 @@ void Connections::loop()
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
 		ready_wset = active_wset;
+		__AWAIT_REQ
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
 		// std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)
@@ -163,5 +163,6 @@ void Connections::loop()
 			}
 			clients.clear();
 		}
+		usleep(100);
 	}	
 }

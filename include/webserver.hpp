@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:24:15 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/25 22:45:10 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/25 22:50:50 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,5 +59,6 @@ std::string random_filename(void);
 #include "Request.hpp"
 #include "Location.hpp"
 #include "Server_conf.hpp"
+#include "term.hpp"
 
 #endif

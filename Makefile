@@ -20,9 +20,11 @@ OBJS			= $(SRCS:.cpp=.o)
 
 CXX				= clang++
 
-CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include
+CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include $(OPTS)
 
 ARGS			= ./conf_files/example2.conf
+
+OPTS			= 
 
 -include $(DEP)
 
@@ -30,9 +32,13 @@ all:			$(NAME)
 
 
 $(NAME):		$(OBJS)
-				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $()
 
 run:			all
+				./$(NAME) $(ARGS)
+
+log:
+				$(MAKE) OPTS="-D LOGGER" re
 				./$(NAME) $(ARGS)
 
 clean:
@@ -44,4 +50,4 @@ fclean:			clean
 
 re:				fclean all
 
-.PHONY:			all clean fclean re run
+.PHONY:			all clean fclean re run log
