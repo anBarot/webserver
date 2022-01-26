@@ -3,14 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   conf_file_parser.cpp                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/24 15:52:29 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/26 16:54:59 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserver.hpp"
+
+int g_line = 0;
 
 std::pair<std::string, std::string> extract_field(std::string &line, unsigned tab_nb)
 {
@@ -30,7 +32,7 @@ int		set_and_check_methods(std::string &extract, Location &loc)
 		method_enum = get_method_enum(word);
 
 		if (method_enum == NOT_A_METHOD)
-			return (CONFFILE_PARSE_ERR);
+			throw(Server_conf::ConfError("method type"));
 		loc.methods[method_enum] = true;
 	}
 	return (0);
@@ -46,7 +48,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	|| extract.first == "cgi_extension" || extract.first == "upload_path")
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
-				return CONFFILE_PARSE_ERR;
+				throw(Server_conf::ConfError("location field tab missing", line, g_line));
 		if (extract.first == "root")		 
 			loc.root = extract.second; 					 
 		else if (extract.first == "index")
@@ -71,7 +73,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	else if (extract.first == "method")					
 	{															 
 		if (set_and_check_methods(extract.second, loc))
-			return (CONFFILE_PARSE_ERR);
+			throw(Server_conf::ConfError("unknown method", line, g_line));
 	}
 	else if (extract.first == "autoindex")
 	{
@@ -80,7 +82,7 @@ int		extract_location_field(std::string &line, Location &loc)
 		else if (extract.second == "off")
 			loc.auto_index = false;
 		else
-			return CONFFILE_PARSE_ERR;
+			throw(Server_conf::ConfError("wrong autoindex value (on|off)", line, g_line));
 	}
 	else													
 		return CONFFILE_PARSE_ERR;
@@ -125,14 +127,13 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		server.error_page[atoi(num.c_str())] = file;
 	}
 	else
-		return CONFFILE_PARSE_ERR;
-
+		throw(Server_conf::ConfError(std::string("unknown server field ") + extract.first), line);
 	return 0;
 }
 
 int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 {
-	while (getline(conf_file, line))
+	while (++g_line && getline(conf_file, line))
 	{
 		ws_trim(line);
 		if (line.find("\t\t") == 0)			
@@ -140,16 +141,18 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 			if (line.find(" = ") != std::string::npos)	
 			{
 				if (extract_location_field(line, loc))
-					return CONFFILE_PARSE_ERR;
+					throw(Server_conf::ConfError("wrong location formating", line, g_line));
 				line.clear();
 				if (conf_file.eof() == true)
 					return 0;
 			}
 			else
-				return CONFFILE_PARSE_ERR;
+				throw(Server_conf::ConfError("wrong autoindex formating", line, g_line));
 		}
-		else if (line != "")					
-			return 0;										
+		else if (line != "") {
+			return (0);
+			// throw(Server_conf::ConfError("missing tab for location", line, g_line));
+		}
 	}
 	return 0;
 }
@@ -158,7 +161,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 {
 	std::string line;
 
-	while (getline(conf_file, line) && conf_file.eof() != true)
+	while (++g_line && getline(conf_file, line) && conf_file.eof() != true)
 	{
 		ws_trim(line);
 		if (line != "")
@@ -170,7 +173,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 					std::string path;
 
 					if (line.find(":") == std::string::npos) 
-						return (CONFFILE_PARSE_ERR);
+						throw(Server_conf::ConfError("missing token `:`", line, g_line));
 					path = line.substr(strlen(S_LOCATION), line.length() - strlen(S_LOCATION) - 1);
 					server.locations[path] = Location();
 					server.locations[path].path = path;
@@ -184,12 +187,12 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 			if (line.find(" = ") != std::string::npos)			
 			{
 				if (extract_server_field(line, server))
-					return CONFFILE_PARSE_ERR;	
+					throw Server_conf::ConfError("missing token `=`", line, g_line);	
 			}
 			else if (line == "server:")			
 				return 0;
 			else
-				return CONFFILE_PARSE_ERR;
+				throw Server_conf::ConfError("filling server error", line, g_line);
 		}
 	}
 	return 0;
@@ -200,9 +203,10 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 	std::ifstream conf_file (file_name);
 	std::string line;
 
+	std::cout << GREEN << "Opening " << file_name << RESET << std::endl;
   	if (conf_file.is_open())
 	{
-		while (getline(conf_file, line))
+		while (++g_line && getline(conf_file, line))
 		{
 			ws_trim(line);
 			while (line == "server:")
@@ -221,8 +225,9 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 		}
 		conf_file.close();
   	}
-	else
-		return error_and_exit(FILE_ERR);
+	else {
+		throw (Server_conf::OpenFile());
+	}
 
 	return 0;
 }

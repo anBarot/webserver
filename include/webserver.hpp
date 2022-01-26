@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:24:15 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/25 22:50:50 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/26 16:23:54 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 int	is_cgi_compatible(Request &req, Location &loc);
 
 #define MKSTEMP_DEFAULT_TEMPLATE "webserv_tmp_XXXXXX"
+#define DEFAULT_SERVER_CONF "./conf_files/example3.conf"
 std::string random_filename(void);
 
 #include "Request.hpp"

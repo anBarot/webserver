@@ -12,11 +12,12 @@ SRCS_FILES		= \
 					\
 					# srcs/debug_display.cpp
 
-DEP 			= $(OBJS:.o=.d)
 
 SRCS			= $(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
 
 OBJS			= $(SRCS:.cpp=.o)
+
+DEP 			= $(OBJS:.o=.d)
 
 CXX				= clang++
 
@@ -26,13 +27,13 @@ ARGS			= ./conf_files/example2.conf
 
 OPTS			= 
 
+
+$(NAME):		$(OBJS)
+				@echo $(OBJS)
+				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
 -include $(DEP)
 
 all:			$(NAME)
-
-
-$(NAME):		$(OBJS)
-				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS) $()
 
 run:			all
 				./$(NAME) $(ARGS)

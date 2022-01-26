@@ -25,10 +25,28 @@ class Server_conf
 		unsigned							max_body_size;
 		std::map<std::string, Location> 	locations;
 		std::map<unsigned, std::string>		error_page;
+		bool								is_virtual;
 	
-		Server_conf() : listen_port(80), max_body_size(1) {}
-		Server_conf(int port) : listen_port(port) {}
+		Server_conf() : listen_port(80), listen_ip("127.0.0.1"), max_body_size(1), is_virtual(false) {}
+		Server_conf(int port) : listen_port(port), listen_ip("127.0.0.1"), max_body_size(1), is_virtual(false) {}
 		~Server_conf() {}
+
+		struct OpenFile : public std::exception {
+			virtual const char* what() const throw() {
+				return ("Fail to open file");
+			};
+		};
+		class ConfError : public std::exception {
+			public:
+				std::string	about;
+				std::string	near;
+				size_t		line;
+				ConfError(std::string a, std::string n = "", size_t l = 0) : about(a), near(n), line(l) {};
+				~ConfError() throw() {}
+				virtual const char* what() const throw() {
+					return (about.c_str());
+				};
+		};
 };
 
 Server_conf get_server_conf(/*Request &req, */std::vector<Server_conf> &confs, unsigned int lsock);
