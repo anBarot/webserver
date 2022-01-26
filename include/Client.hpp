@@ -26,8 +26,9 @@ public:
 	std::deque<Request> requests;
 	Response response;
 	std::vector<char> received_data_raw;
+	time_t last_activity;
 
-	Client(int sock, unsigned short lsock, std::string n_ip_add);
+	Client(int sock, unsigned short lsock, std::string n_ip_add, time_t t);
 
 	int		receive_request(std::vector<Server_conf> &confs);
 	int		respond(std::vector<Server_conf> &confs);

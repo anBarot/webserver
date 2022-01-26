@@ -71,7 +71,7 @@ int Connections::add_clients()
 			// std::cout << "Connection accepted on fd " << fd << " based on listen fd " << it->first << std::endl;
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
-			clients.push_back(Client(fd, it->second.second, it->second.first));
+			clients.push_back(Client(fd, it->second.second, it->second.first, time(NULL)));
 		}
 	}
 	return 0;
@@ -79,15 +79,13 @@ int Connections::add_clients()
 
 int Connections::check_clients()
 {
-	int i;
+	unsigned long i;
 
 	i = 0;
-	while (ready_fd)
+	while (i < clients.size())
 	{
-		// std::cout << "Checking clients"<< std::endl;
 		if (FD_ISSET(clients[i].socket, &ready_rset))
 		{
-			// std::cout << clients[i].socket << " is ready for reading"<< std::endl;
 			--ready_fd;
 			if (clients[i].receive_request(servers_conf) == -1)
 			{
@@ -101,6 +99,7 @@ int Connections::check_clients()
 					FD_SET(clients[i].socket, &active_wset);
 					FD_CLR(clients[i].socket, &active_rset);
 				}
+				clients[i].last_activity = time(NULL);
 				++i;
 			}
 		}
@@ -113,11 +112,17 @@ int Connections::check_clients()
 			else
 			{
 				FD_SET(clients[i].socket, &active_rset);
+				clients[i].last_activity = time(NULL);
 				++i;
 			}
 		}
 		else
-			++i;
+		{
+			if (difftime(time(NULL), clients[i].last_activity) >= 15)
+				remove_client(i);
+			else
+				++i;
+		}
 	}
 	return 0;
 }
@@ -136,7 +141,7 @@ void Connections::loop()
 	// std::cout << "Waiting for connection." << std::endl;
 	while (1)
 	{
-		timeout.tv_sec = 300;
+		timeout.tv_sec = 5;
 		timeout.tv_usec = 0;
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
@@ -146,22 +151,7 @@ void Connections::loop()
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
-		{
 			add_clients();
-			check_clients();
-		}
-		else
-		{
-			std::vector<Client>::iterator it = clients.begin();
-			while (it != clients.end())
-			{
-				FD_CLR(it->socket, &active_rset);
-				FD_CLR(it->socket, &active_wset);
-				close(it->socket);
-				fd_list.remove(it->socket);
-				++it;
-			}
-			clients.clear();
-		}
+		check_clients();
 	}	
 }

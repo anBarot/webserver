@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), ip_address(n_ip_add), port(lsock)
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add, time_t t) : socket(sock), ip_address(n_ip_add), port(lsock), last_activity(t)
 {
 	requests.push_back(Request());
 }
@@ -33,8 +33,11 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 {
 	bool first_encounter = false;
 	Server_conf sv;
+	size_t pos;
 
-	sv_name.erase(sv_name.find_first_of(":"));
+	pos = sv_name.find_first_of(":");
+	if (pos != std::string::npos)
+		sv_name.erase(pos);
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
 	{
 		if (conf->listen_port == port && conf->listen_ip == ip)
