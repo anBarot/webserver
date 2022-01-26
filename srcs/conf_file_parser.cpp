@@ -123,11 +123,13 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		iss >> num;
 		std::string file;
 		iss >> file;
-
+		std::cerr << "Before err" << std::endl;
 		server.error_page[atoi(num.c_str())] = file;
+		std::cerr << "After err" << std::endl;
 	}
-	else
-		throw(Server_conf::ConfError(std::string("unknown server field ") + extract.first), line);
+	else {
+		throw(Server_conf::ConfError("server format error", line, g_line));
+	}
 	return 0;
 }
 

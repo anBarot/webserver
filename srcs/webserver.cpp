@@ -45,6 +45,9 @@ int main(int ac, char **av)
 	} catch (Server_conf::OpenFile &ex) {
 		std::cerr << RED << ex.what() << RESET << ": " << BOLDCYAN << conf_file << RESET << std::endl;
 		return (EXIT_FAILURE);
+	} catch (std::exception &ex) {
+		std::cerr << "Unknown error " << ex.what() << std::endl;
+		return (EXIT_FAILURE);
 	}
 
 	maps_init_MIME_types(MIME_types);
