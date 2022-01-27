@@ -1,9 +1,5 @@
 #include "Connections.hpp"
 
-int Connection::isAlreayRegistered() {
-	
-}
-
 int Connections::init()
 {
 	struct sockaddr_in addr;
@@ -14,10 +10,13 @@ int Connections::init()
 	FD_ZERO(&active_rset);
 	FD_ZERO(&active_wset);
 	optval = 1;
-	memset(&addr, 0,sizeof(addr));
-	addr.sin_family= AF_INET;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
+		if (it->is_virtual) {
+			continue ;
+		}
 		fd = socket(AF_INET, SOCK_STREAM, 0);
 		if (fd == -1)
 		{

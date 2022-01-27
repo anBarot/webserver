@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:35:13 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/26 16:55:50 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/27 17:27:04 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,10 +37,25 @@ int main(int ac, char **av)
 		if (conf_parser(conf_file, connections.servers_conf))
 			return (error_and_exit(CONFFILE_PARSE_ERR));
 	} catch (Server_conf::ConfError &ex) {
-		std::cerr << RED << "Error in file " << BOLDCYAN << conf_file << RED << ": " << RESET << ex.what() << std::endl;
+		std::cerr << RED << "Error in file "
+			<< BOLDCYAN << conf_file
+			<< RED << ": "
+			<< RESET << ex.what() << std::endl;
 		if (!ex.near.empty()) {
-			std::cerr << RED << "    ↳ " << YELLOW << "Near line " << BOLDBLUE << ex.line << YELLOW << ": '" << RESET << ex.near << YELLOW << '\'' << RESET << std::endl;
+			std::cerr << RED << "    ↳ "
+				<< YELLOW<< "Near line "
+				<< BOLDBLUE << ex.line
+				<< YELLOW << ": '"
+				<< RESET << ex.near
+				<< YELLOW << '\''
+				<< RESET << std::endl;
 		}
+		return (EXIT_FAILURE);
+	}  catch (Server_conf::ListenAlreadyExist &ex) {
+		std::cerr << RED << ex.what() << RESET << ": " << BOLDCYAN
+			<< ex.ip << ":" << ex.port
+			<< " has been registered twice in the same block server"
+			<< RESET << std::endl;
 		return (EXIT_FAILURE);
 	} catch (Server_conf::OpenFile &ex) {
 		std::cerr << RED << ex.what() << RESET << ": " << BOLDCYAN << conf_file << RESET << std::endl;

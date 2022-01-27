@@ -115,7 +115,7 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 	#ifdef LOGGER
 		std::cout << CYAN << socket << " received " << ret << " bytes:\n" << RESET << buffer << RESET << std::endl;
 	#endif // DEBUG
-	// std::cout << socket << " received " << ret << " bytes:\n" << buffer << std::endl;
+	std::cout << CYAN << socket << " received " << ret << " bytes:\n" << RESET << buffer << std::endl;
 
 	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);
@@ -273,7 +273,7 @@ int Client::respond(std::vector<Server_conf> &confs)
 	file.open(response.file_name.c_str());
 	buf << response.line.c_str() << response.header_string.c_str() << file.rdbuf() << "\r\n";
 	str = buf.str();
-	// std::cout << "Response:\n" << str << std::endl;
+	std::cout << RED << "Response:\n" << RESET << str << std::endl;
 	response.clear();
 	file.close();
 	if (send(socket, str.c_str(), str.size(), 0) == -1)

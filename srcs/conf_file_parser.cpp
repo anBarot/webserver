@@ -6,13 +6,42 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/26 16:54:59 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/27 18:18:21 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "webserver.hpp"
 
 int g_line = 0;
+
+std::ostream &operator << (std::ostream &out, const Server_conf &sc) {
+	out << BOLDBLUE << std::endl
+		<< "------ Server -----" << RESET << std::endl;
+
+	Server_conf::listenables::const_iterator l_it = sc.listens.begin();
+	Server_conf::listenables::const_iterator l_ite = sc.listens.end();
+	for (; l_it != l_ite; l_it++) {
+		out << " ↳ "
+			<< CYAN << l_it->first
+			<< RESET << ":"
+			<< BOLDCYAN << l_it->second
+			<< std::endl << RESET;
+
+	}
+	out << BLUE << "------ Names ------" << RESET << std::endl;
+	std::list<std::string>::const_iterator n_it = sc.names.begin();
+	std::list<std::string>::const_iterator n_ite = sc.names.end();
+	for (; n_it != n_ite; n_it++) {
+		out << " ↳ " << *n_it << std::endl;
+	}
+	out << BLUE << "-------------------" << RESET << std::endl;
+	out << "isVirtual(" << RED << sc.is_virtual << RESET 
+		<< ") " << std::endl
+		<< "MaxBodySize(" BLUE << sc.max_body_size << RESET
+		<< ")" << std::endl;
+	out << BOLDBLUE << "-------------------" << RESET << std::endl;
+	return out;
+}
 
 std::pair<std::string, std::string> extract_field(std::string &line, unsigned tab_nb)
 {
@@ -45,7 +74,7 @@ int		extract_location_field(std::string &line, Location &loc)
 	extract = extract_field(line, 2);
 
 	if (extract.first == "root" || extract.first == "index" || extract.first == "cgi_path"
-	|| extract.first == "cgi_extension" || extract.first == "upload_path")
+		|| extract.first == "cgi_extension" || extract.first == "upload_path")
 	{
 		if (extract.second.find_first_of("\t ") != std::string::npos)
 				throw(Server_conf::ConfError("location field tab missing", line, g_line));
@@ -105,6 +134,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		server.listen_port = atoi(word.c_str());
 		iss >> word;
 		server.listen_ip = word;
+		server.addListen(server.listen_ip, server.listen_port);
 	}
 	else if (extract.first == "server_name")
 	{
@@ -198,6 +228,14 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 	return 0;
 }
 
+bool conf_exist(std::vector<Server_conf> &confs, Server_conf &c)
+{
+	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end() - 1; ++conf)
+		if (conf->listen_port == c.listen_port && conf->listen_ip == c.listen_ip)
+			return true;
+	return (false);
+}
+
 int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 {
 	std::ifstream conf_file (file_name);
@@ -213,6 +251,10 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 				servers.push_back(Server_conf());
 				if (fill_server(conf_file, servers.back()))
 					return error_and_exit(CONFFILE_PARSE_ERR);
+				if (conf_exist(servers, servers.back())) {
+					servers.back().is_virtual = true;
+				}
+				std::cout << "Server registered: " << servers.back() << std::endl;
 				if (conf_file.eof() == true)
 				{
 					line.clear();
