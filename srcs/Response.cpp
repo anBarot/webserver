@@ -21,8 +21,12 @@ int	is_cgi_compatible(Request &req, Location &loc)
 		((pos = target.find_last_of(".")) == std::string::npos))
 		return 0;
 	ext = target.substr(pos + 1, target.size());
-	if (ext == loc.cgi_extension)
-		return 1;
+	for (std::vector<std::string>::iterator it = loc.cgi_extension.begin();
+	it != loc.cgi_extension.end(); it++)
+	{
+		if (ext == *it)
+			return 1;
+	}
 	return 0;
 }
 
@@ -88,11 +92,7 @@ char **create_cgi_env(Request &req)
 	env_map["SCRIPT_NAME"] = script_name;
 	env_map["SCRIPT_FILENAME"] = req_path;
 	env_map["SERVER_NAME"] = "webserver";
-	// env_map["HTTP_COOKIE"] = ;
-	// env_map["HTTP_USER_AGENT"] = ;
-	// env_map["REMOTE_ADDR"] = ;
-	// env_map["REMOTE_HOST"] = ;
-	
+
 	return create_env_array(env_map);
 }
 
@@ -300,7 +300,6 @@ int Response::exec_cgi(char **exec_arg, char **cgi_env)
 
 void Response::create_cgi_file(Request &req, Location &loc)
 {
-	// std::cout << "Enterring CGI function\nrequest tmp file name : " << req.payload.tmp_file_name << "\n";
 	char **cgi_env;
 	char **exec_arg;
 	int status;

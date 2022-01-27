@@ -152,15 +152,10 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 	{
 		req.extract_headers(received_data_raw);
 		if (req.status == HEADER_PARSED)
-		{
 			check_payload(confs);
-			check_trailer();
-		}
 	}
 	if (req.status == HEADER_PARSED)
 		req.extract_payload(received_data_raw);
-	if (req.status == PAYLOAD_PARSED)
-		req.extract_trailer(received_data_raw);
 }
 
 // check if the request line is valid. If not, an reponse error code is set.
@@ -211,8 +206,13 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 	if (req.request_line.method == POST)
 	{
 		if (req.headers.count("transfer-encoding") &&
-			req.headers["transfer-encoding"].find("chunked") != std::string::npos)
+			req.headers["transfer-encoding"] == "chunked")
 			req.payload.is_chunked = true;
+		else if (req.headers.count("transfer-encoding"))
+		{
+			req.status = FINISH_PARSING;
+			response.code = NOT_IMPLEMENTED;
+		}
 		else if (req.headers.count("content-length"))
 		{
 			req.payload.length = atoi(req.headers["content-length"].c_str());
@@ -235,31 +235,6 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 	}
 	else
 		req.status = FINISH_PARSING;
-}
-
-/*
-	Check if a trailer is expected and header values are allowed.
-	The expected header in trailer are put in the expected_trailers set.
-*/
-void	Client::check_trailer()
-{
-	std::string s[] = {"transfer-encoding", "content-length", "host", 
-	"cache-control", "max-forwards", "te", "authorization", "set-cookie",
-	"content-encoding", "content-type", "content-range", "trailer"};
-	std::set<std::string> disallowed_trailer(s, s + 12);
-
-	if (requests.back().payload.is_chunked == true && requests.back().headers.count("trailer"))
-	{
-		std::istringstream iss(requests.back().headers["trailer"]);
-		std::string word;
-		
-		while (iss >> word)
-		{
-			strlower(word);
-			if (disallowed_trailer.find(word) == disallowed_trailer.end())
-				requests.back().expected_trailers.insert(word);
-		}
-	}
 }
 
 int Client::respond(std::vector<Server_conf> &confs)

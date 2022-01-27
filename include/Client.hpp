@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:20:52 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/20 15:27:40 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/25 18:14:53 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ public:
 private:
 	void extract_request_from_data(std::vector<Server_conf> confs);
 	void check_payload(std::vector<Server_conf> confs);
-	void check_trailer();
 	void check_line();
 	void fill_response(std::vector<Server_conf> confs);
 	void fill_error_response();

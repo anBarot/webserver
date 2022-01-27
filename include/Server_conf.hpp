@@ -6,12 +6,12 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:34 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/05 16:56:37 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/26 16:15:34 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
-#define SERVER_HPP
+#define SERVER_HPP 1
 
 #include "libraries.hpp"
 #include "Location.hpp"
@@ -26,7 +26,7 @@ class Server_conf
 		std::map<std::string, Location> 	locations;
 		std::map<unsigned, std::string>		error_page;
 	
-		Server_conf() : listen_port(80), max_body_size(1) {}
+		Server_conf() : listen_port(80), listen_ip("127.0.0.1"), max_body_size(1) {}
 		Server_conf(int port) : listen_port(port) {}
 		~Server_conf() {}
 };
