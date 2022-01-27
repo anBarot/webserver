@@ -91,7 +91,6 @@ int Connections::check_clients()
 			--ready_fd;
 			if (clients[i].receive_request(servers_conf) == -1)
 			{
-				// std::cout << "Closing connection because of ret 0 on fd " << clients[i].socket << std::endl;
 				FD_CLR(clients[i].socket, &active_rset);
 				remove_client(i);
 			}
@@ -107,14 +106,10 @@ int Connections::check_clients()
 		}
 		else if (FD_ISSET(clients[i].socket, &ready_wset))
 		{
-			// std::cout << clients[i].socket << " is ready for writing"<< std::endl;
 			--ready_fd;
 			FD_CLR(clients[i].socket, &active_wset);
 			if (clients[i].respond(servers_conf) == -1)
-			{
-				// std::cout << "Closing connection because of error on fd " << clients[i].socket << std::endl;
 				remove_client(i);
-			}
 			else
 			{
 				FD_SET(clients[i].socket, &active_rset);

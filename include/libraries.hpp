@@ -2,7 +2,6 @@
 # define LIBRARIES_H
 
 //c libraries
-# include <stdlib.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <signal.h>
@@ -13,6 +12,7 @@
 # include <sys/stat.h>
 # include <sys/wait.h>
 
+# include <cstdlib>
 # include <cstring>
 
 # include <iostream>
