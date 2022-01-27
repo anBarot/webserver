@@ -3,12 +3,10 @@
 std::string get_query(std::string &file_name)
 {
 	std::ifstream payload_file(file_name.c_str());
-	std::string str;
-	std::string res;
+	std::stringstream buf;
 
-	while (std::getline(payload_file, str))
-		res += str;
-	return res;
+	buf << payload_file.rdbuf();
+	return buf.str();
 }
 
 int	is_cgi_compatible(Request &req, Location &loc)
@@ -50,62 +48,6 @@ void create_html_listing_file(std::string path, std::string listing_html)
 	}
 	filein.close();
 	fileout.close();
-}
-
-void free_arguments(char **arg)
-{
-	for (size_t i = 0; arg[i]; i++)
-		free(arg[i]);
-	free(arg);
-}
-
-char **create_env_array(std::map<std::string, std::string> env_map)
-{
-	char **res;
-	std::string tmp;
-	std::map<std::string, std::string>::iterator it = env_map.begin(); 
-
-	if (!(res = (char **)calloc(sizeof(char**), env_map.size() + 1)))
-		return NULL;
-	for (size_t i = 0; i != env_map.size(); i++)
-	{
-		tmp = it->first + "=" + it->second;
-		res[i] = strdup(tmp.c_str());
-		it++;
-	}
-
-	return res;
-}
-
-char **create_cgi_env(Request &req)
-{
-	std::map<std::string, std::string> env_map;
-	std::string &req_path = req.request_line.target;
-
-	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
-
-	env_map["CONTENT_TYPE"] = req.headers["content-type"];
-	env_map["CONTENT_LENGTH"] = req.headers["content-length"];
-	env_map["PATH_INFO"] = req_path;
-	env_map["QUERY_STRING"] = get_query(req.payload.tmp_file_name);
-	env_map["REQUEST_METHOD"] = get_method_string(req.request_line.method);
-	env_map["SCRIPT_NAME"] = script_name;
-	env_map["SCRIPT_FILENAME"] = req_path;
-	env_map["SERVER_NAME"] = "webserver";
-
-	return create_env_array(env_map);
-}
-
-char **create_exec_arg(std::string exec_path, std::string script)
-{
-	char **res;
-
-	if (!(res = (char**)calloc(3, sizeof(char *))))
-		return NULL;
-	res[0] = strdup(exec_path.c_str());
-	res[1] = strdup(script.c_str());
-
-	return res;
 }
 
 void Response::create_directory_listing(std::string path, std::string loc_root, std::string loc_path)
@@ -271,11 +213,73 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-int Response::exec_cgi(char **exec_arg, char **cgi_env)
+void free_arguments(char **arg)
+{
+	for (size_t i = 0; arg[i]; i++)
+		free(arg[i]);
+	free(arg);
+}
+
+char **create_env_array(std::map<std::string, std::string> env_map)
+{
+	char **res;
+	std::string tmp;
+	std::map<std::string, std::string>::iterator it = env_map.begin(); 
+
+	if (!(res = (char **)calloc(sizeof(char**), env_map.size() + 1)))
+		return NULL;
+	for (size_t i = 0; i != env_map.size(); i++)
+	{
+		tmp = it->first + "=" + it->second;
+		res[i] = strdup(tmp.c_str());
+		it++;
+	}
+
+	return res;
+}
+
+char **create_cgi_env(Request &req)
+{
+	std::map<std::string, std::string> env_map;
+	std::string &req_path = req.request_line.target;
+
+	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
+
+	env_map["CONTENT_TYPE"] = req.headers["content-type"];
+	env_map["CONTENT_LENGTH"] = req.headers["content-length"];
+	env_map["PATH_INFO"] = req_path;
+	env_map["QUERY_STRING"] = get_query(req.payload.tmp_file_name);
+	env_map["REQUEST_METHOD"] = get_method_string(req.request_line.method);
+	env_map["SCRIPT_NAME"] = script_name;
+	env_map["SCRIPT_FILENAME"] = req_path;
+	env_map["SERVER_NAME"] = "webserver";
+
+	return create_env_array(env_map);
+}
+
+void Response::create_cgi_file(Request &req, Location &loc)
+{
+	char **cgi_env;
+	int status;
+	std::string script_name;
+	std::string exec_name;
+	std::string &target = req.request_line.target;
+
+	script_name = target.substr(target.find_last_of("/") + 1, target.size());
+	exec_name = loc.cgi_path + "/" + script_name;
+	cgi_env = create_cgi_env(req);
+	status = exec_cgi(exec_name.c_str(), cgi_env);
+	if (status == 1)
+		code = NOT_FOUND;
+	free_arguments(cgi_env);
+}
+
+int Response::exec_cgi(const char *exec_arg, char **cgi_env)
 {
 	pid_t pid;
 	int cgi_file_fd;
 	int status;
+	char *const args[2] = {(char *)exec_arg, NULL};
 
 	pid = fork();
 	if (!pid)
@@ -286,7 +290,7 @@ int Response::exec_cgi(char **exec_arg, char **cgi_env)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
 		dup2(cgi_file_fd, STDERR_FILENO);
-		if ((execve(exec_arg[0], exec_arg, cgi_env)) == -1)
+		if ((execve(args[0], args, cgi_env)) == -1)
 			exit(1);
 	}
 	else if (pid == -1)
@@ -298,25 +302,6 @@ int Response::exec_cgi(char **exec_arg, char **cgi_env)
 	return WEXITSTATUS(status);
 }
 
-void Response::create_cgi_file(Request &req, Location &loc)
-{
-	char **cgi_env;
-	char **exec_arg;
-	int status;
-	std::string script_name;
-	std::string exec_name;
-	std::string &target = req.request_line.target;
-
-	script_name = target.substr(target.find_last_of("/") + 1, target.size());
-	exec_name = loc.cgi_path + "/" + script_name;
-	exec_arg = create_exec_arg(exec_name.c_str(), script_name);
-	cgi_env = create_cgi_env(req);
-	status = exec_cgi(exec_arg, cgi_env);
-	if (status == 1)
-		code = NOT_FOUND;
-	free_arguments(exec_arg);
-	free_arguments(cgi_env);
-}
 
 void Response::extract_cgi_file()
 {
