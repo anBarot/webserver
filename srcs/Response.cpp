@@ -220,41 +220,38 @@ void free_arguments(char **arg)
 	free(arg);
 }
 
-char **create_env_array(std::map<std::string, std::string> env_map)
+char **create_env_array(std::vector<std::string> env_vec)
 {
 	char **res;
-	std::string tmp;
-	std::map<std::string, std::string>::iterator it = env_map.begin(); 
+	std::vector<std::string>::iterator it = env_vec.begin(); 
 
-	if (!(res = (char **)calloc(sizeof(char**), env_map.size() + 1)))
+	if (!(res = (char **)calloc(sizeof(char**), env_vec.size() + 1)))
 		return NULL;
-	for (size_t i = 0; i != env_map.size(); i++)
+	for (size_t i = 0; i != env_vec.size(); i++)
 	{
-		tmp = it->first + "=" + it->second;
-		res[i] = strdup(tmp.c_str());
+		res[i] = strdup(it->c_str());
 		it++;
 	}
-
 	return res;
 }
 
 char **create_cgi_env(Request &req)
 {
-	std::map<std::string, std::string> env_map;
+	std::vector<std::string> env_vec;
 	std::string &req_path = req.request_line.target;
 
 	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
 
-	env_map["CONTENT_TYPE"] = req.headers["content-type"];
-	env_map["CONTENT_LENGTH"] = req.headers["content-length"];
-	env_map["PATH_INFO"] = req_path;
-	env_map["QUERY_STRING"] = get_query(req.payload.tmp_file_name);
-	env_map["REQUEST_METHOD"] = get_method_string(req.request_line.method);
-	env_map["SCRIPT_NAME"] = script_name;
-	env_map["SCRIPT_FILENAME"] = req_path;
-	env_map["SERVER_NAME"] = "webserver";
+	env_vec.push_back("CONTENT_TYPE=" + req.headers["content-type"]);
+	env_vec.push_back("CONTENT_LENGTH=" + req.headers["content-length"]);
+	env_vec.push_back("PATH_INFO=" + req_path);
+	env_vec.push_back("QUERY_STRING=" + get_query(req.payload.tmp_file_name));
+	env_vec.push_back("REQUEST_METHOD=" + get_method_string(req.request_line.method));
+	env_vec.push_back("SCRIPT_NAME=" + script_name);
+	env_vec.push_back("SCRIPT_FILENAME=" + req_path);
+	env_vec.push_back("SERVER_NAME=webserver");
 
-	return create_env_array(env_map);
+	return create_env_array(env_vec);
 }
 
 void Response::create_cgi_file(Request &req, Location &loc)
