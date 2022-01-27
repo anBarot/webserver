@@ -56,7 +56,7 @@ int main(int ac, char **av)
 	signal(SIGINT, sigint_handler);
 
 	connections.init();
-	__WEBSERV_INTRO
+	__WEBSERV_INTRO;
 	connections.loop();
 
 	return (0);

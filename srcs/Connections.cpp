@@ -1,5 +1,9 @@
 #include "Connections.hpp"
 
+int Connection::isAlreayRegistered() {
+	
+}
+
 int Connections::init()
 {
 	struct sockaddr_in addr;
@@ -84,10 +88,10 @@ int Connections::check_clients()
 	i = 0;
 	while (ready_fd)
 	{
-		// std::cout << "Checking clients"<< std::endl;
+		std::cout << "Checking clients"<< std::endl;
 		if (FD_ISSET(clients[i].socket, &ready_rset))
 		{
-			// std::cout << clients[i].socket << " is ready for reading"<< std::endl;
+			std::cout << clients[i].socket << " is ready for reading"<< std::endl;
 			--ready_fd;
 			if (clients[i].receive_request(servers_conf) == -1)
 			{
@@ -140,7 +144,7 @@ void Connections::loop()
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
 		ready_wset = active_wset;
-		__AWAIT_REQ
+		__AWAIT_REQ;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
 		// std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)

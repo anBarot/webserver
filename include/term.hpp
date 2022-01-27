@@ -33,14 +33,15 @@
 
 # ifdef LOGGER
 #  define __WEBSERV_INTRO \
-    std::cout << GREEN  << "██╗    ██╗███████╗██████╗ ███████╗███████╗██████╗ ██╗   ██╗" << std::endl; \
-	std::cout << GREEN  << "██║    ██║██╔════╝██╔══██╗██╔════╝██╔════╝██╔══██╗██║   ██║" << std::endl; \
-	std::cout << YELLOW << "██║ █╗ ██║█████╗  ██████╔╝███████╗█████╗  ██████╔╝██║   ██║" << std::endl; \
-	std::cout << YELLOW << "██║███╗██║██╔══╝  ██╔══██╗╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝" << std::endl; \
-	std::cout << RED    << "╚███╔███╔╝███████╗██████╔╝███████║███████╗██║  ██║ ╚████╔╝ " << std::endl; \
-	std::cout << RED    << "╚══╝╚══╝ ╚══════╝╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝   " << RESET << std::endl;
+    std::cout << RED  		<< "██╗    ██╗███████╗██████╗ ███████╗███████╗██████╗ ██╗   ██╗" << std::endl; \
+	std::cout << YELLOW  	<< "██║    ██║██╔════╝██╔══██╗██╔════╝██╔════╝██╔══██╗██║   ██║" << std::endl; \
+	std::cout << GREEN 		<< "██║ █╗ ██║█████╗  ██████╔╝███████╗█████╗  ██████╔╝██║   ██║" << std::endl; \
+	std::cout << BLUE 		<< "██║███╗██║██╔══╝  ██╔══██╗╚════██║██╔══╝  ██╔══██╗╚██╗ ██╔╝" << std::endl; \
+	std::cout << MAGENTA    << "╚███╔███╔╝███████╗██████╔╝███████║███████╗██║  ██║ ╚████╔╝ " << std::endl; \
+	std::cout << MAGENTA    << " ╚══╝╚══╝ ╚══════╝╚═════╝ ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  " << std::endl; \
+	std::cout << RESET 
 # define __AWAIT_REQ \
-    std::cout << YELLOW << "Awaiting request..." << RESET << std::endl;
+    std::cout << YELLOW << "Awaiting request..." << RESET << std::endl
 # else
 #  define __WEBSERV_INTRO 
 #  define __AWAIT_REQ 

@@ -123,9 +123,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		iss >> num;
 		std::string file;
 		iss >> file;
-		std::cerr << "Before err" << std::endl;
 		server.error_page[atoi(num.c_str())] = file;
-		std::cerr << "After err" << std::endl;
 	}
 	else {
 		throw(Server_conf::ConfError("server format error", line, g_line));
@@ -205,7 +203,6 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 	std::ifstream conf_file (file_name);
 	std::string line;
 
-	std::cout << GREEN << "Opening " << file_name << RESET << std::endl;
   	if (conf_file.is_open())
 	{
 		while (++g_line && getline(conf_file, line))
