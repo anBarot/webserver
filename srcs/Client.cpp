@@ -114,7 +114,10 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 	if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
 		return -1;
 	buffer[ret] = 0;
-	std::cout << socket << " received " << ret << " bytes:\n" << buffer << std::endl;
+
+	#ifdef LOGGER
+		std::cout << CYAN << socket << " received " << ret << " bytes:\n" << RESET << buffer << RESET << std::endl;
+	#endif // DEBUG
 
 	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);

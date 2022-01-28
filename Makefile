@@ -1,33 +1,54 @@
-NAME	=	webserv
+NAME			= webserv
+SRCS_DIR 		= srcs
+SRCS_FILES		= \
+					tools.cpp \
+					webserver.cpp \
+					conf_file_parser.cpp  \
+					headers.cpp \
+					Connections.cpp \
+					Client.cpp \
+					Response.cpp \
+					Request.cpp \
+					\
+					# srcs/debug_display.cpp
 
-SRCS = 	srcs/webserver.cpp \
-		srcs/conf_file_parser.cpp  \
-		srcs/headers.cpp \
-		srcs/tools.cpp \
-		srcs/Connections.cpp \
-		srcs/Client.cpp \
-		srcs/Response.cpp \
-		srcs/Request.cpp
-		# srcs/debug_display.cpp
 
-OBJS	=	$(SRCS:.cpp=.o)
+SRCS			= $(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
 
-CC		=	clang++
+OBJS			= $(SRCS:.cpp=.o)
 
-FLAGS	=	-Wall -Werror -Wextra -g -std=c++98	
+DEP 			= $(OBJS:.o=.d)
 
-%.o:		%.cpp
-			$(CC) $(FLAGS) -c $< -o $@ -I./include
+CXX				= clang++
 
-all:		$(NAME)
+CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include $(OPTS)
 
-$(NAME):	$(OBJS)
-			$(CC) $(FLAGS) -o $(NAME) $(OBJS)
+ARGS			= ./conf_files/example2.conf
+
+OPTS			= 
+
+
+$(NAME):		$(OBJS)
+				@echo $(OBJS)
+				$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+-include $(DEP)
+
+all:			$(NAME)
+
+run:			all
+				./$(NAME) $(ARGS)
+
+log:
+				$(MAKE) OPTS="-D LOGGER" re
+				./$(NAME) $(ARGS)
 
 clean:
-			rm -f $(OBJS)
+				rm -f $(OBJS)
+				rm -f $(DEP)
 
-fclean:		clean
-			rm -f $(NAME)
+fclean:			clean
+				rm -f $(NAME)
 
-re:			fclean all
+re:				fclean all
+
+.PHONY:			all clean fclean re run log
