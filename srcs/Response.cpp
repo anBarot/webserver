@@ -213,70 +213,51 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-void free_arguments(char **arg)
+std::vector<std::string> create_cgi_env(Request &req)
 {
-	for (size_t i = 0; arg[i]; i++)
-		free(arg[i]);
-	free(arg);
-}
-
-char **create_env_array(std::vector<std::string> env_vec)
-{
-	char **res;
-	std::vector<std::string>::iterator it = env_vec.begin(); 
-
-	if (!(res = (char **)calloc(sizeof(char**), env_vec.size() + 1)))
-		return NULL;
-	for (size_t i = 0; i != env_vec.size(); i++)
-	{
-		res[i] = strdup(it->c_str());
-		it++;
-	}
-	return res;
-}
-
-char **create_cgi_env(Request &req)
-{
-	std::vector<std::string> env_vec;
+	std::vector<std::string> env;
 	std::string &req_path = req.request_line.target;
-
 	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
 
-	env_vec.push_back("CONTENT_TYPE=" + req.headers["content-type"]);
-	env_vec.push_back("CONTENT_LENGTH=" + req.headers["content-length"]);
-	env_vec.push_back("PATH_INFO=" + req_path);
-	env_vec.push_back("QUERY_STRING=" + get_query(req.payload.tmp_file_name));
-	env_vec.push_back("REQUEST_METHOD=" + get_method_string(req.request_line.method));
-	env_vec.push_back("SCRIPT_NAME=" + script_name);
-	env_vec.push_back("SCRIPT_FILENAME=" + req_path);
-	env_vec.push_back("SERVER_NAME=webserver");
+	env.push_back("CONTENT_TYPE=" + req.headers["content-type"]);
+	env.push_back("CONTENT_LENGTH=" + req.headers["content-length"]);
+	env.push_back("PATH_INFO=" + req_path);
+	env.push_back("QUERY_STRING=" + get_query(req.payload.tmp_file_name));
+	env.push_back("REQUEST_METHOD=" + get_method_string(req.request_line.method));
+	env.push_back("SCRIPT_NAME=" + script_name);
+	env.push_back("SCRIPT_FILENAME=" + req_path);
+	env.push_back("SERVER_NAME=webserver");
 
-	return create_env_array(env_vec);
+	return env;
 }
 
 void Response::create_cgi_file(Request &req, Location &loc)
 {
-	char **cgi_env;
-	int status;
 	std::string script_name;
 	std::string exec_name;
 	std::string &target = req.request_line.target;
 
 	script_name = target.substr(target.find_last_of("/") + 1, target.size());
 	exec_name = loc.cgi_path + "/" + script_name;
-	cgi_env = create_cgi_env(req);
-	status = exec_cgi(exec_name.c_str(), cgi_env);
-	if (status == 1)
+	if (exec_cgi(exec_name.c_str(), create_cgi_env(req)) == 1)
 		code = NOT_FOUND;
-	free_arguments(cgi_env);
 }
 
-int Response::exec_cgi(const char *exec_arg, char **cgi_env)
+int Response::exec_cgi(const char *exec_arg, std::vector<std::string> cgi_env)
 {
 	pid_t pid;
 	int cgi_file_fd;
 	int status;
-	char *const args[2] = {(char *)exec_arg, NULL};
+
+	std::vector<const char *> char_env;
+	for (std::vector<const char *>::size_type i = 0; i < 8; ++i)
+		char_env.push_back(cgi_env[i].c_str());
+
+	char *const args[2] = {(char*)exec_arg, NULL};
+	char *const env[9] = { (char*)char_env[0], (char *)char_env[1],
+						(char*)char_env[2], (char*)char_env[3],
+						(char*)char_env[4], (char*)char_env[5],
+						(char*)char_env[6], (char*)char_env[7], 0 };
 
 	pid = fork();
 	if (!pid)
@@ -287,7 +268,7 @@ int Response::exec_cgi(const char *exec_arg, char **cgi_env)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
 		dup2(cgi_file_fd, STDERR_FILENO);
-		if ((execve(args[0], args, cgi_env)) == -1)
+		if ((execve(args[0], args, env)) == -1)
 			exit(1);
 	}
 	else if (pid == -1)
