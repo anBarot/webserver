@@ -3,12 +3,10 @@
 std::string get_query(std::string &file_name)
 {
 	std::ifstream payload_file(file_name.c_str());
-	std::string str;
-	std::string res;
+	std::stringstream buf;
 
-	while (std::getline(payload_file, str))
-		res += str;
-	return res;
+	buf << payload_file.rdbuf();
+	return buf.str();
 }
 
 int	is_cgi_compatible(Request &req, Location &loc)
@@ -21,91 +19,24 @@ int	is_cgi_compatible(Request &req, Location &loc)
 		((pos = target.find_last_of(".")) == std::string::npos))
 		return 0;
 	ext = target.substr(pos + 1, target.size());
-	if (ext == loc.cgi_extension)
-		return 1;
+	for (std::vector<std::string>::iterator it = loc.cgi_extension.begin();
+	it != loc.cgi_extension.end(); it++)
+	{
+		if (ext == *it)
+			return 1;
+	}
 	return 0;
 }
 
 void create_html_listing_file(std::string path, std::string listing_html)
 {
-	std::ifstream filein("./html/listing.html");
 	std::ofstream fileout("./html/listing_temp.html");
-	size_t pos_done;
-	size_t pos_dtwo;
-	std::string str;
  	
-	path.append("/");
-	while (std::getline(filein, str))
-	{
-		if ((pos_done = str.find("$1")) != std::string::npos)
-			str.replace(pos_done, 2, path);
-		if ((pos_dtwo = str.find("$2")) != std::string::npos)
-			str.replace(pos_dtwo, 2, listing_html);
-		fileout << str;
-		fileout << "\n";
-	}
-	filein.close();
+	fileout << "<!DOCTYPE html><html><head><title>Index of " << path << 
+		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
+		listing_html <<"</pre><hr></body></html>";
+
 	fileout.close();
-}
-
-void free_arguments(char **arg)
-{
-	for (size_t i = 0; arg[i]; i++)
-		free(arg[i]);
-	free(arg);
-}
-
-char **create_env_array(std::map<std::string, std::string> env_map)
-{
-	char **res;
-	std::string tmp;
-	std::map<std::string, std::string>::iterator it = env_map.begin(); 
-
-	if (!(res = (char **)calloc(sizeof(char**), env_map.size() + 1)))
-		return NULL;
-	for (size_t i = 0; i != env_map.size(); i++)
-	{
-		tmp = it->first + "=" + it->second;
-		res[i] = strdup(tmp.c_str());
-		it++;
-	}
-
-	return res;
-}
-
-char **create_cgi_env(Request &req)
-{
-	std::map<std::string, std::string> env_map;
-	std::string &req_path = req.request_line.target;
-
-	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
-
-	env_map["CONTENT_TYPE"] = req.headers["content-type"];
-	env_map["CONTENT_LENGTH"] = req.headers["content-length"];
-	env_map["PATH_INFO"] = req_path;
-	env_map["QUERY_STRING"] = get_query(req.payload.tmp_file_name);
-	env_map["REQUEST_METHOD"] = get_method_string(req.request_line.method);
-	env_map["SCRIPT_NAME"] = script_name;
-	env_map["SCRIPT_FILENAME"] = req_path;
-	env_map["SERVER_NAME"] = "webserver";
-	// env_map["HTTP_COOKIE"] = ;
-	// env_map["HTTP_USER_AGENT"] = ;
-	// env_map["REMOTE_ADDR"] = ;
-	// env_map["REMOTE_HOST"] = ;
-	
-	return create_env_array(env_map);
-}
-
-char **create_exec_arg(std::string exec_path, std::string script)
-{
-	char **res;
-
-	if (!(res = (char**)calloc(3, sizeof(char *))))
-		return NULL;
-	res[0] = strdup(exec_path.c_str());
-	res[1] = strdup(script.c_str());
-
-	return res;
 }
 
 void Response::create_directory_listing(std::string path, std::string loc_root, std::string loc_path)
@@ -115,6 +46,11 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	DIR *dir;
 	std::string listing_str;
 	std::string absolute_path;
+	std::string relative_path;
+
+	relative_path = path.substr(loc_root.size());
+	if (relative_path[relative_path.size() - 1] != '/')
+		relative_path.append("/");
 
 	if ((dir = opendir(path.c_str())) == NULL)
 	{
@@ -135,11 +71,11 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 			absolute_path = path + "/" + *it;
 			if (is_dir(absolute_path))
 				it->append("/");
-			listing_str.append("<a href=\"").append(loc_path).append(*it).append("\">").append(*it).append("</a>\n");
+			listing_str.append("<a href=\"").append(relative_path).append(*it).append("\">").append(*it).append("</a>\n");
 		}
 	}
 	
-	create_html_listing_file(path.erase(0, loc_root.size()), listing_str);
+	create_html_listing_file(relative_path, listing_str);
 	file_name = "./html/listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
@@ -271,11 +207,51 @@ void Response::create_header_string()
 	header_string = sst.str();
 }
 
-int Response::exec_cgi(char **exec_arg, char **cgi_env)
+std::vector<std::string> create_cgi_env(Request &req)
+{
+	std::vector<std::string> env;
+	std::string &req_path = req.request_line.target;
+	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
+
+	env.push_back("CONTENT_TYPE=" + req.headers["content-type"]);
+	env.push_back("CONTENT_LENGTH=" + req.headers["content-length"]);
+	env.push_back("PATH_INFO=" + req_path);
+	env.push_back("QUERY_STRING=" + get_query(req.payload.tmp_file_name));
+	env.push_back("REQUEST_METHOD=" + get_method_string(req.request_line.method));
+	env.push_back("SCRIPT_NAME=" + script_name);
+	env.push_back("SCRIPT_FILENAME=" + req_path);
+	env.push_back("SERVER_NAME=webserver");
+
+	return env;
+}
+
+void Response::create_cgi_file(Request &req, Location &loc)
+{
+	std::string script_name;
+	std::string exec_name;
+	std::string &target = req.request_line.target;
+
+	script_name = target.substr(target.find_last_of("/") + 1, target.size());
+	exec_name = loc.cgi_path + "/" + script_name;
+	if (exec_cgi(exec_name.c_str(), create_cgi_env(req)) == 1)
+		code = NOT_FOUND;
+}
+
+int Response::exec_cgi(const char *exec_arg, std::vector<std::string> cgi_env)
 {
 	pid_t pid;
 	int cgi_file_fd;
 	int status;
+
+	std::vector<const char *> char_env;
+	for (std::vector<const char *>::size_type i = 0; i < 8; ++i)
+		char_env.push_back(cgi_env[i].c_str());
+
+	char *const args[2] = {(char*)exec_arg, NULL};
+	char *const env[9] = { (char*)char_env[0], (char *)char_env[1],
+						(char*)char_env[2], (char*)char_env[3],
+						(char*)char_env[4], (char*)char_env[5],
+						(char*)char_env[6], (char*)char_env[7], 0 };
 
 	pid = fork();
 	if (!pid)
@@ -286,7 +262,7 @@ int Response::exec_cgi(char **exec_arg, char **cgi_env)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
 		dup2(cgi_file_fd, STDERR_FILENO);
-		if ((execve(exec_arg[0], exec_arg, cgi_env)) == -1)
+		if ((execve(args[0], args, env)) == -1)
 			exit(1);
 	}
 	else if (pid == -1)
@@ -298,26 +274,6 @@ int Response::exec_cgi(char **exec_arg, char **cgi_env)
 	return WEXITSTATUS(status);
 }
 
-void Response::create_cgi_file(Request &req, Location &loc)
-{
-	// std::cout << "Enterring CGI function\nrequest tmp file name : " << req.payload.tmp_file_name << "\n";
-	char **cgi_env;
-	char **exec_arg;
-	int status;
-	std::string script_name;
-	std::string exec_name;
-	std::string &target = req.request_line.target;
-
-	script_name = target.substr(target.find_last_of("/") + 1, target.size());
-	exec_name = loc.cgi_path + "/" + script_name;
-	exec_arg = create_exec_arg(exec_name.c_str(), script_name);
-	cgi_env = create_cgi_env(req);
-	status = exec_cgi(exec_arg, cgi_env);
-	if (status == 1)
-		code = NOT_FOUND;
-	free_arguments(exec_arg);
-	free_arguments(cgi_env);
-}
 
 void Response::extract_cgi_file()
 {

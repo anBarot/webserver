@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int sock, unsigned short lsock, std::string n_ip_add): socket(sock), ip_address(n_ip_add), port(lsock)
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add, time_t t) : socket(sock), ip_address(n_ip_add), port(lsock), last_activity(t)
 {
 	requests.push_back(Request());
 }
@@ -32,9 +32,12 @@ Location &get_location(std::map<std::string, Location> &loc_map, std::string pat
 Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port, std::string ip, std::string sv_name)
 {
 	bool first_encounter = false;
-	std::string host_name;
 	Server_conf sv;
+	size_t pos;
 
+	pos = sv_name.find_first_of(":");
+	if (pos != std::string::npos)
+		sv_name.erase(pos);
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
 	{
 		if (conf->listen_port == port && conf->listen_ip == ip)
@@ -115,7 +118,6 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 	#ifdef LOGGER
 		std::cout << CYAN << socket << " received " << ret << " bytes:\n" << RESET << buffer << RESET << std::endl;
 	#endif // DEBUG
-	std::cout << CYAN << socket << " received " << ret << " bytes:\n" << RESET << buffer << std::endl;
 
 	for (int i = 0; buffer[i]; ++i)
 		received_data_raw.push_back(buffer[i]);
@@ -153,15 +155,10 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 	{
 		req.extract_headers(received_data_raw);
 		if (req.status == HEADER_PARSED)
-		{
 			check_payload(confs);
-			check_trailer();
-		}
 	}
 	if (req.status == HEADER_PARSED)
 		req.extract_payload(received_data_raw);
-	if (req.status == PAYLOAD_PARSED)
-		req.extract_trailer(received_data_raw);
 }
 
 // check if the request line is valid. If not, an reponse error code is set.
@@ -212,8 +209,13 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 	if (req.request_line.method == POST)
 	{
 		if (req.headers.count("transfer-encoding") &&
-			req.headers["transfer-encoding"].find("chunked") != std::string::npos)
+			req.headers["transfer-encoding"] == "chunked")
 			req.payload.is_chunked = true;
+		else if (req.headers.count("transfer-encoding"))
+		{
+			req.status = FINISH_PARSING;
+			response.code = NOT_IMPLEMENTED;
+		}
 		else if (req.headers.count("content-length"))
 		{
 			req.payload.length = atoi(req.headers["content-length"].c_str());
@@ -236,31 +238,6 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 	}
 	else
 		req.status = FINISH_PARSING;
-}
-
-/*
-	Check if a trailer is expected and header values are allowed.
-	The expected header in trailer are put in the expected_trailers set.
-*/
-void	Client::check_trailer()
-{
-	std::string s[] = {"transfer-encoding", "content-length", "host", 
-	"cache-control", "max-forwards", "te", "authorization", "set-cookie",
-	"content-encoding", "content-type", "content-range", "trailer"};
-	std::set<std::string> disallowed_trailer(s, s + 12);
-
-	if (requests.back().payload.is_chunked == true && requests.back().headers.count("trailer"))
-	{
-		std::istringstream iss(requests.back().headers["trailer"]);
-		std::string word;
-		
-		while (iss >> word)
-		{
-			strlower(word);
-			if (disallowed_trailer.find(word) == disallowed_trailer.end())
-				requests.back().expected_trailers.insert(word);
-		}
-	}
 }
 
 int Client::respond(std::vector<Server_conf> &confs)

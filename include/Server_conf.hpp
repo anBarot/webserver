@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:23:34 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/27 17:57:20 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/28 05:14:20 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,10 @@ class Server_conf
 		std::map<std::string, Location> 							locations;
 		std::map<unsigned, std::string>								error_page;
 		bool														is_virtual;
-	
+
 		Server_conf() : listen_port(80), listen_ip("127.0.0.1"), max_body_size(1), is_virtual(false) {}
 		Server_conf(int port) : listen_port(port), listen_ip("127.0.0.1"), max_body_size(1), is_virtual(false) {}
 		~Server_conf() {}
-
 
 		struct OpenFile : public std::exception {
 			virtual const char* what() const throw() {

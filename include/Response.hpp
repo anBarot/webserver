@@ -45,12 +45,12 @@ class Response
 		void create_header_string();
 		void create_directory_listing(std::string path, std::string loc_root, std::string loc_path);
 		
-		void method_get(Request &req, Location &loc);
-		void method_delete(Request &req, Location &loc);
-		void method_post(Request &req, Location &loc, Server_conf &sv);
-		void create_cgi_file(Request &req, Location &loc);
-		int	exec_cgi(char **exec_arg, char **cgi_env);
-		void extract_cgi_file();
+		void	method_get(Request &req, Location &loc);
+		void 	method_delete(Request &req, Location &loc);
+		void	method_post(Request &req, Location &loc, Server_conf &sv);
+		void	create_cgi_file(Request &req, Location &loc);
+		int		exec_cgi(const char *exec_arg, std::vector<std::string> cgi_env);
+		void	extract_cgi_file();
 };
 
 #endif //RESPONSE_HPP
