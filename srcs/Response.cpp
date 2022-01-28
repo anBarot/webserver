@@ -57,7 +57,9 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	DIR *dir;
 	std::string listing_str;
 	std::string absolute_path;
+	std::string relative_path;
 
+	relative_path = path.substr(loc_root.size()) + "/";
 	if ((dir = opendir(path.c_str())) == NULL)
 	{
 		code = FORBIDDEN;
@@ -72,16 +74,17 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 		loc_path.append("/");
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
+		std::cout << "file: " << *it << std::endl;
 		if (*it != ".")
 		{
 			absolute_path = path + "/" + *it;
 			if (is_dir(absolute_path))
 				it->append("/");
-			listing_str.append("<a href=\"").append(loc_path).append(*it).append("\">").append(*it).append("</a>\n");
+			listing_str.append("<a href=\"").append(relative_path).append(*it).append("\">").append(*it).append("</a>\n");
 		}
 	}
 	
-	create_html_listing_file(path.erase(0, loc_root.size()), listing_str);
+	create_html_listing_file(path, listing_str);
 	file_name = "./html/listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
