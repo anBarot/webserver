@@ -49,7 +49,7 @@ class Response
 		void 	method_delete(Request &req, Location &loc);
 		void	method_post(Request &req, Location &loc, Server_conf &sv);
 		void	create_cgi_file(Request &req, Location &loc);
-		int		exec_cgi(const char *exec_arg, std::vector<std::string> cgi_env);
+		int		exec_cgi(const char *exec_arg, Request &req);
 		void	extract_cgi_file();
 };
 
