@@ -26,9 +26,9 @@ int Connections::init()
 	addr.sin_family = AF_INET;
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
-		if (it->is_virtual) {
-			continue ;
-		}
+		// if (it->is_virtual) {
+		// 	continue ;
+		// }
 		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); itl++) {
 			std::string address = itl->first;
 			unsigned short port = itl->second;
@@ -55,7 +55,7 @@ int Connections::init()
 			addr.sin_port = htons(port);
 			if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 			{
-				perror(0);
+				// perror(0);
 				close(fd);
 				continue ;
 			}
