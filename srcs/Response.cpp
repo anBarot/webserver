@@ -30,23 +30,12 @@ int	is_cgi_compatible(Request &req, Location &loc)
 
 void create_html_listing_file(std::string path, std::string listing_html)
 {
-	std::ifstream filein("./html/listing.html");
 	std::ofstream fileout("./html/listing_temp.html");
-	size_t pos_done;
-	size_t pos_dtwo;
-	std::string str;
  	
-	path.append("/");
-	while (std::getline(filein, str))
-	{
-		if ((pos_done = str.find("$1")) != std::string::npos)
-			str.replace(pos_done, 2, path);
-		if ((pos_dtwo = str.find("$2")) != std::string::npos)
-			str.replace(pos_dtwo, 2, listing_html);
-		fileout << str;
-		fileout << "\n";
-	}
-	filein.close();
+	fileout << "<!DOCTYPE html><html><head><title>Index of " << path << 
+		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
+		listing_html <<"</pre><hr></body></html>";
+
 	fileout.close();
 }
 
@@ -59,7 +48,10 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	std::string absolute_path;
 	std::string relative_path;
 
-	relative_path = path.substr(loc_root.size()) + "/";
+	relative_path = path.substr(loc_root.size());
+	if (relative_path[relative_path.size() - 1] != '/')
+		relative_path.append("/");
+
 	if ((dir = opendir(path.c_str())) == NULL)
 	{
 		code = FORBIDDEN;
@@ -74,7 +66,6 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 		loc_path.append("/");
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
-		std::cout << "file: " << *it << std::endl;
 		if (*it != ".")
 		{
 			absolute_path = path + "/" + *it;
@@ -84,7 +75,7 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 		}
 	}
 	
-	create_html_listing_file(path, listing_str);
+	create_html_listing_file(relative_path, listing_str);
 	file_name = "./html/listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
