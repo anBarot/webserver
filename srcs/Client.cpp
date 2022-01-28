@@ -247,12 +247,10 @@ int Client::respond(std::vector<Server_conf> &confs)
 	file.open(response.file_name.c_str());
 	buf << response.line.c_str() << response.header_string.c_str() << file.rdbuf() << "\r\n";
 	str = buf.str();
-	// std::cout << "Response:\n" << str << std::endl;
 	response.clear();
 	file.close();
 	if (send(socket, str.c_str(), str.size(), 0) == -1)
 		return -1;
-	// std::cout << "Response sent to " << socket << std::endl;
 	return 0;
 }
 
@@ -274,7 +272,7 @@ void Client::fill_response(std::vector<Server_conf> confs)
 		response.code = METHOD_NOT_ALLOWED;
 	if (response.code < 300)
 	{
-		if (is_cgi_compatible(req, loc))
+		if (req.is_cgi_compatible(loc))
 		{
 			response.is_cgi = true;
 			response.create_cgi_file(req, loc);

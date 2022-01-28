@@ -46,6 +46,9 @@ public:
 	void extract_payload(std::vector<char> &data);
 	void extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data);
 	void extract_in_chunks(std::string &str, std::ofstream &file, size_t pos);
+
+	int	is_cgi_compatible(Location &loc);
+
 };
 
 #endif //REQUEST_HPP

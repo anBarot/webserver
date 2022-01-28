@@ -49,8 +49,6 @@ int is_header_str(std::string str);
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 
-// CGI
-int	is_cgi_compatible(Request &req, Location &loc);
 
 #include "Request.hpp"
 #include "Location.hpp"

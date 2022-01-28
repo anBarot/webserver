@@ -9,21 +9,6 @@ std::string get_query(std::string &file_name)
 	return buf.str();
 }
 
-int	is_cgi_compatible(Request &req, Location &loc)
-{
-	std::string &target = req.request_line.target;
-	std::string ext;
-	size_t pos;
-
-	if (loc.cgi_path == "" || req.request_line.method == DELETE || 
-		((pos = target.find_last_of(".")) == std::string::npos))
-		return 0;
-	ext = target.substr(pos + 1, target.size());
-	if (std::find(loc.cgi_extension.begin(), loc.cgi_extension.end(), ext) != loc.cgi_extension.end())
-		return 1; 
-	return 0;
-}
-
 void create_html_listing_file(std::string path, std::string listing_html)
 {
 	std::ofstream fileout("./html/listing_temp.html");

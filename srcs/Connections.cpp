@@ -141,7 +141,7 @@ void Connections::loop()
 	// std::cout << "Waiting for connection." << std::endl;
 	while (1)
 	{
-		timeout.tv_sec = 5;
+		timeout.tv_sec = 30;
 		timeout.tv_usec = 0;
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
