@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/01/28 05:12:19 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/28 17:24:21 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,8 @@ int Connections::init()
 			}
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
-			listen_pool[fd].first = it->listen_ip;
-			listen_pool[fd].second = it->listen_port;
+			listen_pool[fd].first = address;
+			listen_pool[fd].second = port;
 		}
 	}
 	return 0;

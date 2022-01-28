@@ -39,27 +39,26 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 	if (pos != std::string::npos)
 		sv_name.erase(pos);
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
-	{
-		if (conf->listen_port == port && conf->listen_ip == ip)
-		{
-			if (first_encounter == false)
+		for (Server_conf::listenables::iterator l = conf->listens.begin(); l != conf->listens.end(); ++l)
+			if (l->second == port && l->first == ip)
 			{
-				sv = *conf;
-				first_encounter = true;
-			}
-			else
-			{
-				for (std::list<std::string>::iterator it = conf->names.begin(); it != conf->names.end(); it++)
+				if (first_encounter == false)
 				{
-					if (*it == sv_name)
+					sv = *conf;
+					first_encounter = true;
+				}
+				else
+				{
+					for (std::list<std::string>::iterator it = conf->names.begin(); it != conf->names.end(); it++)
 					{
-						sv = *conf;
-						break;
+						if (*it == sv_name)
+						{
+							sv = *conf;
+							break;
+						}
 					}
 				}
 			}
-		}
-	}
 	return (sv);
 }
 

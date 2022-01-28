@@ -17,11 +17,11 @@ class Connections
 		std::list<int> fd_list;
 
 	public:
-		int init();
-		int add_clients();
-		int check_clients();
-		void remove_client(int i);
-		void loop();
+		int 	init();
+		int 	add_clients();
+		int 	check_clients();
+		void 	remove_client(int i);
+		void 	loop();
 
 		std::vector<Server_conf> servers_conf;
 };
