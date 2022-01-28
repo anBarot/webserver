@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:24:15 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/04 18:37:21 by abarot           ###   ########.fr       */
+/*   Updated: 2022/01/26 16:23:54 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "libraries.hpp"
 #include "data_struct.hpp"
+#include <stdlib.h>
 
 class Request;
 class Location;
@@ -52,8 +53,13 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 // CGI
 int	is_cgi_compatible(Request &req, Location &loc);
 
+#define MKSTEMP_DEFAULT_TEMPLATE "webserv_tmp_XXXXXX"
+#define DEFAULT_SERVER_CONF "./conf_files/example3.conf"
+std::string random_filename(void);
+
 #include "Request.hpp"
 #include "Location.hpp"
 #include "Server_conf.hpp"
+#include "term.hpp"
 
 #endif

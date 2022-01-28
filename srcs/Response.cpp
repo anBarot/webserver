@@ -266,7 +266,7 @@ void Response::extract_cgi_file()
 	std::string str;
 	size_t pos_dpoint;
 
-	file_name = std::tmpnam(NULL);
+	file_name = random_filename();
 	out_file.open(file_name.c_str());
 	while (getline(in_file, str) && is_header_str(str))
 	{

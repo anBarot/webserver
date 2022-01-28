@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Connections.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
+/*   Updated: 2022/01/28 05:12:19 by adda-sil         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Connections.hpp"
 
 int Connections::init()
@@ -10,10 +22,13 @@ int Connections::init()
 	FD_ZERO(&active_rset);
 	FD_ZERO(&active_wset);
 	optval = 1;
-	memset(&addr, 0,sizeof(addr));
-	addr.sin_family= AF_INET;
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
+		if (it->is_virtual) {
+			continue ;
+		}
 		fd = socket(AF_INET, SOCK_STREAM, 0);
 		if (fd == -1)
 		{
@@ -138,7 +153,6 @@ void Connections::loop()
 {
 	struct timeval timeout;
 	
-	// std::cout << "Waiting for connection." << std::endl;
 	while (1)
 	{
 		timeout.tv_sec = 5;
@@ -146,6 +160,7 @@ void Connections::loop()
 		max_fd = *std::max_element(fd_list.begin(), fd_list.end());
 		ready_rset = active_rset;
 		ready_wset = active_wset;
+		__AWAIT_REQ;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
 		// std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)

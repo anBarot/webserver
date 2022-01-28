@@ -1,2 +1,5 @@
+**/*.o
+**/*.d
 .vscode
-
+webserv
+webserv_tmp_*

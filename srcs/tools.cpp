@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tools.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/12/21 15:34:38 by abarot            #+#    #+#             */
+/*   Updated: 2022/01/28 05:12:37 by adda-sil         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "webserver.hpp"
 
 // Check if the signal is a break signal
@@ -112,6 +124,13 @@ int is_reg(std::string path)
 		return 0;
 	else
 		return 1;
+}
+
+std::string random_filename(void)
+{
+	char filename_template[] = MKSTEMP_DEFAULT_TEMPLATE;
+	mkstemp(filename_template); // Will change XXXXX by a random string
+	return std::string(filename_template);
 }
 
 // Init reason_phrase map 
