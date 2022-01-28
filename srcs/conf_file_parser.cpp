@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/28 18:23:08 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/28 18:33:53 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		int port = atoi(word.c_str());
 		if (port == 80)
 			port = 8080;
-		if (port < 1024 || port > 49451)
+		if (port < 1024 || port > 65535)
 			throw(Server_conf::ConfError("Port is out of range", line, g_line));
 		if ((iss >> word))
 			server.listen_ip = word;

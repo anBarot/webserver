@@ -5,9 +5,11 @@
 
 class Connections
 {
+	public:
+		typedef std::map<int, std::pair<std::string, int> > pool;
 	private:
 		std::vector<Client> clients;
-		std::map<int, std::pair<std::string, int> > listen_pool;
+		pool	listen_pool;
 		fd_set	active_rset;
 		fd_set	active_wset;
 		fd_set	ready_rset;
