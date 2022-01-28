@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/01/28 18:52:48 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/28 20:34:00 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,12 @@ int Connections::init()
 		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); itl++) {
 			std::string address = itl->first;
 			unsigned short port = itl->second;
+			std::cout << "Trying to bind" << address << ":" << port << std::endl;
+
 			for (Connections::pool::iterator poolit = listen_pool.begin(); poolit != listen_pool.end(); poolit++) {
-				std::cout << "Iter pool" << std::endl;
-				if (poolit->second.first == address && poolit->second.second) {
-					std::cout << MAGENTA <<  "Trying to bind a virtual host" << RESET << std::endl;
+				if (poolit->second.first == address && poolit->second.second == port) {
+					std::cout << MAGENTA <<  "Still existing server, can't bind" << RESET << std::endl;
+					continue ;
 				}
 			}
 			// if (it->is_virtual) {
@@ -40,7 +42,6 @@ int Connections::init()
 			// }
 
 
-			std::cout << "Trying to bind" << address << ":" << port << std::endl;
 			fd = socket(AF_INET, SOCK_STREAM, 0);
 			if (fd == -1)
 			{
