@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/28 18:18:31 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/28 18:23:08 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -147,7 +147,11 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		else
 			server.listen_ip = "127.0.0.1";
 		server.listen_port = port;
-		server.addListen(server.listen_ip, server.listen_port);
+		try {
+			server.addListen(server.listen_ip, server.listen_port);
+		} catch (Server_conf::ListenAlreadyExist &ex) {
+			throw(Server_conf::ConfError("This listen have already been defined previously", line, g_line));
+		}
 	}
 	else if (extract.first == "server_name")
 	{
