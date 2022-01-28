@@ -25,7 +25,7 @@ CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include $(OPTS)
 
 ARGS			= ./conf_files/example2.conf
 
-OPTS			= 
+OPTS			= -D LOGGER
 
 
 $(NAME):		$(OBJS)

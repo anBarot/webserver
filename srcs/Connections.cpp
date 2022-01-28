@@ -29,41 +29,47 @@ int Connections::init()
 		if (it->is_virtual) {
 			continue ;
 		}
-		fd = socket(AF_INET, SOCK_STREAM, 0);
-		if (fd == -1)
-		{
-			perror(0);
-			continue ;
+		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); itl++) {
+			std::string address = itl->first;
+			unsigned short port = itl->second;
+
+			std::cout << "Trying to bind" << address << ":" << port << std::endl;
+			fd = socket(AF_INET, SOCK_STREAM, 0);
+			if (fd == -1)
+			{
+				perror(0);
+				continue ;
+			}
+			if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+			{
+				perror(0);
+				continue ;
+			}
+			if (!(address.empty()))
+			{
+				inet_aton(address.c_str(), &ip);
+				addr.sin_addr = ip;
+			}
+			else
+				addr.sin_addr.s_addr = htonl(INADDR_ANY);
+			addr.sin_port = htons(port);
+			if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+			{
+				perror(0);
+				close(fd);
+				continue ;
+			}
+			if (listen(fd, SOMAXCONN) == -1)
+			{
+				perror(0);
+				close(fd);
+				continue ;
+			}
+			FD_SET(fd, &active_rset);
+			fd_list.push_back(fd);
+			listen_pool[fd].first = it->listen_ip;
+			listen_pool[fd].second = it->listen_port;
 		}
-		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-		{
-			perror(0);
-			continue ;
-		}
-		if (!(it->listen_ip.empty()))
-		{
-			inet_aton(it->listen_ip.c_str(), &ip);
-			addr.sin_addr = ip;
-		}
-		else
-			addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		addr.sin_port = htons(it->listen_port);
-		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
-		{
-			perror(0);
-			close(fd);
-			continue ;
-		}
-		if (listen(fd, SOMAXCONN) == -1)
-		{
-			perror(0);
-			close(fd);
-			continue ;
-		}
-		FD_SET(fd, &active_rset);
-		fd_list.push_back(fd);
-		listen_pool[fd].first = it->listen_ip;
-		listen_pool[fd].second = it->listen_port;
 	}
 	return 0;
 }

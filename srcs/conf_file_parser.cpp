@@ -237,8 +237,10 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 bool conf_exist(std::vector<Server_conf> &confs, Server_conf &c)
 {
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end() - 1; ++conf)
-		if (conf->listen_port == c.listen_port && conf->listen_ip == c.listen_ip)
-			return true;
+		for (Server_conf::listenables::iterator itl = conf->listens.begin(); itl != conf->listens.end(); itl++)
+			for (Server_conf::listenables::iterator itc = c.listens.begin(); itc != c.listens.end(); itc++)
+				if (itl->first == itc->first && itl->second == itc->second)
+					return true;
 	return (false);
 }
 
