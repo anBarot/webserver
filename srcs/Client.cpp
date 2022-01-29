@@ -40,7 +40,7 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 		sv_name.erase(pos);
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end(); ++conf)
 		for (Server_conf::listenables::iterator l = conf->listens.begin(); l != conf->listens.end(); ++l)
-			if (l->second == port && l->first == ip)
+			if (l->port == port && l->address == ip)
 			{
 				if (first_encounter == false)
 				{
