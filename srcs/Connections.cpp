@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/01/29 16:22:01 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/29 18:37:05 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ int Connections::check_clients()
 		}
 		else
 		{
-			if (difftime(time(NULL), clients[i].last_activity) >= 15)
+			if (difftime(time(NULL), clients[i].last_activity) >= TIMEOUT)
 				remove_client(i);
 			else
 				++i;
@@ -163,6 +163,7 @@ void Connections::remove_client(int i)
 	fd_list.remove(clients[i].socket);
 	close(clients[i].socket);
 	clients.erase(clients.begin() + i);
+	std::cout << MAGENTA << "Connection closed" << std::endl;
 }
 
 void Connections::loop()
@@ -178,11 +179,10 @@ void Connections::loop()
 		ready_wset = active_wset;
 		__AWAIT_REQ;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
-		// std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
 			add_clients();
 		check_clients();
-	}	
+	}
 }

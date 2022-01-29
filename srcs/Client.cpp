@@ -110,7 +110,7 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 	ssize_t ret;
 
 	ret = recv(socket, buffer, BUFFER_SIZE - 1, 0);
-	if (ret <= 0 || has_telnet_breaksignal(ret, buffer))
+	if (ret <= 0 || has_telnet_breaksignal(ret, buffer)) // verify both -1 and 0
 		return -1;
 	buffer[ret] = 0;
 
@@ -249,7 +249,7 @@ int Client::respond(std::vector<Server_conf> &confs)
 	file.open(response.file_name.c_str());
 	buf << response.line.c_str() << response.header_string.c_str() << file.rdbuf() << "\r\n";
 	str = buf.str();
-	std::cout << RED << "Response:\n" << RESET << str << std::endl;
+	// std::cout << RED << "Response:\n" << RESET << str << std::endl;
 	response.clear();
 	file.close();
 	if (send(socket, str.c_str(), str.size(), 0) == -1)
