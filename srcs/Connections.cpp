@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/01/28 20:34:00 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/29 15:38:29 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,19 +27,21 @@ int Connections::init()
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
 		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); itl++) {
+			bool shouldSkip = false;
 			std::string address = itl->first;
 			unsigned short port = itl->second;
-			std::cout << "Trying to bind" << address << ":" << port << std::endl;
+			std::cout << CYAN << "Trying to bind " << address << ":" << port << " ... ";
 
 			for (Connections::pool::iterator poolit = listen_pool.begin(); poolit != listen_pool.end(); poolit++) {
 				if (poolit->second.first == address && poolit->second.second == port) {
-					std::cout << MAGENTA <<  "Still existing server, can't bind" << RESET << std::endl;
-					continue ;
+					std::cout << MAGENTA <<  "(Skipped)" << RESET;
+					shouldSkip = true;
 				}
 			}
-			// if (it->is_virtual) {
-			// 	continue ;
-			// }
+			std::cout << std::endl << std::endl;
+			if (shouldSkip) {
+				continue ;
+			}
 
 
 			fd = socket(AF_INET, SOCK_STREAM, 0);
