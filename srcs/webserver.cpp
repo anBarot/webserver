@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:35:13 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/28 05:12:38 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/29 15:56:33 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,12 +50,6 @@ int main(int ac, char **av)
 				<< YELLOW << '\''
 				<< RESET << std::endl;
 		}
-		return (EXIT_FAILURE);
-	}  catch (Server_conf::ListenAlreadyExist &ex) {
-		std::cerr << RED << ex.what() << RESET << ": " << BOLDCYAN
-			<< ex.ip << ":" << ex.port
-			<< " has been registered twice in the same block server"
-			<< RESET << std::endl;
 		return (EXIT_FAILURE);
 	} catch (Server_conf::OpenFile &ex) {
 		std::cerr << RED << ex.what() << RESET << ": " << BOLDCYAN << conf_file << RESET << std::endl;

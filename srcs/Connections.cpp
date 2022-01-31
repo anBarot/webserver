@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/01/28 05:12:19 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/29 18:37:05 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,44 +26,60 @@ int Connections::init()
 	addr.sin_family = AF_INET;
 	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
 	{
-		if (it->is_virtual) {
-			continue ;
+		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); itl++) {
+			std::string address = itl->address;
+			unsigned short port = itl->port;
+			#ifdef LOGGER
+				std::cout << CYAN << "Trying to bind " << address << ":" << port << " ... ";
+			#endif
+			if (itl->is_virtual) {
+				#ifdef LOGGER
+					std::cout << MAGENTA <<  "(Virtual skipped)" << std::endl << RESET;
+				#endif
+				continue ;
+			}
+			#ifdef LOGGER
+				std::cout << std::endl;
+			#endif
+
+			fd = socket(AF_INET, SOCK_STREAM, 0);
+			if (fd == -1)
+			{
+				perror(0); // What doe that mean
+				continue ;
+			}
+			if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+			{
+				perror(0); // What doe that mean
+				continue ;
+			}
+			if (!(address.empty()))
+			{
+				inet_aton(address.c_str(), &ip);
+				addr.sin_addr = ip;
+			}
+			else
+				addr.sin_addr.s_addr = htonl(INADDR_ANY);
+			addr.sin_port = htons(port);
+			if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+			{
+				#ifdef LOGGER
+					std::cerr << YELLOW << "Cannot bind " << BLUE << address << ":" << port << YELLOW << " already used" << RESET << std::endl;
+				#endif
+				close(fd);
+				continue ;
+			}
+			if (listen(fd, SOMAXCONN) == -1)
+			{
+				perror(0); // What doe that mean
+				close(fd);
+				continue ;
+			}
+			FD_SET(fd, &active_rset);
+			fd_list.push_back(fd);
+			listen_pool[fd].first = address;
+			listen_pool[fd].second = port;
 		}
-		fd = socket(AF_INET, SOCK_STREAM, 0);
-		if (fd == -1)
-		{
-			perror(0);
-			continue ;
-		}
-		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-		{
-			perror(0);
-			continue ;
-		}
-		if (!(it->listen_ip.empty()))
-		{
-			inet_aton(it->listen_ip.c_str(), &ip);
-			addr.sin_addr = ip;
-		}
-		else
-			addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		addr.sin_port = htons(it->listen_port);
-		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
-		{
-			perror(0);
-			close(fd);
-			continue ;
-		}
-		if (listen(fd, SOMAXCONN) == -1)
-		{
-			perror(0);
-			close(fd);
-			continue ;
-		}
-		FD_SET(fd, &active_rset);
-		fd_list.push_back(fd);
-		listen_pool[fd].first = it->listen_ip;
-		listen_pool[fd].second = it->listen_port;
 	}
 	return 0;
 }
@@ -133,7 +149,7 @@ int Connections::check_clients()
 		}
 		else
 		{
-			if (difftime(time(NULL), clients[i].last_activity) >= 15)
+			if (difftime(time(NULL), clients[i].last_activity) >= TIMEOUT)
 				remove_client(i);
 			else
 				++i;
@@ -147,6 +163,7 @@ void Connections::remove_client(int i)
 	fd_list.remove(clients[i].socket);
 	close(clients[i].socket);
 	clients.erase(clients.begin() + i);
+	std::cout << MAGENTA << "Connection closed" << std::endl;
 }
 
 void Connections::loop()
@@ -162,11 +179,10 @@ void Connections::loop()
 		ready_wset = active_wset;
 		__AWAIT_REQ;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
-		// std::cout << "ready fds " << ready_fd << std::endl;
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
 			add_clients();
 		check_clients();
-	}	
+	}
 }

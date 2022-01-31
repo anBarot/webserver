@@ -6,7 +6,7 @@
 /*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/28 05:15:46 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/01/29 16:20:28 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,12 @@ std::ostream &operator << (std::ostream &out, const Server_conf &sc) {
 	Server_conf::listenables::const_iterator l_ite = sc.listens.end();
 	for (; l_it != l_ite; l_it++) {
 		out << " ↳ "
-			<< CYAN << l_it->first
+			<< CYAN << l_it->address
 			<< RESET << ":"
-			<< BOLDCYAN << l_it->second
-			<< std::endl << RESET;
+			<< BOLDCYAN << l_it->port;
+		if (l_it->is_virtual)
+			out << MAGENTA << " virtual";
+		out	<< std::endl << RESET;
 
 	}
 	out << BLUE << "------ Names ------" << RESET << std::endl;
@@ -35,9 +37,7 @@ std::ostream &operator << (std::ostream &out, const Server_conf &sc) {
 		out << " ↳ " << *n_it << std::endl;
 	}
 	out << BLUE << "-------------------" << RESET << std::endl;
-	out << "isVirtual(" << RED << sc.is_virtual << RESET 
-		<< ") " << std::endl
-		<< "MaxBodySize(" BLUE << sc.max_body_size << RESET
+	out << "MaxBodySize(" BLUE << sc.max_body_size << RESET
 		<< ")" << std::endl;
 	out << BOLDBLUE << "-------------------" << RESET << std::endl;
 	return out;
@@ -137,10 +137,21 @@ int		extract_server_field(std::string &line, Server_conf &server)
 		std::string word;
 		
 		iss >> word;
-		server.listen_port = atoi(word.c_str());
-		iss >> word;
-		server.listen_ip = word;
-		server.addListen(server.listen_ip, server.listen_port);
+		int port = atoi(word.c_str());
+		if (port == 80)
+			port = 8080;
+		if (port < 1024 || port > 65535)
+			throw(Server_conf::ConfError("Port is out of range", line, g_line));
+		if ((iss >> word))
+			server.listen_ip = word;
+		else
+			server.listen_ip = "127.0.0.1";
+		server.listen_port = port;
+		try {
+			server.addListen(server.listen_ip, server.listen_port);
+		} catch (Server_conf::ListenAlreadyExist &ex) {
+			throw(Server_conf::ConfError("This listen have already been defined previously", line, g_line));
+		}
 	}
 	else if (extract.first == "server_name")
 	{
@@ -234,11 +245,15 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 	return 0;
 }
 
-bool conf_exist(std::vector<Server_conf> &confs, Server_conf &c)
+bool check_virtuals(std::vector<Server_conf> &confs, Server_conf &c)
 {
 	for (std::vector<Server_conf>::iterator conf = confs.begin(); conf != confs.end() - 1; ++conf)
-		if (conf->listen_port == c.listen_port && conf->listen_ip == c.listen_ip)
-			return true;
+		for (Server_conf::listenables::iterator itl = conf->listens.begin(); itl != conf->listens.end(); itl++)
+			for (Server_conf::listenables::iterator itc = c.listens.begin(); itc != c.listens.end(); itc++)
+				if (itl->address == itc->address && itl->port == itc->port) {
+					itc->is_virtual = true;
+					return true;
+				}
 	return (false);
 }
 
@@ -249,6 +264,9 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 
   	if (conf_file.is_open())
 	{
+		#ifdef LOGGER
+			std::cout << "Using conf file: " << CYAN << file_name << std::endl;
+		#endif
 		while (++g_line && getline(conf_file, line))
 		{
 			ws_trim(line);
@@ -257,10 +275,10 @@ int conf_parser(char *file_name, std::vector<Server_conf> &servers)
 				servers.push_back(Server_conf());
 				if (fill_server(conf_file, servers.back()))
 					return error_and_exit(CONFFILE_PARSE_ERR);
-				if (conf_exist(servers, servers.back())) {
-					servers.back().is_virtual = true;
-				}
-				std::cout << "Server registered: " << servers.back() << std::endl;
+				check_virtuals(servers, servers.back());
+				#ifdef LOGGER
+					std::cout << "Server registered: " << servers.back() << std::endl;
+				#endif
 				if (conf_file.eof() == true)
 				{
 					line.clear();
