@@ -41,13 +41,14 @@ public:
 
 	Request();
 
-	void extract_request_line(std::vector<char> &data);
-	void extract_headers(std::vector<char> &data);
-	void extract_payload(std::vector<char> &data);
-	void extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data);
-	void extract_in_chunks(std::string &str, std::ofstream &file, size_t pos);
+	void	extract_request_line(std::vector<char> &data);
+	void 	extract_headers(std::vector<char> &data);
+	void	extract_payload(std::vector<char> &data);
+	void 	extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data);
+	void 	extract_in_chunks(std::string &str, std::ofstream &file, size_t pos);
 
-	int	is_cgi_compatible(Location &loc);
+	int		is_cgi_compatible(Location &loc);
+	void	set_environment();
 
 };
 

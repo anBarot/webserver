@@ -19,6 +19,15 @@ Request::Request() : status(STARTING_PARSING)
 	payload.tmp_file_name = "";
 }
 
+std::string get_query(std::string &file_name)
+{
+	std::ifstream payload_file(file_name.c_str());
+	std::stringstream buf;
+
+	buf << payload_file.rdbuf();
+	return buf.str();
+}
+
 /*
 	Function that extracts the request line, then check if the method, 
 	url and http version are valid.
@@ -175,4 +184,19 @@ int	Request::is_cgi_compatible(Location &loc)
 	if (std::find(loc.cgi_extension.begin(), loc.cgi_extension.end(), ext) != loc.cgi_extension.end())
 		return 1; 
 	return 0;
+}
+
+void Request::set_environment()
+{
+	std::string &req_path = request_line.target;
+	std::string script_name = req_path.substr(req_path.find_last_of("/") + 1, req_path.size());
+
+	setenv("CONTENT_TYPE", headers["content-type"].c_str(), 1);
+	setenv("CONTENT_LENGTH", headers["content-length"].c_str(), 1);
+	setenv("PATH_INFO", req_path.c_str(), 1);
+	setenv("QUERY_STRING", get_query(payload.tmp_file_name).c_str(), 1);
+	setenv("REQUEST_METHOD", get_method_string(request_line.method).c_str(), 1);
+	setenv("SCRIPT_NAME", script_name.c_str(), 1);
+	setenv("SCRIPT_FILENAME", req_path.c_str(), 1);
+	setenv("SERVER_NAME", std::string("webserver").c_str(), 1);
 }
