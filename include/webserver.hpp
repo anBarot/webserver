@@ -50,8 +50,6 @@ int is_header_str(std::string str);
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 
-// CGI
-int	is_cgi_compatible(Request &req, Location &loc);
 
 #define MKSTEMP_DEFAULT_TEMPLATE "webserv_tmp_XXXXXX"
 #define DEFAULT_SERVER_CONF "./conf_files/example3.conf"

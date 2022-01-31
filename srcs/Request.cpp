@@ -161,3 +161,18 @@ void Request::extract_with_length(std::string &str, std::ofstream &file, std::ve
 		payload.length -= str.size();
 	}
 }
+
+int	Request::is_cgi_compatible(Location &loc)
+{
+	std::string &target = request_line.target;
+	std::string ext;
+	size_t pos;
+
+	if (loc.cgi_path == "" || request_line.method == DELETE || 
+		((pos = target.find_last_of(".")) == std::string::npos))
+		return 0;
+	ext = target.substr(pos + 1, target.size());
+	if (std::find(loc.cgi_extension.begin(), loc.cgi_extension.end(), ext) != loc.cgi_extension.end())
+		return 1; 
+	return 0;
+}
