@@ -104,25 +104,21 @@ void Response::method_delete(Request &req, Location &loc)
 	std::string path;
 	size_t pos;
 
-	pos = req.request_line.target.find(loc.root);
-	path = loc.root + req.request_line.target;
-	std::cout << "path to delete : " << path << "\n";
+	pos = req.request_line.target.find_last_of("/");
+	path = loc.root + req.request_line.target.substr(pos, req.request_line.target.size());
 	if (is_dir(path))
 		code = CONFLICT;
 	else if (stat(path.c_str(), &st))
 		code = NOT_FOUND;
+	else if (remove(path.c_str()))
+		code = FORBIDDEN;
 	else
 	{
-		if (remove(path.c_str()))
-			code = FORBIDDEN;
-		else
-		{
-			headers["Content-Type"] = get_MIME(path);
-			headers["Content-Length"] = "0";
-			headers["Connection"] = "keep-alive";
-		}
+		code = NO_CONTENT;
+		headers["Content-Type"] = get_MIME(path);
+		headers["Content-Length"] = "0";
+		headers["Connection"] = "keep-alive";
 	}
-	code = NO_CONTENT;
 }
 
 void Response::method_post(Request &req, Location &loc, Server_conf &sv)

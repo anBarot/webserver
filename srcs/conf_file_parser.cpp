@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/02/01 21:29:12 by abarot           ###   ########.fr       */
+/*   Updated: 2022/02/01 23:18:56 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,7 +209,6 @@ int		fill_location(std::ifstream &conf_file, Location &loc, std::string &line)
 		}
 		else if (line != "") {
 			return (0);
-			// throw(Server_conf::ConfError("missing tab for location", line, g_line));
 		}
 	}
 	return 0;
@@ -242,7 +241,7 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 						return 0;
 				}
 			}
-			if (line.find(" = ") != std::string::npos)			
+			if (line.find(" = ") != std::string::npos)		
 			{
 				if (extract_server_field(line, server))
 					throw Server_conf::ConfError("missing token `=`", line, g_line);	
@@ -253,6 +252,8 @@ int fill_server(std::ifstream &conf_file, Server_conf &server)
 				throw Server_conf::ConfError("filling server error", line, g_line);
 		}
 	}
+	if (server.locations.size() == 0)
+		throw Server_conf::ConfError("no location for this server", line, g_line);	
 	return 0;
 }
 
