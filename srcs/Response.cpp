@@ -102,8 +102,11 @@ void Response::method_delete(Request &req, Location &loc)
 {
 	struct stat st;
 	std::string path;
+	size_t pos;
 
+	pos = req.request_line.target.find(loc.root);
 	path = loc.root + req.request_line.target;
+	std::cout << "path to delete : " << path << "\n";
 	if (is_dir(path))
 		code = CONFLICT;
 	else if (stat(path.c_str(), &st))
@@ -219,7 +222,6 @@ int Response::exec_cgi(const char *exec_arg, Request &req)
 	waitpid(pid, &status, 0);
 	return WEXITSTATUS(status);
 }
-
 
 void Response::extract_cgi_file()
 {

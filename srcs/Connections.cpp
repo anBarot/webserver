@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connections.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/01/29 18:37:05 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/02/01 19:26:19 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,12 +45,16 @@ int Connections::init()
 			fd = socket(AF_INET, SOCK_STREAM, 0);
 			if (fd == -1)
 			{
+				std::cerr << RED;
 				perror(0); // What doe that mean
+				std::cerr << RESET;
 				continue ;
 			}
 			if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 			{
+				std::cerr << RED;
 				perror(0); // What doe that mean
+				std::cerr << RESET;
 				continue ;
 			}
 			if (!(address.empty()))
@@ -63,15 +67,20 @@ int Connections::init()
 			addr.sin_port = htons(port);
 			if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 			{
-				#ifdef LOGGER
-					std::cerr << YELLOW << "Cannot bind " << BLUE << address << ":" << port << YELLOW << " already used" << RESET << std::endl;
-				#endif
+				std::cerr << RED;
+				perror(0); // What doe that mean
+				std::cerr << RESET;
+				// #ifdef LOGGER
+				// 	std::cerr << YELLOW << "Cannot bind " << BLUE << address << ":" << port << YELLOW << " already used" << RESET << std::endl;
+				// #endif
 				close(fd);
 				continue ;
 			}
 			if (listen(fd, SOMAXCONN) == -1)
 			{
+				std::cerr << RED;
 				perror(0); // What doe that mean
+				std::cerr << RESET;
 				close(fd);
 				continue ;
 			}
@@ -80,6 +89,9 @@ int Connections::init()
 			listen_pool[fd].first = address;
 			listen_pool[fd].second = port;
 		}
+	}
+	if (listen_pool.size() == 0) {
+		throw std::exception();
 	}
 	return 0;
 }

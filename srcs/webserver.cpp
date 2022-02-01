@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:35:13 by abarot            #+#    #+#             */
-/*   Updated: 2022/01/29 15:56:33 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/02/01 19:29:02 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,12 @@ int main(int ac, char **av)
 	
 	signal(SIGINT, sigint_handler);
 
-	connections.init();
+	try {
+		connections.init();
+	} catch (std::exception &ex) {
+		std::cerr << RED<< "No servers has been launched " << RESET << std::endl;
+		return (EXIT_FAILURE);
+	}
 	__WEBSERV_INTRO;
 	connections.loop();
 

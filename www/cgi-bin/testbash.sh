@@ -9,7 +9,7 @@ echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
 echo "<title>Bash CGI script</title>"
 echo "</head>"
 echo "<body>"
-echo "<p>Hello, Your IP address is $REMOTE_ADDR</p>"
+echo "<p>Hey $USER ! You are now executing the script $SCRIPT_NAME, enjoy! \^^/</p>"
 echo "</body>"
 echo "</html>"
 
