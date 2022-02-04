@@ -62,22 +62,16 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 	return (sv);
 }
 
-std::string	create_error_file(int code)
+void	create_error_file(int code)
 {
-	std::ofstream fileout("./error_temp.html");
-	std::stringstream num;
-	std::string str;
+	std::ofstream fileout("./tmp/error_temp.html");
 
-	num << code;
-	fileout << "<!DOCTYPE html><html><head><title>" << num.str() << " "
+	fileout << "<!DOCTYPE html><html><head><title>" << code << " "
 			<< reason_phrase[code] << "</title></head><body><center><h1>"
-			<< num.str() << " " << reason_phrase[code] << "</h1></center><hr> \
+			<< code << " " << reason_phrase[code] << "</h1></center><hr> \
 			<center>webserver (Ubuntu/Mac OS)</center></body></html>";
 	
 	fileout.close();
-	str = "./error_temp.html";
-	
-	return str;
 }
 
 int	check_http_version(std::string version)
@@ -233,17 +227,12 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 
 int Client::respond(std::vector<Server_conf> &confs)
 {
-	std::stringstream buf;
 	std::string str;
-	std::ifstream file;
 
 	fill_response(confs);
-	file.open(response.file_name.c_str());
-	buf << response.line.c_str() << response.header_string.c_str() << file.rdbuf() << "\r\n";
-	str = buf.str();
+	str = response.response;
 	// std::cout << RED << "Response:\n" << RESET << str << std::endl;
 	response.clear();
-	file.close();
 	if (send(socket, str.c_str(), str.size(), 0) <= 0)
 		return -1;
 	return 0;
@@ -287,11 +276,13 @@ void Client::fill_response(std::vector<Server_conf> confs)
 		if (sv.error_page.count(response.code))
 			response.file_name = sv.error_page[response.code];
 		else
-			response.file_name = create_error_file(response.code);
+		{
+			response.file_name = "./tmp/error_temp.html";
+			create_error_file(response.code);
+		}
 	}
 	if (response.file_name != "")
 		response.headers["Content-Length"] = get_file_size(response.file_name);
-	response.create_response_line();
-	response.create_header_string();
+	response.create_response();
 	requests.pop_front();
 }

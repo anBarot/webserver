@@ -3,5 +3,4 @@
 .vscode
 webserv
 webserv_tmp_*
-error_temp.html
-html/listing_temp.html
+tmp/*

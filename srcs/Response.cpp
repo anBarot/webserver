@@ -2,7 +2,7 @@
 
 void create_html_listing_file(std::string path, std::string listing_html)
 {
-	std::ofstream fileout("./html/listing_temp.html");
+	std::ofstream fileout("./tmp/listing_temp.html");
  	
 	fileout << "<!DOCTYPE html><html><head><title>Index of " << path << 
 		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
@@ -11,7 +11,7 @@ void create_html_listing_file(std::string path, std::string listing_html)
 	fileout.close();
 }
 
-void Response::create_directory_listing(std::string path, std::string loc_root, std::string loc_path)
+void Response::create_directory_listing(std::string path, std::string loc_root)
 {
 	std::vector<std::string> files;
     struct dirent *entry;
@@ -23,7 +23,7 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	relative_path = path.substr(loc_root.size());
 	if (relative_path[relative_path.size() - 1] != '/')
 		relative_path.append("/");
-
+	
 	if ((dir = opendir(path.c_str())) == NULL)
 	{
 		code = FORBIDDEN;
@@ -34,8 +34,6 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	closedir(dir);
 
 	sort(files.begin(), files.end());
-	if (loc_path[loc_path.size() - 1] != '/')
-		loc_path.append("/");
 	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
 	{
 		if (*it != ".")
@@ -48,7 +46,7 @@ void Response::create_directory_listing(std::string path, std::string loc_root, 
 	}
 	
 	create_html_listing_file(relative_path, listing_str);
-	file_name = "./html/listing_temp.html";
+	file_name = "./tmp/listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
 
@@ -81,7 +79,7 @@ void Response::method_get(Request &req, Location &loc)
 			headers["Content-Type"] = get_MIME(path_index);
 		}
 		else
-			create_directory_listing(path, loc.root, loc.path);
+			create_directory_listing(path, loc.root);
 	}
 	else if (S_ISREG(st.st_mode))
 	{
@@ -161,22 +159,17 @@ void Response::method_post(Request &req, Location &loc, Server_conf &sv)
 	}
 }
 
-void Response::create_response_line()
+void Response::create_response()
 {
-	std::stringstream sst;
-	
-	sst << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
-	line = sst.str();
-}
+	std::ifstream file(file_name.c_str());
+	std::stringstream buf;
 
-void Response::create_header_string()
-{
-	std::stringstream sst;
-
+	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-		sst << it->first << ": " << it->second << "\r\n";
-	sst << "\r\n";
-	header_string = sst.str();
+		buf << it->first << ": " << it->second << "\r\n";
+	buf << "\r\n" << file.rdbuf() << "\r\n";
+	response = buf.str();
+	file.close();
 }
 
 void Response::create_cgi_file(Request &req, Location &loc)

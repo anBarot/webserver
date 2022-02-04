@@ -23,8 +23,7 @@ class Response
 {
 	public:
 		e_response_code code;
-		std::string line;
-		std::string header_string;
+		std::string response;
 		std::map<std::string, std::string> headers;
 		std::string file_name;
 		bool is_cgi;
@@ -35,15 +34,13 @@ class Response
 		void clear()
 		{
 			code = DEFAULT;
-			line.clear();
-			header_string.clear();
+			response.clear();
 			headers.clear();
 			file_name.clear();
 		}
 
-		void create_response_line();
-		void create_header_string();
-		void create_directory_listing(std::string path, std::string loc_root, std::string loc_path);
+		void create_response();
+		void create_directory_listing(std::string path, std::string loc_root);
 		
 		void	method_get(Request &req, Location &loc);
 		void 	method_delete(Request &req, Location &loc);
