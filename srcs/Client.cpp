@@ -64,27 +64,19 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 
 std::string	create_error_file(int code)
 {
-	std::ifstream filein("./html/error.html");
 	std::ofstream fileout("./error_temp.html");
-	size_t pos_done;
-	size_t pos_dtwo;
+	std::stringstream num;
 	std::string str;
 
-	std::ostringstream num;
 	num << code;
- 	
-	while (std::getline(filein, str))
-	{
-		if ((pos_done = str.find("$1")) != std::string::npos)
-			str.replace(pos_done, 2, num.str());
-		if ((pos_dtwo = str.find("$2")) != std::string::npos)
-			str.replace(pos_dtwo, 2, reason_phrase[code]);
-		fileout << str;
-		fileout << "\n";
-	}
-	filein.close();
+	fileout << "<!DOCTYPE html><html><head><title>" << num.str() << " "
+			<< reason_phrase[code] << "</title></head><body><center><h1>"
+			<< num.str() << " " << reason_phrase[code] << "</h1></center><hr> \
+			<center>webserver (Ubuntu/Mac OS)</center></body></html>";
+	
 	fileout.close();
 	str = "./error_temp.html";
+	
 	return str;
 }
 
