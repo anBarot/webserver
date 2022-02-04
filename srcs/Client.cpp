@@ -252,7 +252,7 @@ int Client::respond(std::vector<Server_conf> &confs)
 	// std::cout << RED << "Response:\n" << RESET << str << std::endl;
 	response.clear();
 	file.close();
-	if (send(socket, str.c_str(), str.size(), 0) == -1)
+	if (send(socket, str.c_str(), str.size(), 0) <= 0)
 		return -1;
 	return 0;
 }
