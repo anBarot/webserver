@@ -62,18 +62,6 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 	return (sv);
 }
 
-void	create_error_file(int code)
-{
-	std::ofstream fileout("./tmp/error_temp.html");
-
-	fileout << "<!DOCTYPE html><html><head><title>" << code << " "
-			<< reason_phrase[code] << "</title></head><body><center><h1>"
-			<< code << " " << reason_phrase[code] << "</h1></center><hr> \
-			<center>webserver (Ubuntu/Mac OS)</center></body></html>";
-	
-	fileout.close();
-}
-
 int	check_http_version(std::string version)
 {
 	size_t pos = version.find_first_of("/");
@@ -228,61 +216,16 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 int Client::respond(std::vector<Server_conf> &confs)
 {
 	std::string str;
+	Request &req = requests.front();
+	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
+	Location &loc = get_location(sv.locations, req.request_line.target);
 
-	fill_response(confs);
+	response.fill_response(sv, req, loc);
+	requests.pop_front();
 	str = response.response;
 	// std::cout << RED << "Response:\n" << RESET << str << std::endl;
 	response.clear();
 	if (send(socket, str.c_str(), str.size(), 0) <= 0)
 		return -1;
 	return 0;
-}
-
-void Client::fill_response(std::vector<Server_conf> confs)
-{
-	Request &req = requests.front();
-	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
-	Location &loc = get_location(sv.locations, req.request_line.target);
-
-	response.headers["Server"] = "webserver";
-	response.headers["Date"] = get_date(time(NULL));
-	if (loc.redirection.first >= 300)
-	{
-		response.code = loc.redirection.first;
-		response.file_name = sv.error_page[response.code];
-		response.headers["Location"] = loc.redirection.second;
-	}
-	if (response.code < 300 && loc.methods[req.request_line.method] == false) 
-		response.code = METHOD_NOT_ALLOWED;
-	if (response.code < 300)
-	{
-		if (req.is_cgi_compatible(loc))
-		{
-			response.is_cgi = true;
-			response.create_cgi_file(req, loc);
-			response.extract_cgi_file();
-		}
-		else if (req.request_line.method == GET)
-			response.method_get(req, loc);
-		else if (req.request_line.method == POST)
-			response.method_post(req, loc, sv);
-		else if (req.request_line.method == DELETE)
-			response.method_delete(req, loc);
-	}
-	if (response.code >= 400)
-	{
-		if (response.code == METHOD_NOT_ALLOWED)
-			response.headers["Allow"] = get_allow(loc);
-		if (sv.error_page.count(response.code))
-			response.file_name = sv.error_page[response.code];
-		else
-		{
-			response.file_name = "./tmp/error_temp.html";
-			create_error_file(response.code);
-		}
-	}
-	if (response.file_name != "")
-		response.headers["Content-Length"] = get_file_size(response.file_name);
-	response.create_response();
-	requests.pop_front();
 }

@@ -27,7 +27,7 @@ class Response
 		std::map<std::string, std::string> headers;
 		std::string file_name;
 		bool is_cgi;
-
+	
 		Response() : code(OK), is_cgi(false) {}
 		~Response() {}
 
@@ -41,7 +41,8 @@ class Response
 
 		void create_response();
 		void create_directory_listing(std::string path, std::string loc_root);
-		
+		void fill_response(Server_conf &sv, Request &req, Location &loc);
+
 		void	method_get(Request &req, Location &loc);
 		void 	method_delete(Request &req, Location &loc);
 		void	method_post(Request &req, Location &loc, Server_conf &sv);

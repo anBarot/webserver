@@ -13,9 +13,12 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 
-#include "libraries.hpp"
-#include "data_struct.hpp"
-#include <stdlib.h>
+# define MKSTEMP_DEFAULT_TEMPLATE "webserv_tmp_XXXXXX"
+# define DEFAULT_SERVER_CONF "./conf_files/example3.conf"
+# define TIMEOUT 100
+
+# include "libraries.hpp"
+# include "data_struct.hpp"
 
 class Request;
 class Location;
@@ -49,16 +52,13 @@ int is_header_str(std::string str);
 
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
-
-
-#define MKSTEMP_DEFAULT_TEMPLATE "webserv_tmp_XXXXXX"
-#define DEFAULT_SERVER_CONF "./conf_files/example3.conf"
-#define TIMEOUT 100
 std::string random_filename(void);
 
-#include "Request.hpp"
-#include "Location.hpp"
-#include "Server_conf.hpp"
-#include "term.hpp"
+
+
+# include "Request.hpp"
+# include "Location.hpp"
+# include "Server_conf.hpp"
+# include "term.hpp"
 
 #endif

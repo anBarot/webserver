@@ -1,6 +1,6 @@
 #include "Response.hpp"
 
-void create_html_listing_file(std::string path, std::string listing_html)
+void create_autoindex_file(std::string path, std::string listing_html)
 {
 	std::ofstream fileout("./tmp/listing_temp.html");
  	
@@ -8,6 +8,18 @@ void create_html_listing_file(std::string path, std::string listing_html)
 		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
 		listing_html <<"</pre><hr></body></html>";
 
+	fileout.close();
+}
+
+void	create_error_file(int code)
+{
+	std::ofstream fileout("./tmp/error_temp.html");
+
+	fileout << "<!DOCTYPE html><html><head><title>" << code << " "
+			<< reason_phrase[code] << "</title></head><body><center><h1>"
+			<< code << " " << reason_phrase[code] << "</h1></center><hr> \
+			<center>webserver (Ubuntu/Mac OS)</center></body></html>";
+	
 	fileout.close();
 }
 
@@ -45,10 +57,130 @@ void Response::create_directory_listing(std::string path, std::string loc_root)
 		}
 	}
 	
-	create_html_listing_file(relative_path, listing_str);
+	create_autoindex_file(relative_path, listing_str);
 	file_name = "./tmp/listing_temp.html";
 	headers["Content-Type"] = "text/html";
 }
+
+
+void Response::create_cgi_file(Request &req, Location &loc)
+{
+	std::string script_name;
+	std::string exec_name;
+	std::string &target = req.request_line.target;
+
+	script_name = target.substr(target.find_last_of("/") + 1, target.size());
+	exec_name = loc.cgi_path + "/" + script_name;
+	if (exec_cgi(exec_name.c_str(), req) == 1)
+		code = NOT_FOUND;
+}
+
+int Response::exec_cgi(const char *exec_arg, Request &req)
+{
+	pid_t pid;
+	int cgi_file_fd;
+	int status;
+	char *empty_args[] = { NULL };
+
+	pid = fork();
+	if (!pid)
+	{
+		req.set_environment();
+		close(STDIN_FILENO);
+		cgi_file_fd = open("/tmp/tmp_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		if (cgi_file_fd == -1)
+			exit(1);
+		dup2(cgi_file_fd, STDOUT_FILENO);
+		if ((execve(exec_arg, empty_args, environ)) == -1)
+			return 1;
+	}
+	else if (pid == -1)
+	{
+		code = INTERNAL_SERVER_ERROR;
+		return -1;
+	}
+	waitpid(pid, &status, 0);
+	return WEXITSTATUS(status);
+}
+
+void Response::extract_cgi_file()
+{
+	std::ifstream in_file("/tmp/tmp_cgi");
+	std::ofstream out_file;
+	std::string str;
+	size_t pos_dpoint;
+
+	file_name = random_filename();
+	out_file.open(file_name.c_str());
+	while (getline(in_file, str) && is_header_str(str))
+	{
+		pos_dpoint = str.find_first_of(":");
+		headers[str.substr(0, pos_dpoint)] = str.substr(pos_dpoint + 1, str.size());
+	}
+	while (getline(in_file, str))
+		out_file << str + "\n";
+	out_file.close();
+}
+
+void Response::fill_response(Server_conf &sv, Request &req, Location &loc)
+{
+	headers["Server"] = "webserver";
+	headers["Date"] = get_date(time(NULL));
+	if (loc.redirection.first >= 300)
+	{
+		code = loc.redirection.first;
+		file_name = sv.error_page[code];
+		headers["Location"] = loc.redirection.second;
+	}
+	if (code < 300 && loc.methods[req.request_line.method] == false) 
+		code = METHOD_NOT_ALLOWED;
+	if (code < 300)
+	{
+		if (req.is_cgi_compatible(loc))
+		{
+			is_cgi = true;
+			create_cgi_file(req, loc);
+			extract_cgi_file();
+		}
+		else if (req.request_line.method == GET)
+			method_get(req, loc);
+		else if (req.request_line.method == POST)
+			method_post(req, loc, sv);
+		else if (req.request_line.method == DELETE)
+			method_delete(req, loc);
+	}
+	if (code >= 400)
+	{
+		if (code == METHOD_NOT_ALLOWED)
+			headers["Allow"] = get_allow(loc);
+		if (sv.error_page.count(code))
+			file_name = sv.error_page[code];
+		else
+		{
+			file_name = "./tmp/error_temp.html";
+			create_error_file(code);
+		}
+	}
+	if (file_name != "")
+		headers["Content-Length"] = get_file_size(file_name);
+	create_response();
+}
+
+void Response::create_response()
+{
+	std::ifstream file(file_name.c_str());
+	std::stringstream buf;
+
+	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+		buf << it->first << ": " << it->second << "\r\n";
+	buf << "\r\n" << file.rdbuf() << "\r\n";
+	response = buf.str();
+	file.close();
+}
+
+
+// methods
 
 void Response::method_get(Request &req, Location &loc)
 {
@@ -157,76 +289,4 @@ void Response::method_post(Request &req, Location &loc, Server_conf &sv)
 		headers["Location"] = location_path;
 		headers["Connection"] = "keep-alive";
 	}
-}
-
-void Response::create_response()
-{
-	std::ifstream file(file_name.c_str());
-	std::stringstream buf;
-
-	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
-	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-		buf << it->first << ": " << it->second << "\r\n";
-	buf << "\r\n" << file.rdbuf() << "\r\n";
-	response = buf.str();
-	file.close();
-}
-
-void Response::create_cgi_file(Request &req, Location &loc)
-{
-	std::string script_name;
-	std::string exec_name;
-	std::string &target = req.request_line.target;
-
-	script_name = target.substr(target.find_last_of("/") + 1, target.size());
-	exec_name = loc.cgi_path + "/" + script_name;
-	if (exec_cgi(exec_name.c_str(), req) == 1)
-		code = NOT_FOUND;
-}
-
-int Response::exec_cgi(const char *exec_arg, Request &req)
-{
-	pid_t pid;
-	int cgi_file_fd;
-	int status;
-	char *empty_args[] = { NULL };
-
-	pid = fork();
-	if (!pid)
-	{
-		req.set_environment();
-		close(STDIN_FILENO);
-		cgi_file_fd = open("/tmp/tmp_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-		if (cgi_file_fd == -1)
-			exit(1);
-		dup2(cgi_file_fd, STDOUT_FILENO);
-		if ((execve(exec_arg, empty_args, environ)) == -1)
-			return 1;
-	}
-	else if (pid == -1)
-	{
-		code = INTERNAL_SERVER_ERROR;
-		return -1;
-	}
-	waitpid(pid, &status, 0);
-	return WEXITSTATUS(status);
-}
-
-void Response::extract_cgi_file()
-{
-	std::ifstream in_file("/tmp/tmp_cgi");
-	std::ofstream out_file;
-	std::string str;
-	size_t pos_dpoint;
-
-	file_name = random_filename();
-	out_file.open(file_name.c_str());
-	while (getline(in_file, str) && is_header_str(str))
-	{
-		pos_dpoint = str.find_first_of(":");
-		headers[str.substr(0, pos_dpoint)] = str.substr(pos_dpoint + 1, str.size());
-	}
-	while (getline(in_file, str))
-		out_file << str + "\n";
-	out_file.close();
 }
