@@ -211,8 +211,10 @@ void Response::method_get(Request &req, Location &loc)
 			file_name = path_index;
 			headers["Content-Type"] = get_MIME(path_index);
 		}
-		else
+		else if (loc.auto_index == true)
 			create_directory_listing(path, loc.root);
+		else
+			code = FORBIDDEN;
 	}
 	else if (S_ISREG(st.st_mode))
 	{
