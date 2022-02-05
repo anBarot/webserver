@@ -35,8 +35,8 @@ class Server_conf
 		std::map<std::string, Location> 							locations;
 		std::map<unsigned, std::string>								error_page;
 
-		Server_conf() : listen_port(80), listen_ip("127.0.0.1"), max_body_size(1) {}
-		Server_conf(int port) : listen_port(port), listen_ip("127.0.0.1"), max_body_size(1) {}
+		Server_conf() : listen_port(80), listen_ip("127.0.0.1"), max_body_size(1000) {}
+		Server_conf(int port) : listen_port(port), listen_ip("127.0.0.1"), max_body_size(1000) {}
 		~Server_conf() {}
 
 		struct OpenFile : public std::exception {

@@ -46,14 +46,14 @@ int Connections::init()
 			if (fd == -1)
 			{
 				std::cerr << RED;
-				perror(0); // What doe that mean
+				perror(0);
 				std::cerr << RESET;
 				continue ;
 			}
 			if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 			{
 				std::cerr << RED;
-				perror(0); // What doe that mean
+				perror(0);
 				std::cerr << RESET;
 				continue ;
 			}
@@ -68,7 +68,7 @@ int Connections::init()
 			if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 			{
 				std::cerr << RED;
-				perror(0); // What doe that mean
+				perror(0);
 				std::cerr << RESET;
 				// #ifdef LOGGER
 				// 	std::cerr << YELLOW << "Cannot bind " << BLUE << address << ":" << port << YELLOW << " already used" << RESET << std::endl;
@@ -79,7 +79,7 @@ int Connections::init()
 			if (listen(fd, SOMAXCONN) == -1)
 			{
 				std::cerr << RED;
-				perror(0); // What doe that mean
+				perror(0);
 				std::cerr << RESET;
 				close(fd);
 				continue ;

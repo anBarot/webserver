@@ -153,7 +153,8 @@ void Response::fill_response(Server_conf &sv, Request &req, Location &loc)
 	{
 		if (code == METHOD_NOT_ALLOWED)
 			headers["Allow"] = get_allow(loc);
-		if (sv.error_page.count(code))
+		if (sv.error_page.count(code)
+			&& std::ifstream(sv.error_page[code].c_str()).is_open())
 			file_name = sv.error_page[code];
 		else
 		{
