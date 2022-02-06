@@ -56,9 +56,6 @@ int is_header_str(std::string str);
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 std::string random_filename(void);
 
-
-
-
 # include "Request.hpp"
 # include "Location.hpp"
 # include "Server_conf.hpp"
