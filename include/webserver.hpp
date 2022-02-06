@@ -36,6 +36,7 @@ int is_reg(std::string path);
 e_methods get_method_enum(std::string word);
 std::string get_method_string(e_methods enm);
 std::string get_query(std::string &file_name);
+int	check_http_version(std::string version);
 
 // Debug
 // void display_servers(std::vector<Server_conf> &servers);
@@ -54,6 +55,7 @@ int is_header_str(std::string str);
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
 std::string random_filename(void);
+
 
 
 

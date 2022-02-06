@@ -35,8 +35,6 @@ public:
 
 private:
 	void extract_request_from_data(std::vector<Server_conf> confs);
-	void check_payload();
-	void check_line();
 };
 
 #endif //CLIENT_HPP

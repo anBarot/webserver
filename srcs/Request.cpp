@@ -19,14 +19,6 @@ Request::Request() : status(STARTING_PARSING)
 	payload.tmp_file_name = "";
 }
 
-std::string get_query(std::string &file_name)
-{
-	std::ifstream payload_file(file_name.c_str());
-	std::stringstream buf;
-
-	buf << payload_file.rdbuf();
-	return buf.str();
-}
 
 /*
 	Function that extracts the request line, then check if the method, 
@@ -199,4 +191,79 @@ void Request::set_environment()
 	setenv("SCRIPT_NAME", script_name.c_str(), 1);
 	setenv("SCRIPT_FILENAME", req_path.c_str(), 1);
 	setenv("SERVER_NAME", std::string("webserver").c_str(), 1);
+}
+
+// check if the request line is valid. If not, an reponse error code is set.
+void	Request::check_line(Response &response)
+{
+	if (check_http_version(request_line.version))
+		response.code = HTTP_VERSION_NOT_SUPPORTED;
+	else if (request_line.method == NOT_A_METHOD)
+		response.code = NOT_IMPLEMENTED;
+	else if	(request_line.target[0] != '/')
+		response.code = BAD_REQUEST;
+	else if (request_line.target.size() >= 256)
+		response.code = URI_TOO_LONG;
+
+	if (response.code >= 400)
+		status = FINISH_PARSING;
+}
+
+/*
+	check if host header is provided, as required in HTTP/1.1 protocol
+	check if a payload must be extracted and how (length or chunked).
+	If not, the request status is set as finised.
+*/
+void	Request::check_payload(Response &response)
+{
+	if (headers.size() > 32 || headers.count("host") == 0)
+	{
+		status = FINISH_PARSING;
+		response.code = BAD_REQUEST;
+		return ;
+	}
+
+	for (std::map<std::string, std::string>::iterator it = headers.begin(); 
+	it != headers.end(); it++)
+	{
+		if (it->first.find_first_of("\t\r ") != std::string::npos)
+		{
+			status = FINISH_PARSING;
+			response.code = BAD_REQUEST;
+			return ;
+		}
+	}
+
+	if (request_line.method == POST)
+	{
+		if (headers.count("transfer-encoding") &&
+			headers["transfer-encoding"] == "chunked")
+			payload.is_chunked = true;
+		else if (headers.count("transfer-encoding"))
+		{
+			status = FINISH_PARSING;
+			response.code = NOT_IMPLEMENTED;
+		}
+		else if (headers.count("content-length"))
+		{
+			payload.length = atoi(headers["content-length"].c_str());
+			if (payload.length < 0)
+			{
+				status = FINISH_PARSING;
+				response.code = BAD_REQUEST;
+			}
+			else if (payload.length > sv.max_body_size)
+			{
+				status = FINISH_PARSING;
+				response.code = PAYLOAD_TOO_LARGE;
+			}
+		}
+		else
+		{
+			response.code = LENGTH_REQUIRED;
+			status = FINISH_PARSING;
+		}
+	}
+	else
+		status = FINISH_PARSING;
 }

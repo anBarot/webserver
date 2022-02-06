@@ -27,6 +27,31 @@ int has_telnet_breaksignal(ssize_t last_read, char *buffer)
 	return 0;
 }
 
+int	check_http_version(std::string version)
+{
+	size_t pos = version.find_first_of("/");
+	
+	if (pos == std::string::npos)
+		return (1);
+
+	std::string value_part = version.substr(pos + 3, version.size());
+
+    if (value_part.find_first_not_of("0123456789") != std::string::npos
+        || version.substr(0, pos + 3) != "HTTP/1.")
+        return 1;
+
+    return 0;
+}
+
+std::string get_query(std::string &file_name)
+{
+	std::ifstream payload_file(file_name.c_str());
+	std::stringstream buf;
+
+	buf << payload_file.rdbuf();
+	return buf.str();
+}
+
 // Erase the whitespaces found after the last word of the string
 void ws_trim(std::string& s) {
 

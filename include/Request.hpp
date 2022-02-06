@@ -17,6 +17,9 @@
 #include "data_struct.hpp"
 #include "webserver.hpp"
 #include "Server_conf.hpp"
+#include "Response.hpp"
+
+class Response;
 
 typedef struct s_request_line
 {
@@ -49,8 +52,12 @@ public:
 	void 	extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data);
 	void 	extract_in_chunks(std::string &str, std::ofstream &file, size_t pos);
 
+	void	check_line(Response &response);
+	void 	check_payload(Response &response);
+	
 	int		is_cgi_compatible(Location &loc);
 	void	set_environment();
+	
 
 };
 

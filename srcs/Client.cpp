@@ -62,22 +62,6 @@ Server_conf get_server_conf(std::vector<Server_conf> &confs, unsigned short port
 	return (sv);
 }
 
-int	check_http_version(std::string version)
-{
-	size_t pos = version.find_first_of("/");
-	
-	if (pos == std::string::npos)
-		return (1);
-
-	std::string value_part = version.substr(pos + 3, version.size());
-
-    if (value_part.find_first_not_of("0123456789") != std::string::npos
-        || version.substr(0, pos + 3) != "HTTP/1.")
-        return 1;
-
-    return 0;
-}
-
 int Client::receive_request(std::vector<Server_conf> &confs)
 {
 	char buffer[BUFFER_SIZE];
@@ -98,9 +82,11 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 	{
 		if (requests.size())
 		{
-			if (requests.back().status != FINISH_PARSING)
+			Request &req(requests.back());
+
+			if (req.status != FINISH_PARSING)
 				extract_request_from_data(confs);
-			if (requests.back().status == FINISH_PARSING)
+			if (req.status == FINISH_PARSING)
 				requests.push_back(Request());
 		}
 	}
@@ -125,7 +111,7 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 		}
 		req.extract_request_line(received_data_raw);
 		if (req.status == LINE_PARSED) 
-			check_line();
+			req.check_line(response);
 	}
 	if (req.status == LINE_PARSED)
 	{
@@ -133,88 +119,11 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 		if (req.status == HEADER_PARSED)
 		{
 			req.sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
-			check_payload();
+			req.check_payload(response);
 		}
 	}
 	if (req.status == HEADER_PARSED)
 		req.extract_payload(received_data_raw);
-}
-
-// check if the request line is valid. If not, an reponse error code is set.
-void	Client::check_line()
-{
-	if (check_http_version(requests.back().request_line.version))
-		response.code = HTTP_VERSION_NOT_SUPPORTED;
-	else if (requests.back().request_line.method == NOT_A_METHOD)
-		response.code = NOT_IMPLEMENTED;
-	else if	(requests.back().request_line.target[0] != '/')
-		response.code = BAD_REQUEST;
-	else if (requests.back().request_line.target.size() >= 256)
-		response.code = URI_TOO_LONG;
-
-	if (response.code >= 400)
-		requests.back().status = FINISH_PARSING;
-}
-
-/*
-	check if host header is provided, as required in HTTP/1.1 protocol
-	check if a payload must be extracted and how (length or chunked).
-	If not, the request status is set as finised.
-*/
-void	Client::check_payload()
-{
-	Request &req = requests.back();
-
-	if (req.headers.size() > 32 || req.headers.count("host") == 0)
-	{
-		req.status = FINISH_PARSING;
-		response.code = BAD_REQUEST;
-		return ;
-	}
-
-	for (std::map<std::string, std::string>::iterator it = req.headers.begin(); 
-	it != req.headers.end(); it++)
-	{
-		if (it->first.find_first_of("\t\r ") != std::string::npos)
-		{
-			req.status = FINISH_PARSING;
-			response.code = BAD_REQUEST;
-			return ;
-		}
-	}
-
-	if (req.request_line.method == POST)
-	{
-		if (req.headers.count("transfer-encoding") &&
-			req.headers["transfer-encoding"] == "chunked")
-			req.payload.is_chunked = true;
-		else if (req.headers.count("transfer-encoding"))
-		{
-			req.status = FINISH_PARSING;
-			response.code = NOT_IMPLEMENTED;
-		}
-		else if (req.headers.count("content-length"))
-		{
-			req.payload.length = atoi(req.headers["content-length"].c_str());
-			if (req.payload.length < 0)
-			{
-				req.status = FINISH_PARSING;
-				response.code = BAD_REQUEST;
-			}
-			else if (req.payload.length > req.sv.max_body_size)
-			{
-				req.status = FINISH_PARSING;
-				response.code = PAYLOAD_TOO_LARGE;
-			}
-		}
-		else
-		{
-			response.code = LENGTH_REQUIRED;
-			req.status = FINISH_PARSING;
-		}
-	}
-	else
-		req.status = FINISH_PARSING;
 }
 
 int Client::respond()
