@@ -31,13 +31,7 @@ class Response
 		Response() : code(OK), is_cgi(false) {}
 		~Response() {}
 
-		void clear()
-		{
-			code = DEFAULT;
-			response.clear();
-			headers.clear();
-			file_name.clear();
-		}
+		void clear(){*this = Response();}
 
 		void create_response();
 		void create_directory_listing(std::string path, std::string loc_root);
