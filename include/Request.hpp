@@ -16,6 +16,7 @@
 #include "libraries.hpp"
 #include "data_struct.hpp"
 #include "webserver.hpp"
+#include "Server_conf.hpp"
 
 typedef struct s_request_line
 {
@@ -38,6 +39,7 @@ public:
 	t_request_line request_line;
 	std::map<std::string, std::string> headers;
 	t_payload payload;
+	Server_conf	sv;
 
 	Request();
 

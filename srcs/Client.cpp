@@ -131,7 +131,10 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 	{
 		req.extract_headers(received_data_raw);
 		if (req.status == HEADER_PARSED)
-			check_payload(confs);
+		{
+			req.sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
+			check_payload();
+		}
 	}
 	if (req.status == HEADER_PARSED)
 		req.extract_payload(received_data_raw);
@@ -158,7 +161,7 @@ void	Client::check_line()
 	check if a payload must be extracted and how (length or chunked).
 	If not, the request status is set as finised.
 */
-void	Client::check_payload(std::vector<Server_conf> confs)
+void	Client::check_payload()
 {
 	Request &req = requests.back();
 
@@ -180,8 +183,6 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 		}
 	}
 
-	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
-
 	if (req.request_line.method == POST)
 	{
 		if (req.headers.count("transfer-encoding") &&
@@ -200,7 +201,7 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 				req.status = FINISH_PARSING;
 				response.code = BAD_REQUEST;
 			}
-			else if (req.payload.length > sv.max_body_size)
+			else if (req.payload.length > req.sv.max_body_size)
 			{
 				req.status = FINISH_PARSING;
 				response.code = PAYLOAD_TOO_LARGE;
@@ -216,14 +217,13 @@ void	Client::check_payload(std::vector<Server_conf> confs)
 		req.status = FINISH_PARSING;
 }
 
-int Client::respond(std::vector<Server_conf> &confs)
+int Client::respond()
 {
 	std::string str;
 	Request &req = requests.front();
-	Server_conf sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
-	Location &loc = get_location(sv.locations, req.request_line.target);
+	Location &loc = get_location(req.sv.locations, req.request_line.target);
 
-	response.fill_response(sv, req, loc);
+	response.fill_response(req.sv, req, loc);
 	requests.pop_front();
 	str = response.response;
 	// std::cout << RED << "Response:\n" << RESET << str << std::endl;

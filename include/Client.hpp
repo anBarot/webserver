@@ -31,11 +31,11 @@ public:
 	Client(int sock, unsigned short lsock, std::string n_ip_add, time_t t);
 
 	int		receive_request(std::vector<Server_conf> &confs);
-	int		respond(std::vector<Server_conf> &confs);
+	int		respond();
 
 private:
 	void extract_request_from_data(std::vector<Server_conf> confs);
-	void check_payload(std::vector<Server_conf> confs);
+	void check_payload();
 	void check_line();
 };
 

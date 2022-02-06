@@ -150,7 +150,7 @@ int Connections::check_clients()
 		{
 			--ready_fd;
 			FD_CLR(clients[i].socket, &active_wset);
-			if (clients[i].respond(servers_conf) == -1)
+			if (clients[i].respond() == -1)
 				remove_client(i);
 			else
 			{
