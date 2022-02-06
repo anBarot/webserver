@@ -1,5 +1,13 @@
 #include "Response.hpp"
 
+
+Response::Response(Request &request, Location &location) :
+			req(request),
+			code(request.response_code),
+			sv(request.sv),
+			loc(location)
+{}
+
 void create_autoindex_file(std::string path, std::string listing_html)
 {
 	std::ofstream fileout("./tmp/listing_temp.html");
@@ -65,7 +73,7 @@ void Response::create_directory_listing(std::string path, std::string loc_root)
 }
 
 
-void Response::create_cgi_file(Request &req, Location &loc)
+void Response::create_cgi_file()
 {
 	std::string script_name;
 	std::string exec_name;
@@ -73,11 +81,11 @@ void Response::create_cgi_file(Request &req, Location &loc)
 
 	script_name = target.substr(target.find_last_of("/") + 1, target.size());
 	exec_name = loc.cgi_path + "/" + script_name;
-	if (exec_cgi(exec_name.c_str(), req) == 1)
+	if (exec_cgi(exec_name.c_str()) == 1)
 		code = NOT_FOUND;
 }
 
-int Response::exec_cgi(const char *exec_arg, Request &req)
+int Response::exec_cgi(const char *exec_arg)
 {
 	pid_t pid;
 	int cgi_file_fd;
@@ -124,7 +132,7 @@ void Response::extract_cgi_file()
 	out_file.close();
 }
 
-void Response::fill_response(Server_conf &sv, Request &req, Location &loc)
+std::string Response::get_response()
 {
 	headers["Server"] = "webserver";
 	headers["Date"] = get_date(time(NULL));
@@ -141,15 +149,15 @@ void Response::fill_response(Server_conf &sv, Request &req, Location &loc)
 		if (req.is_cgi_compatible(loc))
 		{
 			is_cgi = true;
-			create_cgi_file(req, loc);
+			create_cgi_file();
 			extract_cgi_file();
 		}
 		else if (req.request_line.method == GET)
-			method_get(req, loc);
+			method_get();
 		else if (req.request_line.method == POST)
-			method_post(req, loc, sv);
+			method_post();
 		else if (req.request_line.method == DELETE)
-			method_delete(req, loc);
+			method_delete();
 	}
 	if (code >= 400)
 	{
@@ -167,6 +175,7 @@ void Response::fill_response(Server_conf &sv, Request &req, Location &loc)
 	if (file_name != "")
 		headers["Content-Length"] = get_file_size(file_name);
 	create_response();
+	return response;
 }
 
 void Response::create_response()
@@ -180,13 +189,12 @@ void Response::create_response()
 	buf << "\r\n" << file.rdbuf() << "\r\n";
 	response = buf.str();
 	file.close();
-	std::cout << response << std::endl;
 }
 
 
 // methods
 
-void Response::method_get(Request &req, Location &loc)
+void Response::method_get()
 {
 	struct stat st;
 	std::string path(req.request_line.target);
@@ -234,7 +242,7 @@ void Response::method_get(Request &req, Location &loc)
 	}
 }
 
-void Response::method_delete(Request &req, Location &loc)
+void Response::method_delete()
 {
 	struct stat st;
 	std::string path;
@@ -257,7 +265,7 @@ void Response::method_delete(Request &req, Location &loc)
 	}
 }
 
-void Response::method_post(Request &req, Location &loc, Server_conf &sv)
+void Response::method_post()
 {
 	struct stat st;
 	std::string path;

@@ -1,9 +1,9 @@
 #include "Client.hpp"
 
-Client::Client(int sock, unsigned short lsock, std::string n_ip_add, time_t t) : socket(sock), ip_address(n_ip_add), port(lsock), last_activity(t)
-{
-	requests.push_back(Request());
-}
+Client::Client(int sock, unsigned short lsock, std::string n_ip_add, time_t t) :
+		socket(sock), ip_address(n_ip_add), port(lsock),
+		requests(std::deque<Request>(1)), last_activity(t)
+{}
 
 Location &get_location(std::map<std::string, Location> &loc_map, std::string path)
 {
@@ -111,7 +111,7 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 		}
 		req.extract_request_line(received_data_raw);
 		if (req.status == LINE_PARSED) 
-			req.check_line(response);
+			req.check_line();
 	}
 	if (req.status == LINE_PARSED)
 	{
@@ -119,7 +119,7 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 		if (req.status == HEADER_PARSED)
 		{
 			req.sv = get_server_conf(confs, port, ip_address, req.headers["host"]);
-			req.check_payload(response);
+			req.check_payload();
 		}
 	}
 	if (req.status == HEADER_PARSED)
@@ -128,16 +128,17 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 
 int Client::respond()
 {
-	std::string str;
 	Request &req = requests.front();
 	Location &loc = get_location(req.sv.locations, req.request_line.target);
+	Response resp(req, loc);
+	std::string response;
 
-	response.fill_response(req.sv, req, loc);
+	response = resp.get_response();
 	requests.pop_front();
-	str = response.response;
-	// std::cout << RED << "Response:\n" << RESET << str << std::endl;
-	response.clear();
-	if (send(socket, str.c_str(), str.size(), 0) <= 0)
+	#ifdef LOGGER
+		std::cout << RED << "Response:\n" << RESET << response << std::endl;
+	#endif // DEBUG
+	if (send(socket, response.c_str(), response.size(), 0) <= 0)
 		return -1;
 	return 0;
 }

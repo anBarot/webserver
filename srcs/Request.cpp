@@ -194,18 +194,18 @@ void Request::set_environment()
 }
 
 // check if the request line is valid. If not, an reponse error code is set.
-void	Request::check_line(Response &response)
+void	Request::check_line()
 {
 	if (check_http_version(request_line.version))
-		response.code = HTTP_VERSION_NOT_SUPPORTED;
+		response_code = HTTP_VERSION_NOT_SUPPORTED;
 	else if (request_line.method == NOT_A_METHOD)
-		response.code = NOT_IMPLEMENTED;
+		response_code = NOT_IMPLEMENTED;
 	else if	(request_line.target[0] != '/')
-		response.code = BAD_REQUEST;
+		response_code = BAD_REQUEST;
 	else if (request_line.target.size() >= 256)
-		response.code = URI_TOO_LONG;
+		response_code = URI_TOO_LONG;
 
-	if (response.code >= 400)
+	if (response_code >= 400)
 		status = FINISH_PARSING;
 }
 
@@ -214,12 +214,12 @@ void	Request::check_line(Response &response)
 	check if a payload must be extracted and how (length or chunked).
 	If not, the request status is set as finised.
 */
-void	Request::check_payload(Response &response)
+void	Request::check_payload()
 {
 	if (headers.size() > 32 || headers.count("host") == 0)
 	{
 		status = FINISH_PARSING;
-		response.code = BAD_REQUEST;
+		response_code = BAD_REQUEST;
 		return ;
 	}
 
@@ -229,7 +229,7 @@ void	Request::check_payload(Response &response)
 		if (it->first.find_first_of("\t\r ") != std::string::npos)
 		{
 			status = FINISH_PARSING;
-			response.code = BAD_REQUEST;
+			response_code = BAD_REQUEST;
 			return ;
 		}
 	}
@@ -242,7 +242,7 @@ void	Request::check_payload(Response &response)
 		else if (headers.count("transfer-encoding"))
 		{
 			status = FINISH_PARSING;
-			response.code = NOT_IMPLEMENTED;
+			response_code = NOT_IMPLEMENTED;
 		}
 		else if (headers.count("content-length"))
 		{
@@ -250,17 +250,17 @@ void	Request::check_payload(Response &response)
 			if (payload.length < 0)
 			{
 				status = FINISH_PARSING;
-				response.code = BAD_REQUEST;
+				response_code = BAD_REQUEST;
 			}
 			else if (payload.length > sv.max_body_size)
 			{
 				status = FINISH_PARSING;
-				response.code = PAYLOAD_TOO_LARGE;
+				response_code = PAYLOAD_TOO_LARGE;
 			}
 		}
 		else
 		{
-			response.code = LENGTH_REQUIRED;
+			response_code = LENGTH_REQUIRED;
 			status = FINISH_PARSING;
 		}
 	}

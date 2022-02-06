@@ -24,7 +24,6 @@ public:
 	std::string ip_address;
 	unsigned short port;
 	std::deque<Request> requests;
-	Response response;
 	std::vector<char> received_data_raw;
 	time_t last_activity;
 
@@ -34,7 +33,7 @@ public:
 	int		respond();
 
 private:
-	void extract_request_from_data(std::vector<Server_conf> confs);
+	void	extract_request_from_data(std::vector<Server_conf> confs);
 };
 
 #endif //CLIENT_HPP

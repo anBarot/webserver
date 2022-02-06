@@ -19,9 +19,6 @@ std::map<std::string, std::string> MIME_types;
 void sigint_handler(int signum)
 {
 	std::cout << "\nQuitting webserver\n";
-	
-	//add close sockets
-
 	exit(signum);
 }
 

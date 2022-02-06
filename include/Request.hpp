@@ -23,7 +23,7 @@ class Response;
 
 typedef struct s_request_line
 {
-	e_methods method;
+	e_methods	method;
 	std::string target;
 	std::string version;
 }				t_request_line;
@@ -43,6 +43,7 @@ public:
 	std::map<std::string, std::string> headers;
 	t_payload payload;
 	Server_conf	sv;
+	e_response_code response_code;
 
 	Request();
 
@@ -52,13 +53,12 @@ public:
 	void 	extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data);
 	void 	extract_in_chunks(std::string &str, std::ofstream &file, size_t pos);
 
-	void	check_line(Response &response);
-	void 	check_payload(Response &response);
+	void	check_line();
+	void 	check_payload();
 	
 	int		is_cgi_compatible(Location &loc);
 	void	set_environment();
 	
-
 };
 
 #endif //REQUEST_HPP

@@ -21,28 +21,35 @@
 
 class Response
 {
-	public:
-		e_response_code code;
-		std::string response;
-		std::map<std::string, std::string> headers;
-		std::string file_name;
-		bool is_cgi;
-	
-		Response() : code(OK), is_cgi(false) {}
-		~Response() {}
+public:
 
-		void clear(){*this = Response();}
+	Response(Request &request, Location &loc);
 
-		void create_response();
-		void create_directory_listing(std::string path, std::string loc_root);
-		void fill_response(Server_conf &sv, Request &req, Location &loc);
+	std::string	get_response();
 
-		void	method_get(Request &req, Location &loc);
-		void 	method_delete(Request &req, Location &loc);
-		void	method_post(Request &req, Location &loc, Server_conf &sv);
-		void	create_cgi_file(Request &req, Location &loc);
-		int		exec_cgi(const char *exec_arg, Request &req);
-		void	extract_cgi_file();
+private:
+
+	Request &req;
+	e_response_code code;
+	Server_conf &sv;
+	Location &loc;
+
+	std::map<std::string, std::string> headers;
+	std::string file_name;
+	bool is_cgi;
+	std::string response;
+
+	void	create_response();
+	void	create_directory_listing(std::string path, std::string loc_root);
+
+	void	method_get();
+	void	method_delete();
+	void	method_post();
+	void	create_cgi_file();
+	int		exec_cgi(const char *exec_arg);
+	void	extract_cgi_file();
+
+
 };
 
 #endif //RESPONSE_HPP
