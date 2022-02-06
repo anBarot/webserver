@@ -5,7 +5,8 @@ Response::Response(Request &request, Location &location) :
 			req(request),
 			code(request.response_code),
 			sv(request.sv),
-			loc(location)
+			loc(location),
+			is_cgi(false)
 {}
 
 void create_autoindex_file(std::string path, std::string listing_html)

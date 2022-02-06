@@ -122,8 +122,9 @@ int Connections::add_clients()
 
 int Connections::check_clients()
 {
-	unsigned long i;
-
+	unsigned long	i;
+	int				ret;
+	
 	i = 0;
 	while (i < clients.size())
 	{
@@ -149,12 +150,19 @@ int Connections::check_clients()
 		else if (FD_ISSET(clients[i].socket, &ready_wset))
 		{
 			--ready_fd;
-			FD_CLR(clients[i].socket, &active_wset);
-			if (clients[i].respond() == -1)
+			ret = clients[i].respond();
+			if (ret == -1)
+			{
+				FD_CLR(clients[i].socket, &active_wset);
 				remove_client(i);
+			}
 			else
 			{
-				FD_SET(clients[i].socket, &active_rset);
+				if (ret == 0)
+				{
+					FD_CLR(clients[i].socket, &active_wset);
+					FD_SET(clients[i].socket, &active_rset);
+				}
 				clients[i].last_activity = time(NULL);
 				++i;
 			}
@@ -181,8 +189,9 @@ void Connections::remove_client(int i)
 void Connections::loop()
 {
 	struct timeval timeout;
-	
-	while (1)
+	int i;
+	i = 0;
+	while (i < 20)
 	{
 		timeout.tv_sec = 30;
 		timeout.tv_usec = 0;
@@ -196,5 +205,6 @@ void Connections::loop()
 		if (ready_fd != 0)
 			add_clients();
 		check_clients();
+		i++;
 	}
 }
