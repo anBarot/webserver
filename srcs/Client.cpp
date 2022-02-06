@@ -96,10 +96,13 @@ int Client::receive_request(std::vector<Server_conf> &confs)
 		received_data_raw.push_back(buffer[i]);
 	if (received_data_raw.size())
 	{
-		if (requests.size() && requests.back().status != FINISH_PARSING)
-			extract_request_from_data(confs);
-		else
-			requests.push_back(Request());
+		if (requests.size())
+		{
+			if (requests.back().status != FINISH_PARSING)
+				extract_request_from_data(confs);
+			if (requests.back().status == FINISH_PARSING)
+				requests.push_back(Request());
+		}
 	}
 	return 0;
 }

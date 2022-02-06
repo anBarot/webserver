@@ -35,6 +35,7 @@ int	is_dir(std::string path);
 int is_reg(std::string path);
 e_methods get_method_enum(std::string word);
 std::string get_method_string(e_methods enm);
+std::string get_query(std::string &file_name);
 
 // Debug
 // void display_servers(std::vector<Server_conf> &servers);
