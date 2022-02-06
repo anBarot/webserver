@@ -130,7 +130,7 @@ std::string random_filename(void)
 {
 	char filename_template[] = MKSTEMP_DEFAULT_TEMPLATE;
 	mkstemp(filename_template); // Will change XXXXX by a random string
-	return "./tmp/" + std::string(filename_template);
+	return std::string(filename_template);
 }
 
 // Init reason_phrase map 

@@ -94,7 +94,7 @@ int Response::exec_cgi(const char *exec_arg, Request &req)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
 		if ((execve(exec_arg, empty_args, environ)) == -1)
-			return 1;
+			exit(1);
 	}
 	else if (pid == -1)
 	{

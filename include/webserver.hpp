@@ -13,7 +13,7 @@
 #ifndef WEBSERVER_HPP
 # define WEBSERVER_HPP
 
-# define MKSTEMP_DEFAULT_TEMPLATE "webserv_tmp_XXXXXX"
+# define MKSTEMP_DEFAULT_TEMPLATE "./tmp/webserv_tmp_XXXXXX"
 # define DEFAULT_SERVER_CONF "./conf_files/example3.conf"
 # define TIMEOUT 100
 
