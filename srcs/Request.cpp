@@ -12,7 +12,7 @@
 
 #include "Request.hpp"
 
-Request::Request() : status(STARTING_PARSING)
+Request::Request() : status(STARTING_PARSING), response_code(OK)
 {
 	payload.is_chunked = false;
 	payload.length = 0;
