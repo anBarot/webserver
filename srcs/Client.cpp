@@ -132,13 +132,25 @@ int Client::respond()
 	Location &loc = get_location(req.sv.locations, req.request_line.target);
 	Response resp(req, loc);
 	std::string response;
+	size_t ret;
 
 	response = resp.get_response();
 	requests.pop_front();
+	
 	#ifdef LOGGER
 		std::cout << RED << "Response:\n" << RESET << response << std::endl;
 	#endif // DEBUG
-	if (send(socket, response.c_str(), response.size(), 0) <= 0)
+
+	ret = send(socket, response.c_str(), response.size(), 0);
+	
+	#ifdef LOGGER
+		std::cout << CYAN << socket << " sent " << ret << " bytes out of " << response.size() << ".\n" << RESET << std::endl;
+	#endif // DEBUG
+
+	if (ret < 0)
 		return -1;
+	else if (ret < response.size())
+		return 1;
+
 	return 0;
 }
