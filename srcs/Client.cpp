@@ -128,29 +128,35 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 
 int Client::respond()
 {
-	Request &req = requests.front();
-	Location &loc = get_location(req.sv.locations, req.request_line.target);
-	Response resp(req, loc);
-	std::string response;
 	size_t ret;
 
-	response = resp.get_response();
-	requests.pop_front();
-	
-	#ifdef LOGGER
-		std::cout << RED << "Response:\n" << RESET << response << std::endl;
-	#endif // DEBUG
+	if (response.empty())
+	{
+		Request &req = requests.front();
+		Location &loc = get_location(req.sv.locations, req.request_line.target);
+		Response resp(req, loc);
+
+		response = resp.get_response();
+		
+		#ifdef LOGGER
+			std::cout << RED << "Response:\n" << RESET << response.substr(0, 512) << std::endl;
+		#endif // DEBUG
+	}
 
 	ret = send(socket, response.c_str(), response.size(), 0);
-	
+	if (ret < 0)
+		return -1;
+
 	#ifdef LOGGER
 		std::cout << CYAN << socket << " sent " << ret << " bytes out of " << response.size() << ".\n" << RESET << std::endl;
 	#endif // DEBUG
 
-	if (ret < 0)
-		return -1;
-	else if (ret < response.size())
+	if (ret < response.size())
+	{
+		response.erase(0, ret);
 		return 1;
-
+	}
+	requests.pop_front();
+	response.clear();
 	return 0;
 }
