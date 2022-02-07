@@ -191,7 +191,12 @@ void Connections::loop()
 {
 	struct timeval timeout;
 
-	while (1)
+	#ifdef CHECK_LEAKS
+		int i = 0;
+		while (++i < CHECK_LEAKS)
+	#else
+		while (1)
+	#endif
 	{
 		timeout.tv_sec = 30;
 		timeout.tv_usec = 0;

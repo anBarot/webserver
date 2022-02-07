@@ -23,7 +23,7 @@ CXX				= clang++
 
 CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include $(OPTS)
 
-ARGS			= ./conf_files/example2.conf
+ARGS			= ./conf/webserv_configuration.conf
 
 OPTS			= -D LOGGER
 
@@ -37,6 +37,10 @@ all:			$(NAME)
 
 run:			all
 				./$(NAME) $(ARGS)
+
+leaks:			
+				$(MAKE) OPTS="-D LOGGER -D CHECK_LEAKS=50" re
+				valgrind --leak-check=full ./$(NAME) $(ARGS)
 
 log:
 				$(MAKE) OPTS="-D LOGGER" re

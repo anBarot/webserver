@@ -139,7 +139,7 @@ int Client::respond()
 		response = resp.get_response();
 		
 		#ifdef LOGGER
-			std::cout << RED << "Response:\n" << RESET << response.substr(0, 512) << std::endl;
+			std::cout << BOLDCYAN << "Response:\n" << RESET << response.substr(0, 512) << std::endl;
 		#endif // DEBUG
 	}
 
