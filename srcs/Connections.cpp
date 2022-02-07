@@ -83,7 +83,7 @@ int Connections::init()
 		listen_pool[fd].first = address;
 		listen_pool[fd].second = port;
 	}
-	if (listen_pool.size() == 0)
+	if (listen_pool.size() == 0 || listen_pool.size() > 64)
 		throw std::exception();
 	return 0;
 }
