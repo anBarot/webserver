@@ -18,7 +18,6 @@
 
 class Client
 {
-
 public:
 	int socket;
 	std::string ip_address;

@@ -128,7 +128,7 @@ void Client::extract_request_from_data(std::vector<Server_conf> confs)
 
 int Client::respond()
 {
-	size_t ret;
+	long	ret;
 
 	if (response.empty())
 	{
@@ -143,7 +143,7 @@ int Client::respond()
 		#endif // DEBUG
 	}
 
-	ret = send(socket, response.c_str(), response.size(), 0);
+	ret = send(socket, response.c_str(), response.size(), MSG_NOSIGNAL);
 	if (ret < 0)
 		return -1;
 
@@ -151,11 +151,12 @@ int Client::respond()
 		std::cout << CYAN << socket << " sent " << ret << " bytes out of " << response.size() << ".\n" << RESET << std::endl;
 	#endif // DEBUG
 
-	if (ret < response.size())
+	if (static_cast<size_t>(ret) < response.size())
 	{
 		response.erase(0, ret);
 		return 1;
 	}
+
 	requests.pop_front();
 	response.clear();
 	return 0;

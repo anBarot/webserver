@@ -31,7 +31,7 @@ int main(int ac, char **av)
 	char *conf_file = (ac == 2 ? (char *)av[1] : (char *)DEFAULT_SERVER_CONF);
 	
 	try {
-		if (conf_parser(conf_file, connections.servers_conf))
+		if (conf_parser(conf_file, connections.virtual_hosts))
 			return (error_and_exit(CONFFILE_PARSE_ERR));
 	} catch (Server_conf::ConfError &ex) {
 		std::cerr << RED << "Error in file "

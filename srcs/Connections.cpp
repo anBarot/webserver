@@ -12,6 +12,15 @@
 
 #include "Connections.hpp"
 
+void Connections::get_addresses()
+ {
+	for (std::vector<Server_conf>::iterator it = virtual_hosts.begin(); it != virtual_hosts.end(); ++it)
+	{
+		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); ++itl)
+			addresses.insert(std::make_pair(itl->address, itl->port));
+	}
+ }
+
 int Connections::init()
 {
 	struct sockaddr_in addr;
@@ -24,75 +33,58 @@ int Connections::init()
 	optval = 1;
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
-	for (std::vector<Server_conf>::iterator it = servers_conf.begin(); it != servers_conf.end(); it++)
+	
+	get_addresses();
+	for (std::set<std::pair<std::string, unsigned short> >::iterator it = addresses.begin(); it != addresses.end(); ++it)
 	{
-		for (Server_conf::listenables::iterator itl = it->listens.begin(); itl != it->listens.end(); itl++) {
-			std::string address = itl->address;
-			unsigned short port = itl->port;
-			#ifdef LOGGER
-				std::cout << CYAN << "Trying to bind " << address << ":" << port << " ... ";
-			#endif
-			if (itl->is_virtual) {
-				#ifdef LOGGER
-					std::cout << MAGENTA <<  "(Virtual skipped)" << std::endl << RESET;
-				#endif
-				continue ;
-			}
-			#ifdef LOGGER
-				std::cout << std::endl;
-			#endif
+		std::string address = it->first;
+		unsigned short port = it->second;
 
-			fd = socket(AF_INET, SOCK_STREAM, 0);
-			if (fd == -1)
-			{
-				std::cerr << RED;
-				perror(0);
-				std::cerr << RESET;
-				continue ;
-			}
-			if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
-			{
-				std::cerr << RED;
-				perror(0);
-				std::cerr << RESET;
-				continue ;
-			}
-			if (!(address.empty()))
-			{
-				inet_aton(address.c_str(), &ip);
-				addr.sin_addr = ip;
-			}
-			else
-				addr.sin_addr.s_addr = htonl(INADDR_ANY);
-			addr.sin_port = htons(port);
-			if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
-			{
-				std::cerr << RED;
-				perror(0);
-				std::cerr << RESET;
-				// #ifdef LOGGER
-				// 	std::cerr << YELLOW << "Cannot bind " << BLUE << address << ":" << port << YELLOW << " already used" << RESET << std::endl;
-				// #endif
-				close(fd);
-				continue ;
-			}
-			if (listen(fd, SOMAXCONN) == -1)
-			{
-				std::cerr << RED;
-				perror(0);
-				std::cerr << RESET;
-				close(fd);
-				continue ;
-			}
-			FD_SET(fd, &active_rset);
-			fd_list.push_back(fd);
-			listen_pool[fd].first = address;
-			listen_pool[fd].second = port;
+		#ifdef LOGGER
+			std::cout << CYAN << "Trying to bind " << it->first << ":" << it->second << " ... " << std::endl;
+		#endif
+	
+		fd = socket(AF_INET, SOCK_STREAM, 0);
+		if (fd == -1)
+		{
+			std::cerr << RED;
+			perror(0);
+			std::cerr << RESET;
+			continue ;
 		}
+		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
+		{
+			std::cerr << RED;
+			perror(0);
+			std::cerr << RESET;
+			continue ;
+		}
+		inet_aton(address.c_str(), &ip);
+		addr.sin_addr = ip;
+		addr.sin_port = htons(port);
+		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
+		{
+			std::cerr << RED;
+			perror(0);
+			std::cerr << RESET;
+			close(fd);
+			continue ;
+		}
+		if (listen(fd, SOMAXCONN) == -1)
+		{
+			std::cerr << RED;
+			perror(0);
+			std::cerr << RESET;
+			close(fd);
+			continue ;
+		}
+		FD_SET(fd, &active_rset);
+		fd_list.push_back(fd);
+		listen_pool[fd].first = address;
+		listen_pool[fd].second = port;
 	}
-	if (listen_pool.size() == 0) {
+	if (listen_pool.size() == 0)
 		throw std::exception();
-	}
 	return 0;
 }
 
@@ -111,7 +103,11 @@ int Connections::add_clients()
 				perror(0);
 				continue ;
 			}
-			// std::cout << "Connection accepted on fd " << fd << " based on listen fd " << it->first << std::endl;
+			
+			#ifdef LOGGER
+				std::cout << MAGENTA << "Connection opened on socket descriptor " << fd << std::endl;
+			#endif // DEBUG
+
 			FD_SET(fd, &active_rset);
 			fd_list.push_back(fd);
 			clients.push_back(Client(fd, it->second.second, it->second.first, time(NULL)));
@@ -131,7 +127,7 @@ int Connections::check_clients()
 		if (FD_ISSET(clients[i].socket, &ready_rset))
 		{
 			--ready_fd;
-			if (clients[i].receive_request(servers_conf) == -1)
+			if (clients[i].receive_request(virtual_hosts) == -1)
 			{
 				FD_CLR(clients[i].socket, &active_rset);
 				remove_client(i);
@@ -180,18 +176,22 @@ int Connections::check_clients()
 
 void Connections::remove_client(int i)
 {
+	#ifdef LOGGER
+		std::cout << MAGENTA << "Connection closed on socket descriptor " << clients[i].socket << std::endl;
+	#endif // DEBUG
+
 	fd_list.remove(clients[i].socket);
 	close(clients[i].socket);
 	clients.erase(clients.begin() + i);
-	std::cout << MAGENTA << "Connection closed" << std::endl;
+
+
 }
 
 void Connections::loop()
 {
 	struct timeval timeout;
-	int i;
-	i = 0;
-	while (i < 20)
+
+	while (1)
 	{
 		timeout.tv_sec = 30;
 		timeout.tv_usec = 0;
@@ -200,11 +200,14 @@ void Connections::loop()
 		ready_wset = active_wset;
 		__AWAIT_REQ;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
+		#ifdef LOGGER
+			std::cout << MAGENTA << "Select returned." << std::endl;
+		#endif // DEBUG
+
 		if (ready_fd == -1)
 			error_and_exit(SOCK_ERR);
 		if (ready_fd != 0)
 			add_clients();
 		check_clients();
-		i++;
 	}
 }
