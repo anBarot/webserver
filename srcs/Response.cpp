@@ -102,7 +102,8 @@ int Response::exec_cgi(const char *exec_arg)
 		if (cgi_file_fd == -1)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
-		if ((execve(exec_arg, empty_args, environ)) == -1)
+		// @bruno i removed environ because its not working on MacOs, can't we use the char** from main?
+		if ((execve(exec_arg, empty_args, NULL)) == -1)
 			exit(1);
 	}
 	else if (pid == -1)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connections.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/02/01 19:26:19 by abarot           ###   ########.fr       */
+/*   Updated: 2022/02/07 20:31:08 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,30 +41,33 @@ int Connections::init()
 		unsigned short port = it->second;
 
 		#ifdef LOGGER
-			std::cout << CYAN << "Trying to bind " << it->first << ":" << it->second << " ... " << std::endl;
+			std::cout << CYAN << "Trying to bind " << address << ":" << port << " ... " << std::endl;
 		#endif
 	
 		fd = socket(AF_INET, SOCK_STREAM, 0);
 		if (fd == -1)
 		{
-			std::cerr << RED;
+			std::cerr << "AF_INET: " << RED;
 			perror(0);
 			std::cerr << RESET;
 			continue ;
 		}
 		if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 		{
-			std::cerr << RED;
+			std::cerr << "SOL_SOCKET: " << RED;
 			perror(0);
 			std::cerr << RESET;
 			continue ;
 		}
-		inet_aton(address.c_str(), &ip);
-		addr.sin_addr = ip;
+		if (!(address.empty())) {
+			inet_aton(address.c_str(), &ip);
+			addr.sin_addr = ip;
+		}
+		addr.sin_addr.s_addr = htonl(INADDR_ANY); // Need it to bind 127.0.0.2 for example, otherwise not working
 		addr.sin_port = htons(port);
 		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		{
-			std::cerr << RED;
+			std::cerr << "HTONS: " << RED;
 			perror(0);
 			std::cerr << RESET;
 			close(fd);
@@ -72,12 +75,13 @@ int Connections::init()
 		}
 		if (listen(fd, SOMAXCONN) == -1)
 		{
-			std::cerr << RED;
+			std::cerr << "SOMAXCONN: " << RED;
 			perror(0);
 			std::cerr << RESET;
 			close(fd);
 			continue ;
 		}
+		std::cerr << RESET << std::endl;
 		FD_SET(fd, &active_rset);
 		fd_list.push_back(fd);
 		listen_pool[fd].first = address;
