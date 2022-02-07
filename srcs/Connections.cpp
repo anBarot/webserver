@@ -47,7 +47,7 @@ int Connections::init()
 		fd = socket(AF_INET, SOCK_STREAM, 0);
 		if (fd == -1)
 		{
-			std::cerr << "AF_INET: " << RED;
+			std::cerr << "AF_INET: " << errno << "\n" << RED;
 			perror(0);
 			std::cerr << RESET;
 			continue ;
