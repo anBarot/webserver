@@ -59,11 +59,8 @@ int Connections::init()
 			std::cerr << RESET;
 			continue ;
 		}
-		if (!(address.empty())) {
-			inet_aton(address.c_str(), &ip);
-			addr.sin_addr = ip;
-		}
-		addr.sin_addr.s_addr = htonl(INADDR_ANY); // Need it to bind 127.0.0.2 for example, otherwise not working
+		inet_aton(address.c_str(), &ip);
+		addr.sin_addr = ip;
 		addr.sin_port = htons(port);
 		if (bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1)
 		{
