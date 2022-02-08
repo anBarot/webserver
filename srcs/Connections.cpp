@@ -133,10 +133,7 @@ int Connections::check_clients()
 		{
 			--ready_fd;
 			if (clients[i].receive_request(virtual_hosts) == -1)
-			{
-				FD_CLR(clients[i].socket, &active_rset);
 				remove_client(i);
-			}
 			else
 			{
 				if (clients[i].requests.front().status == FINISH_PARSING)
@@ -153,10 +150,7 @@ int Connections::check_clients()
 			--ready_fd;
 			ret = clients[i].respond();
 			if (ret == -1)
-			{
-				FD_CLR(clients[i].socket, &active_wset);
 				remove_client(i);
-			}
 			else
 			{
 				if (ret == 0)
@@ -185,11 +179,11 @@ void Connections::remove_client(int i)
 		std::cout << MAGENTA << "Connection closed on socket descriptor " << clients[i].socket << std::endl;
 	#endif // DEBUG
 
+	FD_CLR(clients[i].socket, &active_rset);
+	FD_CLR(clients[i].socket, &active_wset);
 	fd_list.remove(clients[i].socket);
 	close(clients[i].socket);
 	clients.erase(clients.begin() + i);
-
-
 }
 
 void Connections::loop()

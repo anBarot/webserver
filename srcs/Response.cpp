@@ -16,7 +16,7 @@ void create_autoindex_file(std::string path, std::string listing_html)
 	fileout << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " 
 		<< path << 
 		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
-		listing_html <<"</pre><hr></body></html>";
+		listing_html <<"</pre><hr></body></html>\n";
 
 	fileout.close();
 }
@@ -29,7 +29,7 @@ void	create_error_file(int code)
 			<< code << " "
 			<< reason_phrase[code] << "</title></head><body><center><h1>"
 			<< code << " " << reason_phrase[code] << "</h1></center><hr> \
-			<center>webserver (Ubuntu/Mac OS)</center></body></html>";
+			<center>webserver (Ubuntu/Mac OS)</center></body></html>\n";
 	
 	fileout.close();
 }
