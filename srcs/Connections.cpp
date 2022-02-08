@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connections.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/28 05:10:51 by adda-sil          #+#    #+#             */
-/*   Updated: 2022/02/07 20:31:08 by adda-sil         ###   ########.fr       */
+/*   Updated: 2022/02/08 18:58:01 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,12 +101,15 @@ int Connections::add_clients()
 			fd = accept(it->first, 0, 0);
 			if (fd == -1)
 			{
+				#ifdef LOGGER
+					std::cout << RED << "Error: " << errno << RESET << std::endl;
+				#endif // DEBUG
 				perror(0);
 				continue ;
 			}
 			
 			#ifdef LOGGER
-				std::cout << MAGENTA << "Connection opened on socket descriptor " << fd << std::endl;
+				std::cout << MAGENTA << "Connection opened on socket descriptor " << fd << RESET << std::endl;
 			#endif // DEBUG
 
 			FD_SET(fd, &active_rset);
