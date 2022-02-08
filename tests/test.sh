@@ -11,8 +11,8 @@ do
 	curl 127.0.0.1:3000/images/perl.png
 	curl 127.0.0.1:3000/images/pythong.png
 	curl 127.0.0.1:3000/method_not_allowed
-#	curl 127.0.0.1:3000/redirect
-	# curl -i 127.0.0.1:3000/google
+	curl 127.0.0.1:3000/redirect
+	curl 127.0.0.1:3000/google
 	curl 127.0.0.1:3000/random
 	curl 127.0.0.1:3001
 	curl --resolve webserv_other:3000:127.0.0.1 webserv_other:3000

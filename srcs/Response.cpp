@@ -141,9 +141,9 @@ std::string Response::get_response()
 	if (loc.redirection.first >= 300)
 	{
 		code = loc.redirection.first;
-		file_name = sv.error_page[code];
+		file_name = "./tmp/error_temp.html";
+		create_error_file(code);
 		headers["Location"] = loc.redirection.second;
-		headers["Connection"] = "close";
 	}
 	if (code < 300 && loc.methods[req.request_line.method] == false) 
 		code = METHOD_NOT_ALLOWED;
@@ -190,7 +190,7 @@ void Response::create_response()
 	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
 		buf << it->first << ": " << it->second << "\r\n";
-	buf << "\r\n" << file.rdbuf() << "\r\n";
+	buf << "\r\n" << file.rdbuf();
 	response = buf.str();
 	file.close();
 }
