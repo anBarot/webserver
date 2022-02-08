@@ -49,6 +49,7 @@ std::string get_query(std::string &file_name)
 	std::stringstream buf;
 
 	buf << payload_file.rdbuf();
+	payload_file.close();
 	return buf.str();
 }
 
@@ -153,8 +154,11 @@ int is_reg(std::string path)
 
 std::string random_filename(void)
 {
+	int fd;
 	char filename_template[] = MKSTEMP_DEFAULT_TEMPLATE;
-	mkstemp(filename_template); // Will change XXXXX by a random string
+	
+	fd = mkstemp(filename_template); // Will change XXXXX by a random string
+	close(fd);
 	return std::string(filename_template);
 }
 

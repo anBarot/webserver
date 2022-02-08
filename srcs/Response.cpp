@@ -130,6 +130,7 @@ void Response::extract_cgi_file()
 	}
 	while (getline(in_file, str))
 		out_file << str + "\n";
+	in_file.close();
 	out_file.close();
 }
 
@@ -165,14 +166,15 @@ std::string Response::get_response()
 	{
 		if (code == METHOD_NOT_ALLOWED)
 			headers["Allow"] = get_allow(loc);
-		if (sv.error_page.count(code)
-			&& std::ifstream(sv.error_page[code].c_str()).is_open())
+		std::ifstream file(sv.error_page[code].c_str());
+		if (sv.error_page.count(code) && file.is_open())
 			file_name = sv.error_page[code];
 		else
 		{
 			file_name = "./tmp/error_temp.html";
 			create_error_file(code);
 		}
+		file.close();
 	}
 	if (file_name != "")
 		headers["Content-Length"] = get_file_size(file_name);
@@ -193,9 +195,7 @@ void Response::create_response()
 	file.close();
 }
 
-
 // methods
-
 void Response::method_get()
 {
 	struct stat st;
