@@ -142,6 +142,7 @@ std::string Response::get_response()
 		code = loc.redirection.first;
 		file_name = sv.error_page[code];
 		headers["Location"] = loc.redirection.second;
+		headers["Connection"] = "close";
 	}
 	if (code < 300 && loc.methods[req.request_line.method] == false) 
 		code = METHOD_NOT_ALLOWED;
