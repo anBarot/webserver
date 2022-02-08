@@ -102,9 +102,10 @@ int Connections::add_clients()
 			if (fd == -1)
 			{
 				#ifdef LOGGER
-					std::cout << RED << "Error: " << errno << RESET << std::endl;
+					std::cerr << RED;
+					perror(0);
+					std::cerr << RESET;
 				#endif // DEBUG
-				perror(0);
 				continue ;
 			}
 			
@@ -214,7 +215,13 @@ void Connections::loop()
 		#endif // DEBUG
 
 		if (ready_fd == -1)
-			error_and_exit(SOCK_ERR);
+		{
+			#ifdef LOGGER
+				std::cerr << RED;
+				perror(0);
+				std::cerr << RESET;
+			#endif // DEBUG
+		}
 		if (ready_fd != 0)
 			add_clients();
 		check_clients();

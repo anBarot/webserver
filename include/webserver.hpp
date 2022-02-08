@@ -15,7 +15,7 @@
 
 # define MKSTEMP_DEFAULT_TEMPLATE "./tmp/webserv_tmp_XXXXXX"
 # define DEFAULT_SERVER_CONF "./conf/webserv_configuration.conf"
-# define TIMEOUT 100
+# define TIMEOUT 30
 
 # include "libraries.hpp"
 # include "data_struct.hpp"
