@@ -10,7 +10,7 @@ echo; sleep 1;
 
 echo -e "\n\n**************  Test DELETE  *****************"
 
-touch ./www/delete/to_del.txt
+touch ../www/delete/to_del.txt
 { 
 echo "DELETE /delete/to_del.txt HTTP/1.1"; 
 echo "Host: localhost:3000"; 

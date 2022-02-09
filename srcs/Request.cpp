@@ -129,11 +129,10 @@ void Request::extract_in_chunks(std::string &str, size_t pos)
 	else if ((pos = str.find_first_of("\r\n")) >= chunk_size)
 		ss << str.substr(0, chunk_size);
 	else
-		ss << str.substr(0, pos);
-
-	ss << "\r\n";
+		ss << str.substr(0, pos + 2);
 	str.erase(0, pos + 2);
-	body = ss.str();
+	if (chunk_size > 0)
+		body += ss.str();
 }
 
 /* 

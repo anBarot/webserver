@@ -309,7 +309,7 @@ void Response::method_post()
 		code = UNAUTHORIZED;
 	else
 	{
-		file << body;
+		file << req.body;
 		headers["Location"] = location_path;
 		headers["Connection"] = "keep-alive";
 		file.close();
