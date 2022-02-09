@@ -35,26 +35,16 @@ int	is_dir(std::string path);
 int is_reg(std::string path);
 e_methods get_method_enum(std::string word);
 std::string get_method_string(e_methods enm);
-std::string get_query(std::string &file_name);
 int	check_http_version(std::string version);
-
-// Debug
-// void display_servers(std::vector<Server_conf> &servers);
-// void display_server(Server_conf &servers);
-// void display_location(Location &loc);
-// void display_request(Request &req);
-// void display_response(Response &res);
 
 // Headers
 std::string get_date(time_t now);
 std::string get_MIME(std::string filename);
-std::string	get_file_size(std::string file_name);
 std::string get_allow(Location &loc);
 int is_header_str(std::string str);
 
 // Parser
 int conf_parser(char *file_name, std::vector<Server_conf> &servers);
-std::string random_filename(void);
 
 # include "Request.hpp"
 # include "Location.hpp"
