@@ -284,11 +284,6 @@ void Response::method_post()
 	if (loc.upload_path.size())
 		path = path.replace(0, path.find_last_of("/"), loc.upload_path);
 
-	if (stat(path.c_str(), &st) == -1)
-		code = CREATED;
-	else
-		code = NO_CONTENT;
-
 	file.open(path.c_str());
 	if (!file.is_open())
 		code = UNAUTHORIZED;
@@ -299,4 +294,9 @@ void Response::method_post()
 		headers["Connection"] = "keep-alive";
 		file.close();
 	}
+
+	if (stat(path.c_str(), &st) == -1)
+		code = CREATED;
+	else
+		code = NO_CONTENT;
 }
