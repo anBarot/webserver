@@ -6,7 +6,7 @@
 /*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:27:54 by abarot            #+#    #+#             */
-/*   Updated: 2022/02/01 23:18:56 by abarot           ###   ########.fr       */
+/*   Updated: 2022/02/09 15:50:27 by abarot           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ int		extract_server_field(std::string &line, Server_conf &server)
 			server.names.push_back(word);
 	}
 	else if (extract.first == "max_body_size")
-		server.max_body_size = (atoi(extract.second.c_str()) * 1000);
+		server.max_body_size = (atoi(extract.second.c_str()));
 	else if (extract.first == "error_page")
 	{
 		std::istringstream iss(extract.second);

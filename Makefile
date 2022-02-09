@@ -42,6 +42,9 @@ leaks:
 				$(MAKE) OPTS="-D LOGGER -D CHECK_LEAKS=50" re
 				valgrind --leak-check=full ./$(NAME) $(ARGS)
 
+test_telnet:	
+				./test/test_telnet
+
 log:
 				$(MAKE) OPTS="-D LOGGER" re
 				./$(NAME) $(ARGS)
