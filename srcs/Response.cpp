@@ -87,7 +87,7 @@ int Response::exec_cgi(const char *exec_arg)
 	{
 		req.set_environment();
 		close(STDIN_FILENO);
-		cgi_file_fd = open("/tmp/tmp_cgi", O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+		cgi_file_fd = open(TMP_CGI_LOC, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 		if (cgi_file_fd == -1)
 			exit(1);
 		dup2(cgi_file_fd, STDOUT_FILENO);
@@ -105,7 +105,7 @@ int Response::exec_cgi(const char *exec_arg)
 
 void Response::extract_cgi_file()
 {
-	std::ifstream in_file("/tmp/tmp_cgi");
+	std::ifstream in_file(TMP_CGI_LOC);
 	std::stringstream ss;
 	std::string str;
 	size_t pos_dpoint;

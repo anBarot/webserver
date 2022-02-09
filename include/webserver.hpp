@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   webserver.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: abarot <abarot@student.42.fr>              +#+  +:+       +#+        */
+/*   By: adda-sil <adda-sil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 15:24:15 by abarot            #+#    #+#             */
-/*   Updated: 2022/02/01 19:30:35 by abarot           ###   ########.fr       */
+/*   Updated: 2022/02/09 23:23:00 by adda-sil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # define MKSTEMP_DEFAULT_TEMPLATE "./tmp/webserv_tmp_XXXXXX"
 # define DEFAULT_SERVER_CONF "./conf/webserv_configuration.conf"
+# define TMP_CGI_LOC "./tmp/tmp_cgi"
 # define TIMEOUT 30
 
 # include "libraries.hpp"
