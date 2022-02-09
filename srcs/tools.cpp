@@ -43,16 +43,6 @@ int	check_http_version(std::string version)
     return 0;
 }
 
-std::string get_query(std::string &file_name)
-{
-	std::ifstream payload_file(file_name.c_str());
-	std::stringstream buf;
-
-	buf << payload_file.rdbuf();
-	payload_file.close();
-	return buf.str();
-}
-
 // Erase the whitespaces found after the last word of the string
 void ws_trim(std::string& s) {
 
@@ -150,16 +140,6 @@ int is_reg(std::string path)
 		return 0;
 	else
 		return 1;
-}
-
-std::string random_filename(void)
-{
-	int fd;
-	char filename_template[] = MKSTEMP_DEFAULT_TEMPLATE;
-	
-	fd = mkstemp(filename_template); // Will change XXXXX by a random string
-	close(fd);
-	return std::string(filename_template);
 }
 
 // Init reason_phrase map 

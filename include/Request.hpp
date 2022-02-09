@@ -32,7 +32,6 @@ typedef struct s_payload
 {
 	bool		is_chunked;
 	size_t		length;
-	std::string tmp_file_name;
 }				t_payload;
 
 class Request
@@ -44,14 +43,15 @@ public:
 	t_payload payload;
 	Server_conf	sv;
 	e_response_code response_code;
+	std::string body;
 
 	Request();
 
 	void	extract_request_line(std::vector<char> &data);
 	void 	extract_headers(std::vector<char> &data);
 	void	extract_payload(std::vector<char> &data);
-	void 	extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data);
-	void 	extract_in_chunks(std::string &str, std::ofstream &file, size_t pos);
+	void 	extract_with_length(std::string &str, std::vector<char> &data);
+	void 	extract_in_chunks(std::string &str, size_t pos);
 
 	void	check_line();
 	void 	check_payload();

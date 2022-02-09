@@ -36,11 +36,14 @@ private:
 
 	std::map<std::string, std::string> headers;
 	std::string file_name;
+	std::string body;
 	bool is_cgi;
 	std::string response;
 
 	void	create_response();
 	void	create_directory_listing(std::string path, std::string loc_root);
+	void 	create_autoindex(std::string path, std::string listing_html);
+	void	create_error(int code);
 
 	void	method_get();
 	void	method_delete();

@@ -9,29 +9,29 @@ Response::Response(Request &request, Location &location) :
 			is_cgi(false)
 {}
 
-void create_autoindex_file(std::string path, std::string listing_html)
+void Response::create_autoindex(std::string path, std::string listing_html)
 {
-	std::ofstream fileout("./tmp/listing_temp.html");
+	std::stringstream ss;
  	
-	fileout << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " 
+	ss << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " 
 		<< path << 
 		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
 		listing_html <<"</pre><hr></body></html>\n";
-
-	fileout.close();
+	
+	body = ss.str();
 }
 
-void	create_error_file(int code)
+void	Response::create_error(int code)
 {
-	std::ofstream fileout("./tmp/error_temp.html");
+	std::stringstream ss;
 
-	fileout << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>" 
+	ss << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>" 
 			<< code << " "
 			<< reason_phrase[code] << "</title></head><body><center><h1>"
 			<< code << " " << reason_phrase[code] << "</h1></center><hr> \
 			<center>webserver (Ubuntu/Mac OS)</center></body></html>\n";
 	
-	fileout.close();
+	body = ss.str();
 }
 
 void Response::create_directory_listing(std::string path, std::string loc_root)
@@ -68,8 +68,7 @@ void Response::create_directory_listing(std::string path, std::string loc_root)
 		}
 	}
 	
-	create_autoindex_file(relative_path, listing_str);
-	file_name = "./tmp/listing_temp.html";
+	create_autoindex(relative_path, listing_str);
 	headers["Content-Type"] = "text/html";
 }
 
@@ -117,32 +116,31 @@ int Response::exec_cgi(const char *exec_arg)
 void Response::extract_cgi_file()
 {
 	std::ifstream in_file("/tmp/tmp_cgi");
-	std::ofstream out_file;
+	std::stringstream ss;
 	std::string str;
 	size_t pos_dpoint;
 
-	file_name = random_filename();
-	out_file.open(file_name.c_str());
 	while (getline(in_file, str) && is_header_str(str))
 	{
 		pos_dpoint = str.find_first_of(":");
 		headers[str.substr(0, pos_dpoint)] = str.substr(pos_dpoint + 1, str.size());
 	}
 	while (getline(in_file, str))
-		out_file << str + "\n";
+		ss << str + "\n";
 	in_file.close();
-	out_file.close();
+	body = ss.str();
 }
 
 std::string Response::get_response()
 {
+	std::stringstream buf;
+
 	headers["Server"] = "webserver";
 	headers["Date"] = get_date(time(NULL));
 	if (loc.redirection.first >= 300)
 	{
 		code = loc.redirection.first;
-		file_name = "./tmp/error_temp.html";
-		create_error_file(code);
+		create_error(code);
 		headers["Location"] = loc.redirection.second;
 	}
 	if (code < 300 && loc.methods[req.request_line.method] == false) 
@@ -170,29 +168,36 @@ std::string Response::get_response()
 		if (sv.error_page.count(code) && file.is_open())
 			file_name = sv.error_page[code];
 		else
-		{
-			file_name = "./tmp/error_temp.html";
-			create_error_file(code);
-		}
+			create_error(code);
 		file.close();
 	}
-	if (file_name != "")
-		headers["Content-Length"] = get_file_size(file_name);
+	if (!file_name.empty())
+	{
+		std::ifstream file(file_name.c_str());
+
+		buf << file.rdbuf();
+		body = buf.str();
+		buf.str("");
+		file.close();
+	}
+	if (!file_name.empty() || !body.empty())
+	{
+		buf << body.size();
+		headers["Content-Length"] = buf.str();
+	}
 	create_response();
 	return response;
 }
 
 void Response::create_response()
 {
-	std::ifstream file(file_name.c_str());
 	std::stringstream buf;
 
 	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
 		buf << it->first << ": " << it->second << "\r\n";
-	buf << "\r\n" << file.rdbuf();
+	buf << "\r\n" << body;
 	response = buf.str();
-	file.close();
 }
 
 // methods
@@ -272,8 +277,9 @@ void Response::method_post()
 	struct stat st;
 	std::string path;
 	std::string location_path;
+	std::ofstream file;
 	
-	if (req.payload.tmp_file_name == "")
+	if (req.body.empty())
 	{
 		code = BAD_REQUEST;
 		return ;
@@ -298,11 +304,14 @@ void Response::method_post()
 	else
 		code = NO_CONTENT;
 
-	if (rename(req.payload.tmp_file_name.c_str(), path.c_str()))
+	file.open(path.c_str());
+	if (!file.is_open())
 		code = UNAUTHORIZED;
 	else
 	{
+		file << body;
 		headers["Location"] = location_path;
 		headers["Connection"] = "keep-alive";
+		file.close();
 	}
 }

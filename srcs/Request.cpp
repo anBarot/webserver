@@ -16,7 +16,6 @@ Request::Request() : status(STARTING_PARSING), response_code(OK)
 {
 	payload.is_chunked = false;
 	payload.length = 0;
-	payload.tmp_file_name = "";
 }
 
 
@@ -80,16 +79,13 @@ void Request::extract_headers(std::vector<char> &data)
 }
 
 /* 
-	Function that extract payload into a temporary file, with a random name. 
+	Function that extract payload into a buffer. 
 	The payload can be extracted by chunks or required length.
 */
 void Request::extract_payload(std::vector<char> &data)
 {
 	std::string str(data.begin(), data.end());
-	if (payload.tmp_file_name == "")
-		payload.tmp_file_name = random_filename();
-	std::ofstream file(payload.tmp_file_name.c_str(), std::ios::out | std::ios::app);
-
+	
 	if (payload.is_chunked)
 	{
 		size_t pos;
@@ -99,21 +95,19 @@ void Request::extract_payload(std::vector<char> &data)
 				(pos = str.find_first_of("\r\n")) != std::string::npos &&
 				(sec_pos = str.find_first_of("\r\n", pos + 2)) != std::string::npos)
 		{
-			extract_in_chunks(str, file, pos);
+			extract_in_chunks(str, pos);
 			data.erase(data.begin(), data.begin() + sec_pos + 2);
 		}
 	}
 	else
 	{
-		extract_with_length(str, file, data);
+		extract_with_length(str, data);
 		if (!payload.length)
 			status = PAYLOAD_PARSED;
 	}
 
 	if (status == PAYLOAD_PARSED)
 		status = FINISH_PARSING;
-	
-	file.close();
 }
 
 /*
@@ -121,10 +115,11 @@ void Request::extract_payload(std::vector<char> &data)
 	the first line is an hexadecimal value that tells the extraction length
 	of the second line
 */
-void Request::extract_in_chunks(std::string &str, std::ofstream &file, size_t pos)
+void Request::extract_in_chunks(std::string &str, size_t pos)
 {
 	size_t chunk_size;
 	std::istringstream iss(str.substr(0, pos));
+	std::stringstream ss;
 
 	iss >> std::hex >> chunk_size;
 	str.erase(0, pos + 2);
@@ -132,12 +127,13 @@ void Request::extract_in_chunks(std::string &str, std::ofstream &file, size_t po
 	if (chunk_size == 0)
 		status = PAYLOAD_PARSED;
 	else if ((pos = str.find_first_of("\r\n")) >= chunk_size)
-		file << str.substr(0, chunk_size);
+		ss << str.substr(0, chunk_size);
 	else
-		file << str.substr(0, pos);
+		ss << str.substr(0, pos);
 
-	file << "\r\n";
+	ss << "\r\n";
 	str.erase(0, pos + 2);
+	body = ss.str();
 }
 
 /* 
@@ -145,19 +141,18 @@ void Request::extract_in_chunks(std::string &str, std::ofstream &file, size_t po
 	If the length of the raw extracted data is greater than the requested length,
 	extract only the length.
 */
-void Request::extract_with_length(std::string &str, std::ofstream &file, std::vector<char> &data)
+void Request::extract_with_length(std::string &str, std::vector<char> &data)
 {
+	std::stringstream ss;
+
 	if (str.size() > payload.length)
 	{
-		file.close();
-		remove(payload.tmp_file_name.c_str());
-		payload.tmp_file_name = "";
 		data.erase(data.begin(), data.begin() + str.size());
 		payload.length = 0;
 	}
 	else
 	{
-		file << str.substr(0, str.size());
+		ss << str.substr(0, str.size());
 		data.erase(data.begin(), data.begin() + str.size());
 		payload.length -= str.size();
 	}
@@ -186,7 +181,7 @@ void Request::set_environment()
 	setenv("CONTENT_TYPE", headers["content-type"].c_str(), 1);
 	setenv("CONTENT_LENGTH", headers["content-length"].c_str(), 1);
 	setenv("PATH_INFO", req_path.c_str(), 1);
-	setenv("QUERY_STRING", get_query(payload.tmp_file_name).c_str(), 1);
+	setenv("QUERY_STRING", body.c_str(), 1);
 	setenv("REQUEST_METHOD", get_method_string(request_line.method).c_str(), 1);
 	setenv("SCRIPT_NAME", script_name.c_str(), 1);
 	setenv("SCRIPT_FILENAME", req_path.c_str(), 1);
