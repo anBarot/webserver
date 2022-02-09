@@ -43,7 +43,7 @@ leaks:
 				valgrind --leak-check=full ./$(NAME) $(ARGS)
 
 test_telnet:	
-				./test/test_telnet
+				./tests/test_telnet.sh > tests/results.txt
 
 log:
 				$(MAKE) OPTS="-D LOGGER" re
