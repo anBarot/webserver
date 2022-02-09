@@ -167,16 +167,17 @@ std::string Response::get_response()
 
 		buf << file.rdbuf();
 		body = buf.str();
-		buf.str("");
+		buf.clear();
+		buf.str(std::string());
 		file.close();
 	}
 	if (!file_name.empty() || !body.empty())
 	{
 		buf << body.size();
 		headers["Content-Length"] = buf.str();
-		buf.str("");
+		buf.clear();
+		buf.str(std::string());
 	}
-
 	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
 		buf << it->first << ": " << it->second << "\r\n";
