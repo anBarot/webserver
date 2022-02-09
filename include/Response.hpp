@@ -42,7 +42,6 @@ private:
 
 	void	create_response();
 	void	create_directory_listing(std::string path, std::string loc_root);
-	void 	create_autoindex(std::string path, std::string listing_html);
 	void	create_error(int code);
 
 	void	method_get();

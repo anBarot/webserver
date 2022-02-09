@@ -9,18 +9,6 @@ Response::Response(Request &request, Location &location) :
 			is_cgi(false)
 {}
 
-void Response::create_autoindex(std::string path, std::string listing_html)
-{
-	std::stringstream ss;
- 	
-	ss << "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " 
-		<< path << 
-		"</title></head><body><h1>Index of " << path << "</h1><hr><pre>" << 
-		listing_html <<"</pre><hr></body></html>\n";
-	
-	body = ss.str();
-}
-
 void	Response::create_error(int code)
 {
 	std::stringstream ss;
@@ -68,7 +56,9 @@ void Response::create_directory_listing(std::string path, std::string loc_root)
 		}
 	}
 	
-	create_autoindex(relative_path, listing_str);
+	body = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Index of " 
+		+ relative_path + "</title></head><body><h1>Index of " + relative_path
+		+ "</h1><hr><pre>" + listing_str + "</pre><hr></body></html>\n";
 	headers["Content-Type"] = "text/html";
 }
 
