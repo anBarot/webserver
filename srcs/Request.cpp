@@ -142,8 +142,6 @@ void Request::extract_in_chunks(std::string &str, size_t pos)
 */
 void Request::extract_with_length(std::string &str, std::vector<char> &data)
 {
-	std::stringstream ss;
-
 	if (str.size() > payload.length)
 	{
 		data.erase(data.begin(), data.begin() + str.size());
@@ -151,7 +149,7 @@ void Request::extract_with_length(std::string &str, std::vector<char> &data)
 	}
 	else
 	{
-		ss << str.substr(0, str.size());
+		body = str.substr(0, str.size());
 		data.erase(data.begin(), data.begin() + str.size());
 		payload.length -= str.size();
 	}
