@@ -8,9 +8,7 @@ SRCS_FILES		= \
 					Connections.cpp \
 					Client.cpp \
 					Response.cpp \
-					Request.cpp \
-					\
-					# srcs/debug_display.cpp
+					Request.cpp
 
 
 SRCS			= $(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
@@ -23,8 +21,6 @@ CXX				= clang++
 
 CXXFLAGS		= -Wall -Werror -Wextra -g -std=c++98 -MMD -I ./include $(OPTS)
 
-ARGS			= ./conf/webserv_configuration.conf
-
 OPTS			= -D LOGGER
 
 
@@ -36,18 +32,7 @@ $(NAME):		$(OBJS)
 all:			$(NAME)
 
 run:			all
-				./$(NAME) $(ARGS)
-
-leaks:			
-				$(MAKE) OPTS="-D LOGGER -D CHECK_LEAKS=50" re
-				valgrind --leak-check=full ./$(NAME) $(ARGS)
-
-test_telnet:	
-				./tests/test_telnet.sh > tests/results.txt
-
-log:
-				$(MAKE) OPTS="-D LOGGER" re
-				./$(NAME) $(ARGS)
+				./$(NAME)
 
 clean:
 				rm -f $(OBJS)

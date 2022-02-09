@@ -190,12 +190,7 @@ void Connections::loop()
 {
 	struct timeval timeout;
 
-	#ifdef CHECK_LEAKS
-		int i = 0;
-		while (++i < CHECK_LEAKS)
-	#else
-		while (1)
-	#endif
+	while (1)
 	{
 		timeout.tv_sec = 30;
 		timeout.tv_usec = 0;
@@ -204,10 +199,6 @@ void Connections::loop()
 		ready_wset = active_wset;
 		__AWAIT_REQ;
 		ready_fd = select(max_fd + 1, &ready_rset, &ready_wset, 0, &timeout);
-		#ifdef LOGGER
-			std::cout << MAGENTA << "Select returned." << std::endl;
-		#endif // DEBUG
-
 		if (ready_fd == -1)
 		{
 			#ifdef LOGGER

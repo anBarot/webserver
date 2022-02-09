@@ -1,1 +1,0 @@
-docker run -ti --add-host=host.docker.internal:host-gateway siege /bin/bash
