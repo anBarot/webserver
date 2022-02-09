@@ -144,7 +144,7 @@ int Client::respond()
 	}
 
 	ret = send(socket, response.c_str(), response.size(), MSG_NOSIGNAL);
-	if (ret < 0)
+	if (ret < 0 || requests.front().headers["connection"] == "close")
 		return -1;
 
 	#ifdef LOGGER
