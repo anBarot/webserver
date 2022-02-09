@@ -30,20 +30,6 @@ std::string get_MIME(std::string filename)
 	return ("application/octet-stream");
 }
 
-std::string	get_file_size(std::string file_name)
-{
-	struct stat st;
-	std::stringstream ss;
-    std::string res;
-
-	if (stat(file_name.c_str(), &st) || !S_ISREG(st.st_mode))
-		return "";
-
-	ss << st.st_size;
-	ss >> res;
-	return (res);
-}
-
 std::string get_allow(Location &loc)
 {
 	std::string res;

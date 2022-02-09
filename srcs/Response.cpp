@@ -174,20 +174,15 @@ std::string Response::get_response()
 	{
 		buf << body.size();
 		headers["Content-Length"] = buf.str();
+		buf.str("");
 	}
-	create_response();
-	return response;
-}
-
-void Response::create_response()
-{
-	std::stringstream buf;
 
 	buf << "HTTP/1.1 " << (int)code << " " << reason_phrase[code] << "\r\n";
 	for (std::map<std::string, std::string>::iterator it = headers.begin(); it != headers.end(); it++)
 		buf << it->first << ": " << it->second << "\r\n";
 	buf << "\r\n" << body;
-	response = buf.str();
+
+	return buf.str();
 }
 
 // methods
